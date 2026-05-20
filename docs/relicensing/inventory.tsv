@@ -35,6 +35,7 @@ CONTRIBUTING.md	unknown-license				no
 Doxyfile	unknown-license			generated	no
 HACKING.md	unknown-license				no
 LICENSE.AGPL	unknown-license		"COPYRIGHT | COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES AND/OR CONVEYS | Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/> | Copyright (C) <year>  <name of author> | Copyright"" also means copyright-like laws that apply to other kinds of | copyright | copyright are not | copyright disclaimer"" for the program, if necessary. | copyright holder as a result of your choosing to follow a | copyright holder explicitly and | copyright holder is | copyright holder is reinstated (a) | copyright holder notifies you of the | copyright holder who authorizes use under this | copyright holder, and you cure the violation prior to 30 days after | copyright holders of | copyright if you do | copyright law, except executing it on a | copyright law. | copyright notice, and (2) | copyright notice; | copyright on the Program, and are irrevocable provided the stated | copyright on the software, and (2) offer | copyright permission, other than the making of an | copyright permission. | copyright treaty adopted on 20 December 1996, or | copyright.  Those thus making or running the covered works"		no
+Makefile	Apache-only	Apache-2.0			no
 NOTICE.txt	unknown-license				no
 ORIGIN	unknown-license				no
 README.md	unknown-license				no
@@ -1276,6 +1277,7 @@ docs/reference/metrics.rst	unknown-license				no
 docs/relicensing/clean-room-guidelines.md	unknown-license				no
 docs/relicensing/generate-inventory.py	Apache-only	Apache-2.0			no
 docs/relicensing/module-migration.md	unknown-license				no
+docs/relicensing/relicensing-status.py	Apache-only	Apache-2.0			no
 docs/robots.txt	unknown-license				no
 docs/rst_include/advance-index.rst	unknown-license				no
 docs/rst_include/apache-copyrights-index-all-attributes.rst	unknown-license				no

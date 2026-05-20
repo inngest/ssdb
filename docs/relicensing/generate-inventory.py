@@ -163,9 +163,15 @@ def write_tsv(path: Path, rows: list[dict[str, str]]) -> None:
 
 
 def markdown_table(counter: Counter[str]) -> str:
-    lines = ["| Category | Files |", "|---|---:|"]
-    for key, count in sorted(counter.items()):
-        lines.append(f"| {key} | {count} |")
+    rows = [(key, str(count)) for key, count in sorted(counter.items())]
+    category_width = max([len("Category")] + [len(key) for key, _count in rows])
+    files_width = max([len("Files")] + [len(count) for _key, count in rows])
+    lines = [
+        f"| {'Category'.ljust(category_width)} | {'Files'.ljust(files_width)} |",
+        f"|{'-' * (category_width + 2)}|{'-' * (files_width + 2)}|",
+    ]
+    for key, count in rows:
+        lines.append(f"| {key.ljust(category_width)} | {count.ljust(files_width)} |")
     return "\n".join(lines)
 
 
