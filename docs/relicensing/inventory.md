@@ -6,7 +6,7 @@ It is an audit starting point, not a legal conclusion.
 - Source: tracked files in the current working tree
 - Generator: `docs/relicensing/generate-inventory.py`
 - Complete per-file inventory: `inventory.tsv`
-- Tracked files scanned: `5956`
+- Tracked files scanned: `5957`
 
 ## License Classes
 
@@ -15,7 +15,7 @@ It is an audit starting point, not a legal conclusion.
 | AGPL-only       | 1695  |
 | Apache-only     | 37    |
 | dual-licensed   | 371   |
-| unknown-license | 3853  |
+| unknown-license | 3854  |
 
 ## File Flags
 
@@ -58,12 +58,12 @@ It is an audit starting point, not a legal conclusion.
 - `.github/workflows/clang-nightly.yaml`
 - `.github/workflows/clang-tidy.yaml`
 - `.github/workflows/codespell.yaml`
+- `.github/workflows/commits.yml`
 - `.github/workflows/docs-pages.yaml`
 - `.github/workflows/docs-pr.yaml`
 - `.github/workflows/iwyu.yaml`
 - `.github/workflows/kuebiko-pr.yaml`
 - `.github/workflows/pr-require-backport-label.yaml`
-- `.github/workflows/read-toolchain.yaml`
 
 ## Generated Examples
 

@@ -18,6 +18,7 @@ path	license_class	spdx	copyright	flags	binary
 .github/workflows/clang-nightly.yaml	unknown-license				no
 .github/workflows/clang-tidy.yaml	unknown-license				no
 .github/workflows/codespell.yaml	unknown-license				no
+.github/workflows/commits.yml	unknown-license				no
 .github/workflows/docs-pages.yaml	unknown-license				no
 .github/workflows/docs-pr.yaml	unknown-license				no
 .github/workflows/iwyu.yaml	unknown-license				no
