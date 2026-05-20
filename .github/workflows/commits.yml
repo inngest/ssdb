@@ -15,3 +15,4 @@ jobs:
         uses: ytanikin/pr-conventional-commits@1.5.2
         with:
           task_types: '["feat","fix","docs","doc","test","ci","build","refactor","perf","chore","revert","style","security"]'
+          add_label: 'false'
