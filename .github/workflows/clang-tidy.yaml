@@ -4,17 +4,16 @@ on:
   pull_request:
     branches:
       - main
-    paths-ignore:
-      - '**/*.rst'
-      - '**/*.md'
-      - 'docs/**'
-      - '.github/**'
-      - 'AGENTS.md'
-      - 'CLAUDE.md'
-      - 'Makefile'
-      - '.envrc'
-      - 'flake.*'
-      - 'dist/nix/**'
+    paths:
+      - '**/*.c'
+      - '**/*.cc'
+      - '**/*.cpp'
+      - '**/*.h'
+      - '**/*.hh'
+      - 'CMakeLists.txt'
+      - '**/CMakeLists.txt'
+      - 'cmake/**'
+      - 'configure.py'
   workflow_dispatch:
 
 env:
