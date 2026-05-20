@@ -20,16 +20,16 @@ has been independently authored, reviewed, tested, and documented.
 
 ## Subsystem Table
 
-| Subsystem | Current source | Target | Status | First clean milestone | Provenance notes |
-|---|---|---|---|---|---|
-| CQL protocol | inherited C++ | Rust Apache-2.0 | candidate | Native protocol frame parse/encode | First Rust milestone. Base behavior on public Cassandra native protocol docs and black-box fixtures. |
-| Storage engine | inherited C++ | Rust Apache-2.0 | inherited | None | High-risk area. Requires independent storage format and compaction design docs before implementation. |
-| Query execution | inherited C++ | Rust Apache-2.0 | inherited | None | High-risk area. Use independently written semantics specs and black-box CQL tests. |
-| Cluster membership | inherited C++ | Rust Apache-2.0 | inherited | None | High-risk area. Avoid copying topology, gossip, or raft integration structure. |
-| Admin/API server | inherited C++/scripts | Rust Apache-2.0 | candidate | Status and health endpoints | Good early candidate after CQL framing. Public HTTP behavior can be specified independently. |
-| Packaging/install | inherited scripts | New packaging | candidate | Package metadata names and service paths | Rebrand service names, install paths, metrics namespaces, and artifacts while preserving required notices. |
-| Docs | inherited docs | Rewritten docs | candidate | Provenance and compatibility docs | Preserve required attribution. Rewrite user-facing ScyllaDB branding and copied prose before Apache-2.0 claims. |
-| Tests | inherited tests plus new tests | Mixed/new | candidate | Black-box CQL protocol fixtures | Copied inherited tests remain AGPL-derived unless independently rewritten. New black-box fixtures should record public inputs. |
+| Subsystem          | Current source                 | Target          | Status    | First clean milestone                    | Provenance notes                                                                                                               |
+|--------------------|--------------------------------|-----------------|-----------|------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|
+| CQL protocol       | inherited C++                  | Rust Apache-2.0 | candidate | Native protocol frame parse/encode       | First Rust milestone. Base behavior on public Cassandra native protocol docs and black-box fixtures.                           |
+| Storage engine     | inherited C++                  | Rust Apache-2.0 | inherited | None                                     | High-risk area. Requires independent storage format and compaction design docs before implementation.                          |
+| Query execution    | inherited C++                  | Rust Apache-2.0 | inherited | None                                     | High-risk area. Use independently written semantics specs and black-box CQL tests.                                             |
+| Cluster membership | inherited C++                  | Rust Apache-2.0 | inherited | None                                     | High-risk area. Avoid copying topology, gossip, or raft integration structure.                                                 |
+| Admin/API server   | inherited C++/scripts          | Rust Apache-2.0 | candidate | Status and health endpoints              | Good early candidate after CQL framing. Public HTTP behavior can be specified independently.                                   |
+| Packaging/install  | inherited scripts              | New packaging   | candidate | Package metadata names and service paths | Rebrand service names, install paths, metrics namespaces, and artifacts while preserving required notices.                     |
+| Docs               | inherited docs                 | Rewritten docs  | candidate | Provenance and compatibility docs        | Preserve required attribution. Rewrite user-facing ScyllaDB branding and copied prose before Apache-2.0 claims.                |
+| Tests              | inherited tests plus new tests | Mixed/new       | candidate | Black-box CQL protocol fixtures          | Copied inherited tests remain AGPL-derived unless independently rewritten. New black-box fixtures should record public inputs. |
 
 ## Required Entry For New Clean Modules
 

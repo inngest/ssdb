@@ -10,20 +10,20 @@ It is an audit starting point, not a legal conclusion.
 
 ## License Classes
 
-| Category | Files |
-|---|---:|
-| AGPL-only | 1695 |
-| Apache-only | 35 |
-| dual-licensed | 371 |
-| unknown-license | 3850 |
+| Category        | Files |
+|-----------------|-------|
+| AGPL-only       | 1695  |
+| Apache-only     | 35    |
+| dual-licensed   | 371   |
+| unknown-license | 3850  |
 
 ## File Flags
 
-| Category | Files |
-|---|---:|
-| generated | 72 |
-| gitlink | 6 |
-| vendored | 12 |
+| Category  | Files |
+|-----------|-------|
+| generated | 72    |
+| gitlink   | 6     |
+| vendored  | 12    |
 
 ## Classification Rules
 
