@@ -1,51 +1,166 @@
 {
-  description = "Monstrously Fast + Scalable NoSQL";
+  description = "KuebikoDB";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, flake-utils }: {
-    overlays.default = import ./dist/nix/overlay.nix nixpkgs;
-
-    lib = {
-      _attrs = system: let
+  outputs =
+    {
+      self,
+      nixpkgs,
+      flake-utils,
+      ...
+    }:
+    flake-utils.lib.eachDefaultSystem (
+      system:
+      let
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [ self.overlays.default ];
+          config = {
+            allowUnfree = true;
+            permittedInsecurePackages = [
+              "python-2.7.18.12"
+            ];
+          };
+          overlays = [
+            (final: prev: {
+              # default.nix predates current nixpkgs and still references
+              # package names that have been removed from unstable.
+              llvmPackages_15 = prev.llvmPackages;
+              boost175 = prev.boost181;
+              libyamlcpp = prev.yaml-cpp;
+            })
+            (import ./dist/nix/overlay.nix nixpkgs)
+          ];
         };
 
-        repl = pkgs.writeText "repl" ''
-          let
-            self = builtins.getFlake (toString ${self.outPath});
-            attrs = self.lib._attrs "${system}";
-          in {
-            inherit self;
-            inherit (attrs) pkgs;
-          }
-        '';
+        lib = pkgs.lib;
+        llvm = pkgs.llvmPackages;
 
-        args = {
-          flake = true;
-          srcPath = "${self}";
-          inherit pkgs repl;
+        pythonEnv = pkgs.python3.withPackages (
+          ps: with ps; [
+            aiohttp
+            boto3
+            colorama
+            distro
+            psutil
+            pyparsing
+            pytest
+            pytest-asyncio
+            pyyaml
+            requests
+            setuptools
+            tabulate
+            urwid
+          ]
+        );
+
+        rustTools = with pkgs; [
+          cargo
+          clippy
+          cxx-rs
+          rust-analyzer
+          rustc
+          rustfmt
+        ];
+
+        cppTools = with pkgs; [
+          cmake
+          gnumake
+          llvm.bintools
+          llvm.clang
+          ninja
+          pkg-config
+          ragel
+        ];
+
+        portableDevShell = pkgs.mkShell {
+          packages =
+            cppTools
+            ++ rustTools
+            ++ (with pkgs; [
+              antlr3
+              git
+              jdk11_headless
+              lz4
+              protobuf
+              pythonEnv
+              wabt
+              zstd
+            ]);
+
+          shellHook = lib.optionalString pkgs.stdenv.isDarwin ''
+            echo "KuebikoDB portable macOS dev shell"
+            echo "The inherited C++ database build is Linux-oriented; use a Linux Nix shell for the full C++ build."
+          '';
         };
 
-        package = import ./default.nixpkgs args;
-        devShell = import ./shell.nix args;
-      in {
-        inherit pkgs args package devShell;
-      };
-    };
-  }
-  // (flake-utils.lib.eachDefaultSystem (system: let
-    packageName = "scylla";
-    attrs = self.lib._attrs system;
-  in {
-    packages.${packageName} = attrs.package;
-    defaultPackage = self.packages.${system}.${packageName};
+        scyllaDevShell =
+          if pkgs.stdenv.isLinux then
+            import ./shell.nix {
+              inherit pkgs;
+              flake = true;
+              srcPath = self;
+            }
+          else
+            portableDevShell;
 
-    inherit (attrs) devShell;
-  }));
+        linuxCppShell =
+          if pkgs.stdenv.isLinux then
+            scyllaDevShell
+          else
+            pkgs.mkShell {
+              packages = [ ];
+              shellHook = ''
+                echo "KuebikoDB full C++ build shell is Linux-only."
+                echo "On macOS, use: nix develop .#portable or nix develop .#rust"
+                return 1
+              '';
+            };
+
+        macosShell =
+          if pkgs.stdenv.isDarwin then
+            portableDevShell
+          else
+            pkgs.mkShell {
+              packages = [ ];
+              shellHook = ''
+                echo "KuebikoDB macOS shell is Darwin-only."
+                echo "On Linux, use: nix develop .#default, nix develop .#cpp, or nix develop .#rust"
+                return 1
+              '';
+            };
+
+        rustDevShell = pkgs.mkShell {
+          packages =
+            rustTools
+            ++ (with pkgs; [
+              cmake
+              git
+              llvm.clang
+              ninja
+              openssl
+              pkg-config
+              pythonEnv
+            ]);
+
+          shellHook = ''
+            echo "KuebikoDB Rust dev shell"
+            echo "Use this for rust/, rust-next/, cxxbridge, and Apache-2.0 rewrite work."
+          '';
+        };
+      in
+      {
+        devShells.default = scyllaDevShell;
+        devShells.cpp = linuxCppShell;
+        devShells.linux-cpp = linuxCppShell;
+        devShells.rust = rustDevShell;
+        devShells.macos = macosShell;
+        devShells.portable = portableDevShell;
+
+        formatter = pkgs.nixfmt;
+      }
+    );
 }

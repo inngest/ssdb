@@ -32,5 +32,5 @@ test/*/*.reject
 compile_commands.json
 .ccls-cache/
 .mypy_cache
-.envrc
 clang_build
+/.direnv/
