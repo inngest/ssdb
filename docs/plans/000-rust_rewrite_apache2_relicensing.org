@@ -233,8 +233,8 @@ Track every subsystem explicitly.
 - [ ] Identify all AGPL-only, Apache-only, dual-licensed, generated, vendored, and
   unknown-license files.
 - [X] Decide whether to assume a ScyllaDB relicensing grant is available.
-- [ ] Create =docs/relicensing/inventory.org=.
-- [ ] Create =docs/relicensing/module-migration.org=.
+- [ ] Create =docs/relicensing/inventory.md=.
+- [ ] Create =docs/relicensing/module-migration.md=.
 - [ ] Add contribution guidelines requiring Apache-2.0 and contributor authority
   attestation for new clean rewrite code.
 - [ ] Define what contributors may and may not reference when implementing clean
