@@ -12,6 +12,8 @@ on:
       - enterprise
     paths:
       - "docs/**"
+      - "!docs/plans/**"
+      - "!docs/relicensing/**"
       - "db/config.hh"
       - "db/config.cc"
 jobs:
