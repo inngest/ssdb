@@ -6,7 +6,7 @@ It is an audit starting point, not a legal conclusion.
 - Source: tracked files in the current working tree
 - Generator: `docs/relicensing/generate-inventory.py`
 - Complete per-file inventory: `inventory.tsv`
-- Tracked files scanned: `5950`
+- Tracked files scanned: `5951`
 
 ## License Classes
 
@@ -15,7 +15,7 @@ It is an audit starting point, not a legal conclusion.
 | AGPL-only | 1695 |
 | Apache-only | 35 |
 | dual-licensed | 371 |
-| unknown-license | 3849 |
+| unknown-license | 3850 |
 
 ## File Flags
 

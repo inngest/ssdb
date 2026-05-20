@@ -1275,6 +1275,7 @@ docs/reference/limits.rst	unknown-license				no
 docs/reference/metrics.rst	unknown-license				no
 docs/relicensing/clean-room-guidelines.md	unknown-license				no
 docs/relicensing/generate-inventory.py	Apache-only	Apache-2.0			no
+docs/relicensing/module-migration.md	unknown-license				no
 docs/robots.txt	unknown-license				no
 docs/rst_include/advance-index.rst	unknown-license				no
 docs/rst_include/apache-copyrights-index-all-attributes.rst	unknown-license				no
