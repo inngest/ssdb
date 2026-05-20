@@ -3,7 +3,7 @@ name: Sync labels
 on:
   pull_request_target:
     types: [opened, labeled, unlabeled]
-    branches: [master, next]
+    branches: [main, next]
   issues:
     types: [labeled, unlabeled]
 

@@ -1,0 +1,25 @@
+name: KuebikoDB PR
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  relicensing:
+    name: Relicensing checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Phase 1 checks
+        run: make phase1-check
+      - name: Show relicensing status
+        run: make relicensing-status

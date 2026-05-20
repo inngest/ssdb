@@ -21,6 +21,7 @@ path	license_class	spdx	copyright	flags	binary
 .github/workflows/docs-pages.yaml	unknown-license				no
 .github/workflows/docs-pr.yaml	unknown-license				no
 .github/workflows/iwyu.yaml	unknown-license				no
+.github/workflows/kuebiko-pr.yaml	unknown-license				no
 .github/workflows/pr-require-backport-label.yaml	unknown-license				no
 .github/workflows/read-toolchain.yaml	unknown-license				no
 .github/workflows/reproducible-build.yaml	unknown-license				no
@@ -31,6 +32,7 @@ path	license_class	spdx	copyright	flags	binary
 .gitorderfile	unknown-license				no
 .mailmap	unknown-license				no
 AGENTS.md	unknown-license				no
+CLAUDE.md	unknown-license				no
 CMakeLists.txt	unknown-license				no
 CONTRIBUTING.md	unknown-license				no
 Doxyfile	unknown-license			generated	no

@@ -4,12 +4,12 @@ name: "Docs / Publish"
 
 env:
   FLAG: ${{ github.repository == 'scylladb/scylla-enterprise' && 'enterprise' || 'opensource' }}
-  DEFAULT_BRANCH: ${{ github.repository == 'scylladb/scylla-enterprise' && 'enterprise' || 'master' }}
+  DEFAULT_BRANCH: ${{ github.repository == 'scylladb/scylla-enterprise' && 'enterprise' || 'main' }}
 
 on:
   push:
     branches:
-      - 'master'
+      - 'main'
       - 'enterprise'
       - 'branch-**'
     paths:
@@ -38,6 +38,6 @@ jobs:
         run: make -C docs FLAG="${{ env.FLAG }}" redirects
       - name: Deploy docs to GitHub Pages
         run: ./docs/_utils/deploy.sh
-        if: (github.ref_name == 'master' && env.FLAG == 'opensource') || (github.ref_name == 'enterprise' && env.FLAG == 'enterprise')
+        if: (github.ref_name == 'main' && env.FLAG == 'opensource') || (github.ref_name == 'enterprise' && env.FLAG == 'enterprise')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

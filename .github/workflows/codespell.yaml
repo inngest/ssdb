@@ -2,7 +2,7 @@ name: codespell
 on:
   pull_request:
     branches:
-      - master
+      - main
 permissions: {}
 jobs:
   codespell:

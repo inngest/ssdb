@@ -3,12 +3,18 @@ name: clang-tidy
 on:
   pull_request:
     branches:
-      - master
+      - main
     paths-ignore:
       - '**/*.rst'
       - '**/*.md'
       - 'docs/**'
       - '.github/**'
+      - 'AGENTS.md'
+      - 'CLAUDE.md'
+      - 'Makefile'
+      - '.envrc'
+      - 'flake.*'
+      - 'dist/nix/**'
   workflow_dispatch:
 
 env:
