@@ -229,11 +229,11 @@ Track every subsystem explicitly.
 
 ** Phase 1: Provenance baseline
 
-- [ ] Generate a complete SPDX and copyright inventory.
-- [ ] Identify all AGPL-only, Apache-only, dual-licensed, generated, vendored, and
+- [X] Generate a complete SPDX and copyright inventory.
+- [X] Identify all AGPL-only, Apache-only, dual-licensed, generated, vendored, and
   unknown-license files.
 - [X] Decide whether to assume a ScyllaDB relicensing grant is available.
-- [ ] Create =docs/relicensing/inventory.md=.
+- [X] Create =docs/relicensing/inventory.md=.
 - [ ] Create =docs/relicensing/module-migration.md=.
 - [X] Add contribution guidelines requiring Apache-2.0 and contributor authority
   attestation for new clean rewrite code.
