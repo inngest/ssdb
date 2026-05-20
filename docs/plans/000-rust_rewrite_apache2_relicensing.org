@@ -234,7 +234,7 @@ Track every subsystem explicitly.
   unknown-license files.
 - [X] Decide whether to assume a ScyllaDB relicensing grant is available.
 - [X] Create =docs/relicensing/inventory.md=.
-- [ ] Create =docs/relicensing/module-migration.md=.
+- [X] Create =docs/relicensing/module-migration.md=.
 - [X] Add contribution guidelines requiring Apache-2.0 and contributor authority
   attestation for new clean rewrite code.
 - [X] Define what contributors may and may not reference when implementing clean
