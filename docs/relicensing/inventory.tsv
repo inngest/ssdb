@@ -30,6 +30,7 @@ path	license_class	spdx	copyright	flags	binary
 .gitmodules	unknown-license				no
 .gitorderfile	unknown-license				no
 .mailmap	unknown-license				no
+AGENTS.md	unknown-license				no
 CMakeLists.txt	unknown-license				no
 CONTRIBUTING.md	unknown-license				no
 Doxyfile	unknown-license			generated	no
