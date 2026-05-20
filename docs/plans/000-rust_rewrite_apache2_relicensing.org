@@ -235,9 +235,9 @@ Track every subsystem explicitly.
 - [X] Decide whether to assume a ScyllaDB relicensing grant is available.
 - [ ] Create =docs/relicensing/inventory.md=.
 - [ ] Create =docs/relicensing/module-migration.md=.
-- [ ] Add contribution guidelines requiring Apache-2.0 and contributor authority
+- [X] Add contribution guidelines requiring Apache-2.0 and contributor authority
   attestation for new clean rewrite code.
-- [ ] Define what contributors may and may not reference when implementing clean
+- [X] Define what contributors may and may not reference when implementing clean
   modules.
 
 ** Phase 2: Rebrand inherited fork

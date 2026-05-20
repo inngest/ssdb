@@ -1,5 +1,24 @@
 # Contributing to Scylla
 
+## KuebikoDB clean rewrite contributions
+
+KuebikoDB is migrating inherited AGPL-covered ScyllaDB code toward cleanly
+authored Apache-2.0 Rust components. This migration does not relicense inherited
+code. New clean rewrite contributions must preserve clear provenance.
+
+For any contribution intended to be Apache-2.0 clean rewrite code, contributors
+must attest that they have authority to license the contribution under
+Apache-2.0. If the contribution may be owned by an employer, the contributor
+must have employer authorization, a corporate CLA, or equivalent written
+approval before the project treats that contribution as Apache-2.0 clean code.
+
+Clean rewrite code must be based on public protocols, public documentation,
+behavioral specifications, black-box tests, benchmarks, and observed behavior.
+Do not copy inherited AGPL implementation code, comments, file structure, or
+distinctive implementation expression into new Apache-2.0 modules.
+
+See `docs/relicensing/clean-room-guidelines.md` for the detailed rewrite rules.
+
 ## Asking questions or requesting help
 
 Use the [ScyllaDB Community Forum](https://forum.scylladb.com) or the [Slack workspace](http://slack.scylladb.com) for general questions and help.
