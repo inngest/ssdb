@@ -4,6 +4,7 @@ on:
   schedule:
     # 5AM every friday
     - cron: '0 5 * * FRI'
+  workflow_dispatch:
 
 permissions: {}
 
@@ -19,7 +20,6 @@ jobs:
     with:
       build_mode: release
   compare-checksum:
-    if: github.repository == 'scylladb/scylladb'
     runs-on: ubuntu-latest
     needs:
       - build-a

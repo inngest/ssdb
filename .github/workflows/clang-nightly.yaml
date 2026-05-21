@@ -4,6 +4,7 @@ on:
   schedule:
     # only at 5AM Saturday
     - cron: '0 5 * * SAT'
+  workflow_dispatch:
 
 env:
   # use the development branch explicitly
@@ -20,7 +21,6 @@ concurrency:
 jobs:
   clang-dev:
     name: Build with clang nightly
-    if: github.repository == 'scylladb/scylladb'
     runs-on: ubuntu-latest
     container: fedora:40
     strategy:

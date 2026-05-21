@@ -1,20 +1,20 @@
 [submodule "seastar"]
 	path = seastar
-	url = ../seastar
+	url = https://github.com/scylladb/seastar.git
 	ignore = dirty
 [submodule "swagger-ui"]
 	path = swagger-ui
-	url = ../scylla-swagger-ui
+	url = https://github.com/scylladb/scylla-swagger-ui.git
 	ignore = dirty
 [submodule "abseil"]
 	path = abseil
-	url = ../abseil-cpp
+	url = https://github.com/scylladb/abseil-cpp.git
 [submodule "scylla-tools"]
 	path = tools/java
-	url = ../scylla-tools-java
+	url = https://github.com/scylladb/scylla-tools-java.git
 [submodule "scylla-python3"]
 	path = tools/python3
-	url = ../scylla-python3
+	url = https://github.com/scylladb/scylla-python3.git
 [submodule "tools/cqlsh"]
 	path = tools/cqlsh
-	url = ../scylla-cqlsh
+	url = https://github.com/scylladb/scylla-cqlsh.git

@@ -16,7 +16,6 @@ jobs:
   read-toolchain:
     uses: ./.github/workflows/read-toolchain.yaml
   build:
-    if: github.repository == 'scylladb/scylladb'
     needs:
       - read-toolchain
     runs-on: ubuntu-latest

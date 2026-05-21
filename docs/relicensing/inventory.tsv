@@ -23,6 +23,7 @@ path	license_class	spdx	copyright	flags	binary
 .github/workflows/docs-pr.yaml	unknown-license				no
 .github/workflows/iwyu.yaml	unknown-license				no
 .github/workflows/kuebiko-pr.yaml	unknown-license				no
+.github/workflows/pr-builds.yml	Apache-only	Apache-2.0			no
 .github/workflows/pr-require-backport-label.yaml	unknown-license				no
 .github/workflows/read-toolchain.yaml	unknown-license				no
 .github/workflows/reproducible-build.yaml	unknown-license				no
