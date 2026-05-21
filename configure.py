@@ -1676,7 +1676,7 @@ if args.target != '':
     user_cflags += ' -march=' + args.target
 
 if os.environ.get('NIX_CC'):
-    user_cflags += ' -DFMT_CONSTEVAL='
+    user_cflags += ' -DFMT_CONSTEVAL= -Wno-deprecated-literal-operator'
 
 user_cflags = user_cflags.strip()
 
