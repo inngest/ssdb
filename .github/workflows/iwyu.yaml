@@ -96,7 +96,7 @@ jobs:
         run: |
           nix develop .#cpp -c bash -c '
             for d in $CLEANER_DIRS; do
-              find $d -name "*.cc" -o -name "*.hh"        \
+              find "$d" \( -name "*.cc" -o -name "*.hh" \) \
                 -exec echo {} \;                          \
                 -exec clang-include-cleaner               \
                   --ignore-headers=seastarx.hh            \
