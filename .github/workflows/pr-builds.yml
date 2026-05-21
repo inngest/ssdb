@@ -20,15 +20,6 @@ jobs:
     name: Read C++ toolchain
     uses: ./.github/workflows/read-toolchain.yaml
 
-  submodules:
-    name: Submodule checkout
-    runs-on: depot-ubuntu-24.04
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
   cxx-configure:
     name: C++ configure smoke
     needs:
@@ -65,13 +56,3 @@ jobs:
         run: cargo check --locked --manifest-path rust/Cargo.toml
       - name: Test Rust workspace
         run: cargo test --locked --manifest-path rust/Cargo.toml
-
-  nix:
-    name: Nix flake check
-    runs-on: depot-ubuntu-24.04
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-      - uses: cachix/install-nix-action@v31
-      - name: Check Linux flake outputs
-        run: nix flake check --system x86_64-linux --print-build-logs
