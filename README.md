@@ -84,6 +84,13 @@ Documentation can be found [here](docs/dev/README.md).
 Seastar documentation can be found [here](http://docs.seastar.io/master/index.html).
 User documentation can be found [here](https://docs.scylladb.com/).
 
+## License
+
+KuebikoDB currently uses a mixed dual-license model. Inherited ScyllaDB-derived
+code remains AGPL-3.0-or-later, while cleanly authored KuebikoDB rewrite code
+may be Apache-2.0. See [LICENSE](LICENSE), [LICENSE.AGPL](LICENSE.AGPL), and
+[LICENSE.APACHE](LICENSE.APACHE).
+
 ## Training
 
 Training material and online courses can be found at [Scylla University](https://university.scylladb.com/).

@@ -4,9 +4,9 @@ This file provides guidance to AI coding agents working in this repository.
 
 ## Repository Context
 
-This repository is the KuebikoDB fork of ScyllaDB OSS. It currently contains
-inherited AGPL-governed ScyllaDB-derived code and is being migrated toward
-cleanly authored Apache-2.0 Rust components.
+This repository is the KuebikoDB fork of ScyllaDB OSS. It uses a mixed
+dual-license model: inherited ScyllaDB-derived code remains AGPL-governed, and
+cleanly authored KuebikoDB rewrite components may be Apache-2.0.
 
 Do not describe the whole repository or final binary as Apache-2.0 while
 inherited AGPL code remains part of the distributed work. New clean rewrite

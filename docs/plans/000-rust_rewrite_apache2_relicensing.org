@@ -23,7 +23,8 @@ license inventory, rewrite process, contribution records, and release artifacts.
 
 - The inherited repository is derived from ScyllaDB OSS and currently contains
   AGPL-licensed code.
-- The top-level license file is =LICENSE.AGPL=.
+- The top-level license notice is =LICENSE=, with =LICENSE.AGPL= for inherited
+  AGPL code and =LICENSE.APACHE= for clean Apache-2.0 rewrite code.
 - The existing license inventory includes many source files marked
   =AGPL-3.0-or-later= and some files marked as Apache-2.0 or dual licensed.
 - Existing source and docs contain ScyllaDB/Scylla names, install paths, service
@@ -194,8 +195,9 @@ counsel approves a different attribution format.
 
 Maintain these files:
 
+- =LICENSE= for the repository-level mixed dual-license notice.
 - =LICENSE.AGPL= for inherited AGPL code.
-- =LICENSE= or =rust-next/LICENSE= for Apache-2.0 code.
+- =LICENSE.APACHE= or =rust-next/LICENSE= for Apache-2.0 code.
 - =NOTICE.txt= for inherited notices and third-party attribution.
 - =docs/relicensing/inventory.org= for current license inventory.
 - =docs/relicensing/module-migration.org= for component-level status.

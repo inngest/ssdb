@@ -6,7 +6,7 @@ It is an audit starting point, not a legal conclusion.
 - Source: tracked files in the current working tree
 - Generator: `docs/relicensing/generate-inventory.py`
 - Complete per-file inventory: `inventory.tsv`
-- Tracked files scanned: `5953`
+- Tracked files scanned: `5955`
 
 ## License Classes
 
@@ -15,13 +15,13 @@ It is an audit starting point, not a legal conclusion.
 | AGPL-only       | 1695  |
 | Apache-only     | 39    |
 | dual-licensed   | 371   |
-| unknown-license | 3848  |
+| unknown-license | 3850  |
 
 ## File Flags
 
 | Category  | Files |
 |-----------|-------|
-| generated | 72    |
+| generated | 73    |
 | gitlink   | 6     |
 | vendored  | 12    |
 
@@ -68,6 +68,7 @@ It is an audit starting point, not a legal conclusion.
 ## Generated Examples
 
 - `Doxyfile`
+- `LICENSE.APACHE`
 - `alternator/expressions.g`
 - `alternator/expressions_types.hh`
 - `api/api-doc/authorization_cache.json`
@@ -91,7 +92,6 @@ It is an audit starting point, not a legal conclusion.
 - `api/api-doc/storage_proxy.json`
 - `api/api-doc/storage_service.json`
 - `api/api-doc/stream_manager.json`
-- `api/api-doc/swagger20_header.json`
 
 ## Vendored Examples
 

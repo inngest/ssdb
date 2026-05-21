@@ -6,6 +6,10 @@ KuebikoDB is migrating inherited AGPL-covered ScyllaDB code toward cleanly
 authored Apache-2.0 Rust components. This migration does not relicense inherited
 code. New clean rewrite contributions must preserve clear provenance.
 
+The repository uses a mixed dual-license model: inherited code remains
+AGPL-3.0-or-later, and cleanly authored KuebikoDB rewrite code may be
+Apache-2.0 when it satisfies the provenance rules.
+
 For any contribution intended to be Apache-2.0 clean rewrite code, contributors
 must attest that they have authority to license the contribution under
 Apache-2.0. If the contribution may be owned by an employer, the contributor
