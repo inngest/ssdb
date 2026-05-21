@@ -1,0 +1,6 @@
+
+{{ description | readable_desc_rst }}
+
+   {% if type %}* **Type:** ``{{ type }}``{% endif %}
+   {% if default %}* **Default value:** ``{{ default }}``{% endif %}
+   {% if liveness %}* :term:`Liveness <Liveness>`: ``{{ liveness }}``{% endif %}

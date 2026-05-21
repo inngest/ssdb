@@ -28,7 +28,7 @@ has been independently authored, reviewed, tested, and documented.
 | Cluster membership | inherited C++                  | Rust Apache-2.0 | inherited | None                                     | High-risk area. Avoid copying topology, gossip, or raft integration structure.                                                 |
 | Admin/API server   | inherited C++/scripts          | Rust Apache-2.0 | candidate | Status and health endpoints              | Good early candidate after CQL framing. Public HTTP behavior can be specified independently.                                   |
 | Packaging/install  | inherited scripts              | New packaging   | candidate | Package metadata names and service paths | Rebrand service names, install paths, metrics namespaces, and artifacts while preserving required notices.                     |
-| Docs               | inherited docs removed         | Rewritten docs  | candidate | Provenance and compatibility docs        | Inherited ScyllaDB user-facing docs were removed. Keep provenance docs and rewrite public docs cleanly before Apache-2.0 claims. |
+| Docs               | inherited docs retained       | Rewritten docs  | candidate | Provenance and compatibility docs        | Inherited ScyllaDB docs are retained as temporary references; docs build remains disabled. Rewrite public docs cleanly before Apache-2.0 claims. |
 | Tests              | inherited tests plus new tests | Mixed/new       | candidate | Black-box CQL protocol fixtures          | Copied inherited tests remain AGPL-derived unless independently rewritten. New black-box fixtures should record public inputs. |
 
 ## Required Entry For New Clean Modules
