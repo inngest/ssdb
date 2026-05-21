@@ -45,6 +45,12 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           ./configure.py --mode dev --with scylla --disable-dpdk
 
+  kuebikodb-build:
+    name: Build KuebikoDB
+    uses: ./.github/workflows/build-kuebikodb.yaml
+    with:
+      build_mode: dev
+
   rust:
     name: Rust checks and tests
     runs-on: ubuntu-latest

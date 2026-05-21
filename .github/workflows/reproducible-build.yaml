@@ -12,11 +12,11 @@ env:
   BUILD_MODE: release
 jobs:
   build-a:
-    uses: ./.github/workflows/build-scylla.yaml
+    uses: ./.github/workflows/build-kuebikodb.yaml
     with:
       build_mode: release
   build-b:
-    uses: ./.github/workflows/build-scylla.yaml
+    uses: ./.github/workflows/build-kuebikodb.yaml
     with:
       build_mode: release
   compare-checksum:

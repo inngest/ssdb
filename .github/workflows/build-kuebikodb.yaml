@@ -1,4 +1,4 @@
-name: Build Scylla
+name: Build KuebikoDB
 
 on:
   workflow_call:
@@ -9,7 +9,7 @@ on:
         required: true
     outputs:
       md5sum:
-        description: 'the md5sum for scylla executable'
+        description: 'the md5sum for the inherited database executable'
         value: ${{ jobs.build.outputs.md5sum }}
 
 jobs:

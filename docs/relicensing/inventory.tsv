@@ -14,7 +14,7 @@ path	license_class	spdx	copyright	flags	binary
 .github/scripts/sync_labels.py	unknown-license				no
 .github/workflows/add-label-when-promoted.yaml	unknown-license				no
 .github/workflows/backport-pr-fixes-validation.yaml	unknown-license				no
-.github/workflows/build-scylla.yaml	unknown-license				no
+.github/workflows/build-kuebikodb.yaml	unknown-license				no
 .github/workflows/clang-nightly.yaml	unknown-license				no
 .github/workflows/clang-tidy.yaml	unknown-license				no
 .github/workflows/codespell.yaml	unknown-license				no
@@ -907,6 +907,7 @@ docs/architecture/sstable/sstable3/sstables-3-index.rst	unknown-license				no
 docs/architecture/sstable/sstable3/sstables-3-statistics.rst	unknown-license				no
 docs/architecture/sstable/sstable3/sstables-3-summary.rst	unknown-license				no
 docs/architecture/tablets.rst	unknown-license				no
+docs/ci/workflow-audit.md	Apache-only	Apache-2.0			no
 docs/conf.py	unknown-license		"copyright = str(date.today().year) + "", ScyllaDB. All rights reserved."""	generated	no
 docs/contribute.rst	unknown-license				no
 docs/cql/_common/tablets-default.rst	unknown-license				no
