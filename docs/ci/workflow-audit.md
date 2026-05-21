@@ -58,5 +58,7 @@ changes, and which should be removed.
 
 - Full inherited C++ builds and C++ source-analysis builds use
   `depot-ubuntu-24.04-8` so build parallelism has enough CPU.
+- Heavy non-reproducibility builds use `ccache` with GitHub Actions cache.
+  Reproducible builds disable compiler caching to preserve a clean comparison.
 - Lightweight validation, relicensing, Rust, Nix, submodule, and reusable
   metadata jobs use `depot-ubuntu-24.04`.

@@ -7,6 +7,10 @@ on:
         description: 'the build mode'
         type: string
         required: true
+      enable_ccache:
+        description: 'enable ccache for non-reproducibility builds'
+        type: boolean
+        default: true
     outputs:
       md5sum:
         description: 'the md5sum for the inherited database executable'
@@ -20,19 +24,55 @@ jobs:
       - read-toolchain
     runs-on: depot-ubuntu-24.04-8
     container: ${{ needs.read-toolchain.outputs.image }}
+    env:
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_MAXSIZE: 2G
+      CCACHE_BASEDIR: ${{ github.workspace }}
+      CCACHE_NOHASHDIR: true
     outputs:
       md5sum: ${{ steps.checksum.outputs.md5sum }}
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+      - name: Install ccache
+        if: ${{ inputs.enable_ccache }}
+        run: |
+          sudo dnf -y install ccache zstd
+      - name: Restore ccache
+        if: ${{ inputs.enable_ccache }}
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-${{ runner.os }}-build-kuebikodb-${{ inputs.build_mode }}-${{ hashFiles('tools/toolchain/image', 'configure.py', 'CMakeLists.txt', 'cmake/**', '.gitmodules') }}-${{ github.run_id }}
+          restore-keys: |
+            ccache-${{ runner.os }}-build-kuebikodb-${{ inputs.build_mode }}-${{ hashFiles('tools/toolchain/image', 'configure.py', 'CMakeLists.txt', 'cmake/**', '.gitmodules') }}-
+            ccache-${{ runner.os }}-build-kuebikodb-${{ inputs.build_mode }}-
+            ccache-${{ runner.os }}-build-kuebikodb-
+      - name: Configure ccache
+        if: ${{ inputs.enable_ccache }}
+        run: |
+          mkdir -p "$CCACHE_DIR" "$GITHUB_WORKSPACE/.cache-wrappers"
+          printf '#!/bin/sh\nexec ccache clang "$@"\n' > "$GITHUB_WORKSPACE/.cache-wrappers/clang"
+          printf '#!/bin/sh\nexec ccache clang++ "$@"\n' > "$GITHUB_WORKSPACE/.cache-wrappers/clang++"
+          chmod +x "$GITHUB_WORKSPACE/.cache-wrappers/clang" "$GITHUB_WORKSPACE/.cache-wrappers/clang++"
+          ccache --max-size="$CCACHE_MAXSIZE"
+          ccache --zero-stats
       - name: Generate the building system
         run: |
           git config --global --add safe.directory $GITHUB_WORKSPACE
-          ./configure.py --mode ${{ inputs.build_mode }} --with scylla
+          if [ '${{ inputs.enable_ccache }}' = 'true' ]; then
+            ./configure.py --mode ${{ inputs.build_mode }} --with scylla --compiler "$GITHUB_WORKSPACE/.cache-wrappers/clang++" --c-compiler "$GITHUB_WORKSPACE/.cache-wrappers/clang"
+          else
+            ./configure.py --mode ${{ inputs.build_mode }} --with scylla
+          fi
       - run: |
           ninja build/${{ inputs.build_mode }}/scylla
       - id: checksum
         run: |
           checksum=$(md5sum build/${{ inputs.build_mode }}/scylla | cut -c -32)
           echo "md5sum=$checksum" >> $GITHUB_OUTPUT
+      - name: Show ccache stats
+        if: ${{ always() && inputs.enable_ccache }}
+        run: |
+          ccache --show-stats

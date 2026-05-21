@@ -15,10 +15,12 @@ jobs:
     uses: ./.github/workflows/build-kuebikodb.yaml
     with:
       build_mode: release
+      enable_ccache: false
   build-b:
     uses: ./.github/workflows/build-kuebikodb.yaml
     with:
       build_mode: release
+      enable_ccache: false
   compare-checksum:
     runs-on: depot-ubuntu-24.04
     needs:

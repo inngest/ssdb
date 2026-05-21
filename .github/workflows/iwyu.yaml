@@ -37,18 +37,39 @@ jobs:
       - read-toolchain
     runs-on: depot-ubuntu-24.04-8
     container: ${{ needs.read-toolchain.outputs.image }}
+    env:
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_MAXSIZE: 2G
+      CCACHE_BASEDIR: ${{ github.workspace }}
+      CCACHE_NOHASHDIR: true
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: true
       - run: |
-          sudo dnf -y install clang-tools-extra
+          sudo dnf -y install ccache clang-tools-extra zstd
+      - name: Restore ccache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-${{ runner.os }}-iwyu-${{ env.BUILD_TYPE }}-${{ hashFiles('tools/toolchain/image', 'configure.py', 'CMakeLists.txt', 'cmake/**', '.gitmodules') }}-${{ github.run_id }}
+          restore-keys: |
+            ccache-${{ runner.os }}-iwyu-${{ env.BUILD_TYPE }}-${{ hashFiles('tools/toolchain/image', 'configure.py', 'CMakeLists.txt', 'cmake/**', '.gitmodules') }}-
+            ccache-${{ runner.os }}-iwyu-${{ env.BUILD_TYPE }}-
+            ccache-${{ runner.os }}-iwyu-
+      - name: Configure ccache
+        run: |
+          mkdir -p "$CCACHE_DIR"
+          ccache --max-size="$CCACHE_MAXSIZE"
+          ccache --zero-stats
       - name: Generate compilation database
         run: |
           cmake                                         \
             -DCMAKE_BUILD_TYPE=$BUILD_TYPE              \
             -DCMAKE_C_COMPILER=clang                    \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache          \
             -DCMAKE_CXX_COMPILER=clang++                \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache        \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON          \
             -G Ninja                                    \
             -B $BUILD_DIR                               \
@@ -88,3 +109,7 @@ jobs:
         with:
           name: Logs (clang-include-cleaner)
           path: "./${{ env.CLEANER_OUTPUT_PATH }}"
+      - name: Show ccache stats
+        if: ${{ always() }}
+        run: |
+          ccache --show-stats
