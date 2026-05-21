@@ -11,8 +11,9 @@ into the `Nixpkgs` collection (that's "just" a matter of implementing
 environment that is predictable, is independent from the state of the
 host distribution, and does not require entering a container.
 
-`gdb` with green thread debugging support is included, plus other
-assorted debugging tools.
+Assorted debugging tools are included. The old patched `gdb` with green thread
+debugging support is no longer part of the flake shell because it is not
+currently compatible with the pinned nixpkgs input.
 
 Compilers are transparently wrapped to use `ccache` and `distcc`, if
 you have those configured.

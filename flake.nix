@@ -117,7 +117,6 @@
                   # for debugging
                   binutils
                   elfutils
-                  gdbWithGreenThreadSupport
                   llvm.llvm
                   lz4
 
