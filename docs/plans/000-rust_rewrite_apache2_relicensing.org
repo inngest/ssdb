@@ -222,7 +222,7 @@ Track every subsystem explicitly.
 | Cluster membership | inherited C++         | Rust Apache-2.0 | not started | avoid copying topology/gossip implementation          |
 | Admin/API server   | inherited C++/scripts | Rust Apache-2.0 | not started | good early candidate                                  |
 | Packaging/install  | inherited scripts     | new packaging   | not started | strip ScyllaDB paths and service names                |
-| Docs               | inherited docs        | rewritten docs  | not started | preserve required attribution, remove brand confusion |
+| Docs               | inherited docs removed | rewritten docs  | in progress | provenance docs retained; user-facing docs must be rewritten cleanly |
 | Tests              | inherited tests       | mixed/new       | not started | clean behavioral tests are strategic asset            |
 
 * Phased Implementation Plan
@@ -243,8 +243,10 @@ Track every subsystem explicitly.
 ** Phase 2: Rebrand inherited fork
 
 - [X] Pick the new project name.
-- [ ] Replace user-facing ScyllaDB/Scylla branding in README, docs, package
-  metadata, service names, and install paths.
+- [X] Remove inherited ScyllaDB user-facing docs from the fork.
+- [X] Remove inherited ScyllaDB docs build and publish workflows.
+- [ ] Replace user-facing ScyllaDB/Scylla branding in README, package metadata,
+  service names, and install paths.
 - [ ] Keep copyright notices and required attribution intact.
 - [ ] Add a clear provenance statement explaining that the inherited code remains
   AGPL while the rewrite proceeds.
