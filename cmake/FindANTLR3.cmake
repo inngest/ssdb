@@ -7,6 +7,11 @@
 #
 find_path(ANTLR3_INCLUDE_DIR
   NAMES antlr3.hpp
+  HINTS
+    ENV ANTLR3_INCLUDE_DIR
+    ENV ANTLR3_ROOT
+  PATH_SUFFIXES
+    include
   PATHS
     /opt/scylladb/include)
 

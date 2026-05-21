@@ -107,7 +107,7 @@
               flake = true;
               shell = true;
               srcPath = self;
-              antlr3Package = pkgs.antlr3_4;
+              antlr3Package = pkgs.antlr3;
               fmtPackage = pkgs.fmt_10.overrideAttrs (old: {
                 cmakeFlags = (old.cmakeFlags or [ ]) ++ [
                   "-DFMT_TEST=OFF"

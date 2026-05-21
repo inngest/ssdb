@@ -171,6 +171,7 @@ in derive ({
 // (if shell then {
 
   configurePhase = "./configure.py${if verbose then " --verbose" else ""} --disable-dpdk";
+  ANTLR3_INCLUDE_DIR = "${antlr3Package}/include";
 
 } else {
 
