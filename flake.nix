@@ -39,6 +39,21 @@
         lib = pkgs.lib;
         llvm = pkgs.llvmPackages;
 
+        antlr3Cpp = pkgs.antlr3.overrideAttrs (old: {
+          postInstall = (old.postInstall or "") + ''
+            sed -i \
+              -e 's/const ANTLR_INT32[[:space:]]*m_decisionNumber;/ANTLR_INT32 m_decisionNumber;/' \
+              -e 's/const ANTLR_INT32\* const[[:space:]]*m_eot;/const ANTLR_INT32* m_eot;/' \
+              -e 's/const ANTLR_INT32\* const[[:space:]]*m_eof;/const ANTLR_INT32* m_eof;/' \
+              -e 's/const ANTLR_INT32\* const[[:space:]]*m_min;/const ANTLR_INT32* m_min;/' \
+              -e 's/const ANTLR_INT32\* const[[:space:]]*m_max;/const ANTLR_INT32* m_max;/' \
+              -e 's/const ANTLR_INT32\* const[[:space:]]*m_accept;/const ANTLR_INT32* m_accept;/' \
+              -e 's/const ANTLR_INT32\* const[[:space:]]*m_special;/const ANTLR_INT32* m_special;/' \
+              -e 's/const ANTLR_INT32\* const \*const[[:space:]]*m_transition;/const ANTLR_INT32* const * m_transition;/' \
+              "$out/include/antlr3cyclicdfa.hpp"
+          '';
+        });
+
         pythonEnv = pkgs.python3.withPackages (
           ps: with ps; [
             aiohttp
@@ -107,7 +122,7 @@
               flake = true;
               shell = true;
               srcPath = self;
-              antlr3Package = pkgs.antlr3;
+              antlr3Package = antlr3Cpp;
               fmtPackage = pkgs.fmt_10.overrideAttrs (old: {
                 cmakeFlags = (old.cmakeFlags or [ ]) ++ [
                   "-DFMT_TEST=OFF"

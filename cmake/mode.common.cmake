@@ -6,6 +6,7 @@ set(disabled_warnings
   overloaded-virtual
   unsupported-friend
   enum-constexpr-conversion
+  unnecessary-virtual-specifier
   unused-parameter)
 include(CheckCXXCompilerFlag)
 foreach(warning ${disabled_warnings})

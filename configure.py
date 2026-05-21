@@ -1548,6 +1548,7 @@ def get_warning_options(cxx):
         '-Wno-unsupported-friend',
         '-Wno-missing-field-initializers',
         '-Wno-deprecated-copy',
+        '-Wno-unnecessary-virtual-specifier',
         # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=77728
         '-Wno-psabi',
         '-Wno-enum-constexpr-conversion',
@@ -1674,6 +1675,9 @@ user_cflags = args.user_cflags + f" -ffile-prefix-map={curdir}=."
 
 if args.target != '':
     user_cflags += ' -march=' + args.target
+
+if os.environ.get('NIX_CC'):
+    user_cflags += ' -DFMT_USE_CONSTEVAL=0'
 
 for mode in modes:
     # Those flags are passed not only to Scylla objects, but also to libraries
