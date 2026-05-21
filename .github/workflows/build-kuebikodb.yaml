@@ -53,7 +53,7 @@ jobs:
         run: |
           git config --global --add safe.directory $GITHUB_WORKSPACE
           # The .#cpp shell's compiler wrappers use ccache when CCACHE_DIR is set.
-          nix develop .#cpp -c ./configure.py --mode ${{ inputs.build_mode }} --with scylla
+          nix develop .#cpp -c ./configure.py --mode ${{ inputs.build_mode }} --with scylla --no-seastar-unused-result-error
       - run: |
           nix develop .#cpp -c ninja build/${{ inputs.build_mode }}/scylla
       - id: checksum

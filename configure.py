@@ -741,6 +741,9 @@ arg_parser.add_argument('--enable-alloc-failure-injector', dest='alloc_failure_i
                         help='enable allocation failure injection')
 arg_parser.add_argument('--enable-seastar-debug-allocations', dest='seastar_debug_allocations', action='store_true', default=False,
                         help='enable seastar debug allocations')
+arg_parser.add_argument('--seastar-unused-result-error', dest='seastar_unused_result_error',
+                        action=argparse.BooleanOptionalAction, default=True,
+                        help='treat ignored warn_unused_result calls in Seastar as errors')
 arg_parser.add_argument('--with-antlr3', dest='antlr3_exec', action='store', default="antlr3",
                         help='path to antlr3 executable')
 arg_parser.add_argument('--with-ragel', dest='ragel_exec', action='store', default='ragel',
@@ -1708,7 +1711,7 @@ def configure_seastar(build_dir, mode, mode_config):
         '-DSeastar_CXX_DIALECT=gnu++23',
         '-DSeastar_API_LEVEL=7',
         '-DSeastar_DEPRECATED_OSTREAM_FORMATTERS=OFF',
-        '-DSeastar_UNUSED_RESULT_ERROR=ON',
+        '-DSeastar_UNUSED_RESULT_ERROR={}'.format('ON' if args.seastar_unused_result_error else 'OFF'),
         '-DCMAKE_EXPORT_COMPILE_COMMANDS=ON',
         '-DSeastar_SCHEDULING_GROUPS_COUNT=16',
         '-DSeastar_IO_URING=OFF', # io_uring backend is not stable enough

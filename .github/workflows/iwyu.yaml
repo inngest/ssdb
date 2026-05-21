@@ -66,6 +66,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=$BUILD_TYPE              \
             -DCMAKE_C_COMPILER=clang                    \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache          \
+            -DScylla_SEASTAR_UNUSED_RESULT_ERROR=OFF    \
             -DCMAKE_CXX_COMPILER=clang++                \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache        \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON          \
