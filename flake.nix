@@ -124,6 +124,7 @@
                   # etc
                   diffutils
                   doxygen
+                  rapidxml
                   colordiff
                   wabt
                 ];
