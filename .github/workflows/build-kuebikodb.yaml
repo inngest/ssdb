@@ -20,7 +20,6 @@ jobs:
   build:
     runs-on: depot-ubuntu-24.04-8
     env:
-      CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_MAXSIZE: 2G
       CCACHE_BASEDIR: ${{ github.workspace }}
       CCACHE_NOHASHDIR: true
@@ -36,7 +35,7 @@ jobs:
         if: ${{ inputs.enable_ccache }}
         uses: actions/cache@v4
         with:
-          path: ${{ env.CCACHE_DIR }}
+          path: ${{ github.workspace }}/.ccache
           key: ccache-${{ runner.os }}-build-kuebikodb-${{ inputs.build_mode }}-${{ hashFiles('flake.nix', 'flake.lock', 'configure.py', 'CMakeLists.txt', 'cmake/**', '.gitmodules') }}-${{ github.run_id }}
           restore-keys: |
             ccache-${{ runner.os }}-build-kuebikodb-${{ inputs.build_mode }}-${{ hashFiles('flake.nix', 'flake.lock', 'configure.py', 'CMakeLists.txt', 'cmake/**', '.gitmodules') }}-
@@ -45,12 +44,15 @@ jobs:
       - name: Configure ccache
         if: ${{ inputs.enable_ccache }}
         run: |
+          echo "CCACHE_DIR=$GITHUB_WORKSPACE/.ccache" >> "$GITHUB_ENV"
+          export CCACHE_DIR="$GITHUB_WORKSPACE/.ccache"
           mkdir -p "$CCACHE_DIR"
           nix develop .#cpp -c ccache --max-size="$CCACHE_MAXSIZE"
           nix develop .#cpp -c ccache --zero-stats
       - name: Generate the building system
         run: |
           git config --global --add safe.directory $GITHUB_WORKSPACE
+          # The .#cpp shell's compiler wrappers use ccache when CCACHE_DIR is set.
           nix develop .#cpp -c ./configure.py --mode ${{ inputs.build_mode }} --with scylla
       - run: |
           nix develop .#cpp -c ninja build/${{ inputs.build_mode }}/scylla

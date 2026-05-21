@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later OR Apache-2.0
+
 set -euo pipefail
 
 extra_args=()

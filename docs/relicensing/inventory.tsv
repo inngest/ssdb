@@ -10,6 +10,7 @@ path	license_class	spdx	copyright	flags	binary
 .github/mergify.yml	unknown-license				no
 .github/pull_request_template.md	unknown-license				no
 .github/scripts/auto-backport.py	unknown-license				no
+.github/scripts/clang-tidy-nix.sh	dual-licensed	AGPL-3.0-or-later OR Apache-2.0			no
 .github/scripts/label_promoted_commits.py	unknown-license				no
 .github/scripts/sync_labels.py	unknown-license				no
 .github/workflows/build-kuebikodb.yaml	unknown-license				no

@@ -26,6 +26,11 @@
 # shell env will want to add stuff to the environment, and the way
 # for it to do so is to pass us a function with this signatire:
 , devInputs ? ({ pkgs, llvm }: [])
+
+# Compatibility pins for the inherited C++ build. Keep these local to this
+# expression so tooling packages in dev shells can still use current nixpkgs.
+, antlr3Package ? pkgs.antlr3
+, fmtPackage ? pkgs.fmt
 }:
 
 let
@@ -77,9 +82,10 @@ in derive ({
   # "aspirational" all the way to "cargo cult ritual" -- i.e. not
   # expected to be actually correct or verifiable.  but it's the
   # thought that counts!
-  nativeBuildInputs = with pkgs; [
+  nativeBuildInputs = [
+    antlr3Package
+  ] ++ (with pkgs; [
     ant
-    antlr3
     boost
     cargo
     cmake
@@ -113,15 +119,16 @@ in derive ({
     ragel
     rustc
     stow
-  ] ++ (devInputs { inherit pkgs llvm; });
+  ]) ++ (devInputs { inherit pkgs llvm; });
 
-  buildInputs = with pkgs; [
+  buildInputs = [
+    antlr3Package
+    fmtPackage
+  ] ++ (with pkgs; [
     abseil-cpp
-    antlr3
     boost
     c-ares
     cryptopp
-    fmt
     gmp
     gnutls
     hwloc
@@ -155,7 +162,7 @@ in derive ({
     xxHash
     zlib
     zstd
-  ];
+  ]);
 
   JAVA8_HOME = "${pkgs.openjdk8_headless}/lib/openjdk";
   JAVA_HOME = "${pkgs.openjdk11_headless}/lib/openjdk";
