@@ -66,3 +66,10 @@ changes, and which should be removed.
 - External dependency coordinates such as `scylladb/scylla-toolchain` and
   `scylladb/seastar` are intentionally left as dependency references until this
   fork provides replacements.
+
+## Runner Notes
+
+- Full inherited C++ builds and C++ source-analysis builds use
+  `depot-ubuntu-24.04-8` so build parallelism has enough CPU.
+- Lightweight validation, docs, relicensing, Rust, Nix, submodule, and reusable
+  metadata jobs use `depot-ubuntu-24.04`.

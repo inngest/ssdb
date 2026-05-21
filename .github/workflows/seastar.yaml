@@ -17,7 +17,7 @@ env:
 
 jobs:
   build-with-the-latest-seastar:
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04-8
     # be consistent with tools/toolchain/image
     container: scylladb/scylla-toolchain:fedora-40-20240621
     strategy:

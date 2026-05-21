@@ -9,7 +9,7 @@ on:
 
 jobs:
   read-toolchain:
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04
     outputs:
       image: ${{ steps.read.outputs.image }}
     steps:

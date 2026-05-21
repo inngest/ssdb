@@ -39,7 +39,7 @@ jobs:
     name: Run clang-tidy
     needs:
       - read-toolchain
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04-8
     container: ${{ needs.read-toolchain.outputs.image }}
     steps:
       - env:

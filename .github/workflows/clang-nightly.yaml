@@ -21,7 +21,7 @@ concurrency:
 jobs:
   clang-dev:
     name: Build with clang nightly
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04-8
     container: fedora:40
     strategy:
       matrix:
