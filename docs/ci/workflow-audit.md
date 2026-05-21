@@ -14,7 +14,6 @@ changes, and which should be removed.
 | Core PR CI                    | Should run on normal pull requests to protect this fork.                 |
 | Reusable CI                   | Building block called by other workflows; should not run directly.       |
 | Heavy or scheduled CI         | Useful, but too expensive or specialized for every pull request.         |
-| Backport and label automation | Inherited release-management automation that needs audit before keeping. |
 | External service automation   | GitHub-managed or dependency automation outside normal PR validation.    |
 
 ## Keep
@@ -37,17 +36,6 @@ changes, and which should be removed.
 | Check Reproducible Build      | `.github/workflows/reproducible-build.yaml` | Heavy or scheduled CI | Builds twice and compares checksums.                              | Keep manual/scheduled. Consider reducing frequency until full binary rename and release process are settled.                                           |
 | clang-nightly                 | `.github/workflows/clang-nightly.yaml`      | Heavy or scheduled CI | Builds with a nightly Clang snapshot.                             | Keep manual/scheduled if compiler-forward compatibility matters. Rename workflow once the inherited C++ build has KuebikoDB naming.                    |
 | Build with the latest Seastar | `.github/workflows/seastar.yaml`            | Heavy or scheduled CI | Builds against upstream Seastar.                                  | Keep manual/scheduled while Seastar remains a dependency. Confirm whether this should track ScyllaDB's Seastar fork or a KuebikoDB fork.               |
-
-## Removed
-
-| Workflow                         | Former file                                           | Category                      | Removal reason                                                               |
-|----------------------------------|-------------------------------------------------------|-------------------------------|------------------------------------------------------------------------------|
-| PR require backport label        | `.github/workflows/pr-require-backport-label.yaml`    | Backport and label automation | This fork does not currently use Scylla-style mandatory backport labels.     |
-| Check if commits are promoted    | `.github/workflows/add-label-when-promoted.yaml`      | Backport and label automation | This fork does not currently use the inherited promotion/backport process.   |
-| Sync labels                      | `.github/workflows/sync-labels.yaml`                  | Backport and label automation | The workflow was gated to `scylladb/scylladb` and inert in this repository.  |
-| Fixes validation for backport PR | `.github/workflows/backport-pr-fixes-validation.yaml` | Backport and label automation | This fork does not currently define `branch-*` backport PR validation rules. |
-| Docs / Build PR                  | `.github/workflows/docs-pr.yaml`                      | Docs CI                       | Inherited ScyllaDB docs build was removed with the inherited docs tree.      |
-| Docs / Publish                   | `.github/workflows/docs-pages.yaml`                   | Docs CI                       | Inherited ScyllaDB docs publishing was removed with the inherited docs tree. |
 
 ## External Or Generated
 
