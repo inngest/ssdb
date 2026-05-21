@@ -12,6 +12,7 @@ on:
       - enterprise
     paths:
       - "docs/**"
+      - "!docs/ci/**"
       - "!docs/plans/**"
       - "!docs/relicensing/**"
       - "db/config.hh"

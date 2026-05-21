@@ -14,6 +14,7 @@ on:
       - 'branch-**'
     paths:
       - "docs/**"
+      - "!docs/ci/**"
       - "!docs/plans/**"
       - "!docs/relicensing/**"
   workflow_dispatch:
