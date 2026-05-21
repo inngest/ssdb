@@ -125,6 +125,7 @@
                   diffutils
                   doxygen
                   colordiff
+                  wabt
                 ];
             }
           else

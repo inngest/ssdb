@@ -1805,11 +1805,11 @@ abseil_libs = ['absl/' + lib for lib in [
 
 def query_seastar_flags(pc_file, use_shared_libs, link_static_cxx=False):
     if use_shared_libs:
-        opt = '--shared'
+        opts = []
     else:
-        opt = '--static'
-    cflags = pkg_config(pc_file, '--cflags', opt)
-    libs = pkg_config(pc_file, '--libs', opt)
+        opts = ['--static']
+    cflags = pkg_config(pc_file, '--cflags', *opts)
+    libs = pkg_config(pc_file, '--libs', *opts)
     if use_shared_libs:
         rpath = os.path.dirname(libs.split()[0])
         libs = f"-Wl,-rpath='{rpath}' {libs}"
