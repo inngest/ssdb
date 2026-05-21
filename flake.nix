@@ -84,7 +84,7 @@
             cppTools
             ++ rustTools
             ++ (with pkgs; [
-              antlr3
+              antlr3_4
               git
               jdk11_headless
               lz4
