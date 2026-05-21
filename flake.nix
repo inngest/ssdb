@@ -39,20 +39,21 @@
         lib = pkgs.lib;
         llvm = pkgs.llvmPackages;
 
-        antlr3Cpp = pkgs.antlr3.overrideAttrs (old: {
-          postInstall = (old.postInstall or "") + ''
-            sed -i \
-              -e 's/const ANTLR_INT32[[:space:]]*m_decisionNumber;/ANTLR_INT32 m_decisionNumber;/' \
-              -e 's/const ANTLR_INT32\* const[[:space:]]*m_eot;/const ANTLR_INT32* m_eot;/' \
-              -e 's/const ANTLR_INT32\* const[[:space:]]*m_eof;/const ANTLR_INT32* m_eof;/' \
-              -e 's/const ANTLR_INT32\* const[[:space:]]*m_min;/const ANTLR_INT32* m_min;/' \
-              -e 's/const ANTLR_INT32\* const[[:space:]]*m_max;/const ANTLR_INT32* m_max;/' \
-              -e 's/const ANTLR_INT32\* const[[:space:]]*m_accept;/const ANTLR_INT32* m_accept;/' \
-              -e 's/const ANTLR_INT32\* const[[:space:]]*m_special;/const ANTLR_INT32* m_special;/' \
-              -e 's/const ANTLR_INT32\* const \*const[[:space:]]*m_transition;/const ANTLR_INT32* const * m_transition;/' \
-              "$out/include/antlr3cyclicdfa.hpp"
-          '';
-        });
+        antlr3Cpp = pkgs.runCommand "antlr-3.5.2-kuebikodb" { } ''
+          mkdir -p "$out"
+          cp -a ${pkgs.antlr3}/. "$out/"
+          chmod -R u+w "$out"
+          sed -E \
+            -e 's/const[[:space:]]+ANTLR_INT32([[:space:]]+)m_decisionNumber;/ANTLR_INT32\1m_decisionNumber;/' \
+            -e 's/const[[:space:]]+ANTLR_INT32\*[[:space:]]+const([[:space:]]+)m_(eot|eof|min|max|accept|special);/const ANTLR_INT32*\1m_\2;/' \
+            -e 's/const[[:space:]]+ANTLR_INT32\*[[:space:]]+const[[:space:]]+\*const([[:space:]]+)m_transition;/const ANTLR_INT32* const *\1m_transition;/' \
+            "$out/include/antlr3cyclicdfa.hpp" > "$out/include/antlr3cyclicdfa.hpp.tmp"
+          mv "$out/include/antlr3cyclicdfa.hpp.tmp" "$out/include/antlr3cyclicdfa.hpp"
+          if grep -nE 'const[[:space:]]+ANTLR_INT32[[:space:]]+m_decisionNumber|const[[:space:]]+ANTLR_INT32\*[[:space:]]+const[[:space:]]+m_(eot|eof|min|max|accept|special)|const[[:space:]]+ANTLR_INT32\*[[:space:]]+const[[:space:]]+\*const[[:space:]]+m_transition' "$out/include/antlr3cyclicdfa.hpp"; then
+            echo "failed to patch ANTLR3 cyclic DFA copy members" >&2
+            exit 1
+          fi
+        '';
 
         pythonEnv = pkgs.python3.withPackages (
           ps: with ps; [
