@@ -69,6 +69,7 @@
         cppTools = with pkgs; [
           ccache
           cmake
+          doxygen
           gnumake
           llvm.bintools
           llvm.clang
@@ -122,6 +123,7 @@
 
                   # etc
                   diffutils
+                  doxygen
                   colordiff
                 ];
             }
