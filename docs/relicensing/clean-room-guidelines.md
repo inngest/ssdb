@@ -52,6 +52,16 @@ For high-risk modules, use a split workflow:
 High-risk modules include storage, compaction, query planning, query execution,
 replication, topology, membership, and CQL semantics beyond frame encoding.
 
+## SPDX Policy For `rust-next/`
+
+Future clean rewrite code under `rust-next/` is intended to be Apache-2.0.
+Every new source file in that tree must include the standard Apache-2.0 SPDX
+license identifier header.
+
+Each clean Rust crate should also set `license = "Apache-2.0"` in `Cargo.toml`.
+Do not place inherited AGPL implementation code in `rust-next/`; keep inherited
+code in the existing tree until it is removed or relicensed.
+
 ## Required Provenance Note
 
 Every clean rewrite module should record:

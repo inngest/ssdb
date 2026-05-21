@@ -21,6 +21,11 @@ behavioral specifications, black-box tests, benchmarks, and observed behavior.
 Do not copy inherited AGPL implementation code, comments, file structure, or
 distinctive implementation expression into new Apache-2.0 modules.
 
+Future clean rewrite code under `rust-next/` must carry an
+`SPDX-License-Identifier: Apache-2.0` header in source files. New clean Rust
+crates should set `license = "Apache-2.0"` in `Cargo.toml` and must not contain
+inherited AGPL implementation code.
+
 See `docs/relicensing/clean-room-guidelines.md` for the detailed rewrite rules.
 
 ## Asking questions or requesting help

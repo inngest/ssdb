@@ -250,10 +250,11 @@ Track every subsystem explicitly.
   remain useful references.
 - [ ] Rewrite or remove retained inherited docs before making Apache-2.0 docs
   claims.
-- [ ] Replace user-facing ScyllaDB/Scylla branding in README, package metadata,
-  service names, and install paths.
+- [X] Rebrand the top-level README and state the inherited-code caveats.
+- [ ] Replace user-facing ScyllaDB/Scylla branding in package metadata, service
+  names, and install paths.
 - [ ] Keep copyright notices and required attribution intact.
-- [ ] Add a clear provenance statement explaining that the inherited code remains
+- [X] Add a clear provenance statement explaining that the inherited code remains
   AGPL while the rewrite proceeds.
 - [ ] Remove or disable upstream telemetry/housekeeping integrations unless they
   are intentionally retained and rebranded.
@@ -264,6 +265,7 @@ Track every subsystem explicitly.
 - [ ] Add Apache-2.0 license and notice files for new Rust code.
 - [ ] Add linting, formatting, test, and provenance checks.
 - [ ] Add CI that rejects missing SPDX headers in new Rust crates.
+- [X] Define the SPDX policy for future clean =rust-next/= source files.
 - [X] Choose the first Rust milestone.
 - [ ] Start with CQL native protocol framing as the first low-risk component with
   clear external behavior.
@@ -342,6 +344,7 @@ Before claiming Apache-2.0 for the full project:
 * Engineering Guardrails
 
 - [ ] Use SPDX headers on every new source file.
+- [X] Define the SPDX header requirement for future clean rewrite source files.
 - [X] Decide contributor authority requirements for Apache-2.0 clean rewrite
   work.
 - [ ] Require signed-off contributions or a lightweight contributor agreement that
