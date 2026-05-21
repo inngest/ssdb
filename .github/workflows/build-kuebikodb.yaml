@@ -24,6 +24,7 @@ jobs:
       CCACHE_MAXSIZE: 2G
       CCACHE_BASEDIR: ${{ github.workspace }}
       CCACHE_NOHASHDIR: true
+      NODISTCC: true
     outputs:
       md5sum: ${{ steps.checksum.outputs.md5sum }}
     steps:
@@ -44,22 +45,13 @@ jobs:
       - name: Configure ccache
         if: ${{ inputs.enable_ccache }}
         run: |
-          nix develop .#cpp -c sh -c '
-            mkdir -p "$CCACHE_DIR" "$GITHUB_WORKSPACE/.cache-wrappers"
-            printf "#!/bin/sh\nexec ccache clang \"\$@\"\n" > "$GITHUB_WORKSPACE/.cache-wrappers/clang"
-            printf "#!/bin/sh\nexec ccache clang++ \"\$@\"\n" > "$GITHUB_WORKSPACE/.cache-wrappers/clang++"
-            chmod +x "$GITHUB_WORKSPACE/.cache-wrappers/clang" "$GITHUB_WORKSPACE/.cache-wrappers/clang++"
-            ccache --max-size="$CCACHE_MAXSIZE"
-            ccache --zero-stats
-          '
+          mkdir -p "$CCACHE_DIR"
+          nix develop .#cpp -c ccache --max-size="$CCACHE_MAXSIZE"
+          nix develop .#cpp -c ccache --zero-stats
       - name: Generate the building system
         run: |
           git config --global --add safe.directory $GITHUB_WORKSPACE
-          if [ '${{ inputs.enable_ccache }}' = 'true' ]; then
-            nix develop .#cpp -c ./configure.py --mode ${{ inputs.build_mode }} --with scylla --compiler "$GITHUB_WORKSPACE/.cache-wrappers/clang++" --c-compiler "$GITHUB_WORKSPACE/.cache-wrappers/clang"
-          else
-            nix develop .#cpp -c ./configure.py --mode ${{ inputs.build_mode }} --with scylla
-          fi
+          nix develop .#cpp -c ./configure.py --mode ${{ inputs.build_mode }} --with scylla
       - run: |
           nix develop .#cpp -c ninja build/${{ inputs.build_mode }}/scylla
       - id: checksum

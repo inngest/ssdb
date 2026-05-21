@@ -41,6 +41,7 @@ jobs:
       CCACHE_MAXSIZE: 2G
       CCACHE_BASEDIR: ${{ github.workspace }}
       CCACHE_NOHASHDIR: true
+      NODISTCC: true
     steps:
       - uses: actions/checkout@v4
         with:
@@ -66,11 +67,12 @@ jobs:
             -DCMAKE_BUILD_TYPE=$BUILD_TYPE              \
             -DCMAKE_C_COMPILER=clang                    \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache          \
+            -DCMAKE_CXX_FLAGS="-Wno-error=deprecated-builtins" \
             -DScylla_USE_LINKER=ld.lld                  \
             -DCMAKE_CXX_COMPILER=clang++                \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache        \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON          \
-            -DCMAKE_CXX_CLANG_TIDY="clang-tidy;--checks=$CLANG_TIDY_CHECKS" \
+            -DCMAKE_CXX_CLANG_TIDY="bash;$GITHUB_WORKSPACE/.github/scripts/clang-tidy-nix.sh;--checks=$CLANG_TIDY_CHECKS" \
             -G Ninja                                    \
             -B $BUILD_DIR                               \
             -S .

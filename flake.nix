@@ -28,6 +28,8 @@
             (final: prev: {
               # default.nix predates current nixpkgs and still references
               # package names that have been removed from unstable.
+              antlr3 = prev.antlr3_4;
+              fmt = prev.fmt_10;
               llvmPackages_15 = prev.llvmPackages;
               boost175 = prev.boost181;
               libyamlcpp = prev.yaml-cpp;
