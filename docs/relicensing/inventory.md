@@ -6,7 +6,7 @@ It is an audit starting point, not a legal conclusion.
 - Source: tracked files in the current working tree
 - Generator: `docs/relicensing/generate-inventory.py`
 - Complete per-file inventory: `inventory.tsv`
-- Tracked files scanned: `5959`
+- Tracked files scanned: `5955`
 
 ## License Classes
 
@@ -15,7 +15,7 @@ It is an audit starting point, not a legal conclusion.
 | AGPL-only       | 1695  |
 | Apache-only     | 39    |
 | dual-licensed   | 371   |
-| unknown-license | 3854  |
+| unknown-license | 3850  |
 
 ## File Flags
 
@@ -52,8 +52,6 @@ It is an audit starting point, not a legal conclusion.
 - `.github/scripts/auto-backport.py`
 - `.github/scripts/label_promoted_commits.py`
 - `.github/scripts/sync_labels.py`
-- `.github/workflows/add-label-when-promoted.yaml`
-- `.github/workflows/backport-pr-fixes-validation.yaml`
 - `.github/workflows/build-kuebikodb.yaml`
 - `.github/workflows/clang-nightly.yaml`
 - `.github/workflows/clang-tidy.yaml`
@@ -63,7 +61,9 @@ It is an audit starting point, not a legal conclusion.
 - `.github/workflows/docs-pr.yaml`
 - `.github/workflows/iwyu.yaml`
 - `.github/workflows/kuebiko-pr.yaml`
-- `.github/workflows/pr-require-backport-label.yaml`
+- `.github/workflows/read-toolchain.yaml`
+- `.github/workflows/reproducible-build.yaml`
+- `.github/workflows/seastar.yaml`
 
 ## Generated Examples
 

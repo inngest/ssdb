@@ -41,14 +41,14 @@ changes, and which should be removed.
 | clang-nightly                 | `.github/workflows/clang-nightly.yaml`      | Heavy or scheduled CI | Builds with a nightly Clang snapshot.                             | Keep manual/scheduled if compiler-forward compatibility matters. Rename workflow once the inherited C++ build has KuebikoDB naming.                    |
 | Build with the latest Seastar | `.github/workflows/seastar.yaml`            | Heavy or scheduled CI | Builds against upstream Seastar.                                  | Keep manual/scheduled while Seastar remains a dependency. Confirm whether this should track ScyllaDB's Seastar fork or a KuebikoDB fork.               |
 
-## Consider Removing Or Replacing
+## Removed
 
-| Workflow                         | File                                                  | Category                      | Current role                                                                          | Recommended change                                                                           |
-|----------------------------------|-------------------------------------------------------|-------------------------------|---------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------|
-| PR require backport label        | `.github/workflows/pr-require-backport-label.yaml`    | Backport and label automation | Requires backport labels on non-draft PRs.                                            | Remove or replace unless this fork keeps Scylla-style release backport branches.             |
-| Check if commits are promoted    | `.github/workflows/add-label-when-promoted.yaml`      | Backport and label automation | Adds labels when commits are promoted across branches.                                | Remove unless the fork keeps the same promotion/backport process and has the required token. |
-| Sync labels                      | `.github/workflows/sync-labels.yaml`                  | Backport and label automation | Syncs backport labels between PRs and issues, currently gated to `scylladb/scylladb`. | Remove or rewrite for this repo; as written it is inert here.                                |
-| Fixes validation for backport PR | `.github/workflows/backport-pr-fixes-validation.yaml` | Backport and label automation | Validates `Fixes` references on `branch-*` PRs.                                       | Remove or retarget once the fork's release branch policy is defined.                         |
+| Workflow                         | Former file                                           | Category                      | Removal reason                                                               |
+|----------------------------------|-------------------------------------------------------|-------------------------------|------------------------------------------------------------------------------|
+| PR require backport label        | `.github/workflows/pr-require-backport-label.yaml`    | Backport and label automation | This fork does not currently use Scylla-style mandatory backport labels.     |
+| Check if commits are promoted    | `.github/workflows/add-label-when-promoted.yaml`      | Backport and label automation | This fork does not currently use the inherited promotion/backport process.   |
+| Sync labels                      | `.github/workflows/sync-labels.yaml`                  | Backport and label automation | The workflow was gated to `scylladb/scylladb` and inert in this repository.  |
+| Fixes validation for backport PR | `.github/workflows/backport-pr-fixes-validation.yaml` | Backport and label automation | This fork does not currently define `branch-*` backport PR validation rules. |
 
 ## External Or Generated
 

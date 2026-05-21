@@ -12,8 +12,6 @@ path	license_class	spdx	copyright	flags	binary
 .github/scripts/auto-backport.py	unknown-license				no
 .github/scripts/label_promoted_commits.py	unknown-license				no
 .github/scripts/sync_labels.py	unknown-license				no
-.github/workflows/add-label-when-promoted.yaml	unknown-license				no
-.github/workflows/backport-pr-fixes-validation.yaml	unknown-license				no
 .github/workflows/build-kuebikodb.yaml	unknown-license				no
 .github/workflows/clang-nightly.yaml	unknown-license				no
 .github/workflows/clang-tidy.yaml	unknown-license				no
@@ -24,11 +22,9 @@ path	license_class	spdx	copyright	flags	binary
 .github/workflows/iwyu.yaml	unknown-license				no
 .github/workflows/kuebiko-pr.yaml	unknown-license				no
 .github/workflows/pr-builds.yml	Apache-only	Apache-2.0			no
-.github/workflows/pr-require-backport-label.yaml	unknown-license				no
 .github/workflows/read-toolchain.yaml	unknown-license				no
 .github/workflows/reproducible-build.yaml	unknown-license				no
 .github/workflows/seastar.yaml	unknown-license				no
-.github/workflows/sync-labels.yaml	unknown-license				no
 .gitignore	unknown-license				no
 .gitmodules	unknown-license				no
 .gitorderfile	unknown-license				no
