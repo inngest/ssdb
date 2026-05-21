@@ -1679,6 +1679,8 @@ if args.target != '':
 if os.environ.get('NIX_CC'):
     user_cflags += ' -DFMT_USE_CONSTEVAL=0'
 
+user_cflags = user_cflags.strip()
+
 for mode in modes:
     # Those flags are passed not only to Scylla objects, but also to libraries
     # that we compile ourselves.
