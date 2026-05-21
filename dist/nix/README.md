@@ -19,8 +19,8 @@ you have those configured.
 
 ## Basic usage
 
-If you have Nix flake support enabled (recommended!), enter the
-environment using `nix develop .`.  Otherwise, use `nix-shell .`.
+Enter the environment using `nix develop .`.  The flake imports `default.nix`
+directly; the old `shell.nix` wrapper is no longer used.
 
 `$configPhase` will configure Scylla for building (it just invokes
 `./configure.py --disable-dpdk`).  Then use `ninja` to build,
@@ -32,11 +32,9 @@ Using [direnv](https://direnv.net) is recommended to make life more convenient. 
 `.envrc` at the project root with the contents:
 ```bash
 nix_direnv_watch_file default.nix
-nix_direnv_watch_file shell.nix
+nix_direnv_watch_file flake.nix
 for f in $(find dist/nix/ -type f); do
     nix_direnv_watch_file $f
 done
 use flake
 ```
-
-For non-flake usage, replace the last line with `use nix`.

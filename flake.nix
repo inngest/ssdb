@@ -67,10 +67,12 @@
         ];
 
         cppTools = with pkgs; [
+          ccache
           cmake
           gnumake
           llvm.bintools
           llvm.clang
+          llvm.clang-tools
           ninja
           pkg-config
           ragel
@@ -99,10 +101,30 @@
 
         scyllaDevShell =
           if pkgs.stdenv.isLinux then
-            import ./shell.nix {
+            import ./default.nix {
               inherit pkgs;
               flake = true;
+              shell = true;
               srcPath = self;
+              devInputs =
+                { pkgs, llvm }:
+                with pkgs;
+                [
+                  # for impure building
+                  ccache
+                  distcc
+
+                  # for debugging
+                  binutils
+                  elfutils
+                  gdbWithGreenThreadSupport
+                  llvm.llvm
+                  lz4
+
+                  # etc
+                  diffutils
+                  colordiff
+                ];
             }
           else
             portableDevShell;
@@ -138,6 +160,7 @@
             rustTools
             ++ (with pkgs; [
               cmake
+              ccache
               git
               llvm.clang
               ninja

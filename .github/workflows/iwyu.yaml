@@ -14,6 +14,10 @@ on:
       - '**/CMakeLists.txt'
       - 'cmake/**'
       - 'configure.py'
+      - '.gitmodules'
+      - '.github/workflows/iwyu.yaml'
+      - 'flake.nix'
+      - 'flake.lock'
 
 env:
   BUILD_TYPE: RelWithDebInfo
@@ -29,14 +33,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  read-toolchain:
-    uses: ./.github/workflows/read-toolchain.yaml
   clang-include-cleaner:
     name: "Analyze #includes in source files"
-    needs:
-      - read-toolchain
     runs-on: depot-ubuntu-24.04-8
-    container: ${{ needs.read-toolchain.outputs.image }}
     env:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_MAXSIZE: 2G
@@ -46,25 +45,24 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
-      - run: |
-          sudo dnf -y install ccache clang-tools-extra zstd
+      - uses: DeterminateSystems/nix-installer-action@v3
       - name: Restore ccache
         uses: actions/cache@v4
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ccache-${{ runner.os }}-iwyu-${{ env.BUILD_TYPE }}-${{ hashFiles('tools/toolchain/image', 'configure.py', 'CMakeLists.txt', 'cmake/**', '.gitmodules') }}-${{ github.run_id }}
+          key: ccache-${{ runner.os }}-iwyu-${{ env.BUILD_TYPE }}-${{ hashFiles('flake.nix', 'flake.lock', 'configure.py', 'CMakeLists.txt', 'cmake/**', '.gitmodules') }}-${{ github.run_id }}
           restore-keys: |
-            ccache-${{ runner.os }}-iwyu-${{ env.BUILD_TYPE }}-${{ hashFiles('tools/toolchain/image', 'configure.py', 'CMakeLists.txt', 'cmake/**', '.gitmodules') }}-
+            ccache-${{ runner.os }}-iwyu-${{ env.BUILD_TYPE }}-${{ hashFiles('flake.nix', 'flake.lock', 'configure.py', 'CMakeLists.txt', 'cmake/**', '.gitmodules') }}-
             ccache-${{ runner.os }}-iwyu-${{ env.BUILD_TYPE }}-
             ccache-${{ runner.os }}-iwyu-
       - name: Configure ccache
         run: |
           mkdir -p "$CCACHE_DIR"
-          ccache --max-size="$CCACHE_MAXSIZE"
-          ccache --zero-stats
+          nix develop .#cpp -c ccache --max-size="$CCACHE_MAXSIZE"
+          nix develop .#cpp -c ccache --zero-stats
       - name: Generate compilation database
         run: |
-          cmake                                         \
+          nix develop .#cpp -c cmake                    \
             -DCMAKE_BUILD_TYPE=$BUILD_TYPE              \
             -DCMAKE_C_COMPILER=clang                    \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache          \
@@ -76,33 +74,37 @@ jobs:
             -S .
       - name: Build headers
         run: |
-          swagger_targets=''
-          for f in api/api-doc/*.json; do
-            if test "${f#*.}" = json; then
-              name=$(basename "$f" .json)
-              if test $name != swagger20_header; then
-                swagger_targets+=" scylla_swagger_gen_$name"
+          nix develop .#cpp -c bash -c '
+            swagger_targets=""
+            for f in api/api-doc/*.json; do
+              if test "${f#*.}" = json; then
+                name=$(basename "$f" .json)
+                if test $name != swagger20_header; then
+                  swagger_targets+=" scylla_swagger_gen_$name"
+                fi
               fi
-            fi
-          done
-          cmake                                         \
-            --build build                               \
-             --target seastar_http_request_parser       \
-             --target idl-sources                       \
-             --target $swagger_targets
+            done
+            cmake                                       \
+              --build build                             \
+              --target seastar_http_request_parser      \
+              --target idl-sources                      \
+              --target $swagger_targets
+          '
       - run: |
           echo "::add-matcher::.github/clang-include-cleaner.json"
       - name: clang-include-cleaner
         run: |
-          for d in $CLEANER_DIRS; do
-            find $d -name '*.cc' -o -name '*.hh'          \
-              -exec echo {} \;                            \
-              -exec clang-include-cleaner                 \
-                --ignore-headers=seastarx.hh              \
-                --print=changes                           \
-                -p $BUILD_DIR                             \
-                {} \; | tee --append $CLEANER_OUTPUT_PATH
-          done
+          nix develop .#cpp -c bash -c '
+            for d in $CLEANER_DIRS; do
+              find $d -name "*.cc" -o -name "*.hh"        \
+                -exec echo {} \;                          \
+                -exec clang-include-cleaner               \
+                  --ignore-headers=seastarx.hh            \
+                  --print=changes                         \
+                  -p $BUILD_DIR                           \
+                  {} \; | tee --append $CLEANER_OUTPUT_PATH
+            done
+          '
       - run: |
           echo "::remove-matcher owner=clang-include-cleaner::"
       - uses: actions/upload-artifact@v4
@@ -112,4 +114,4 @@ jobs:
       - name: Show ccache stats
         if: ${{ always() }}
         run: |
-          ccache --show-stats
+          nix develop .#cpp -c ccache --show-stats

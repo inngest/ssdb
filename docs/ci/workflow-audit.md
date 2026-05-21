@@ -20,22 +20,21 @@ changes, and which should be removed.
 
 | Workflow                          | File                                     | Category    | Current role                                                                                                                  | Audit note                                                                                     |
 |-----------------------------------|------------------------------------------|-------------|-------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
-| KuebikoDB Build and Test          | `.github/workflows/pr-builds.yml`        | Core PR CI  | Runs submodule checkout, C++ configure smoke, full inherited binary build, Rust checks/tests, and Linux Nix flake validation. | Keep as the fork's primary PR signal. Expand as Rust replacement modules become testable.      |
+| KuebikoDB Build and Test          | `.github/workflows/pr-builds.yml`        | Core PR CI  | Installs Nix, validates the flake, runs the C++ configure smoke through the C++ shell, runs the reusable inherited binary build, and runs Rust checks/tests through Makefile/Nix targets. | Keep as the fork's primary PR signal. Expand as Rust replacement modules become testable.      |
 | KuebikoDB PR                      | `.github/workflows/kuebiko-pr.yaml`      | Core PR CI  | Runs relicensing Phase 1 checks and prints relicensing status.                                                                | Keep until provenance checks are merged into broader CI.                                       |
 | PR Conventional Commit Validation | `.github/workflows/commits.yml`          | Core PR CI  | Validates conventional PR titles without adding labels.                                                                       | Keep for release-note hygiene.                                                                 |
 | codespell                         | `.github/workflows/codespell.yaml`       | Core PR CI  | Warns on spelling issues.                                                                                                     | Keep, but consider making it fail once inherited false positives are cleaned up.               |
-| Build KuebikoDB                   | `.github/workflows/build-kuebikodb.yaml` | Reusable CI | Builds the inherited database executable for a requested mode.                                                                | Keep as reusable CI. Internal target paths still use `scylla` until the build tree is renamed. |
-| Read Toolchain                    | `.github/workflows/read-toolchain.yaml`  | Reusable CI | Reads the container image from `tools/toolchain/image`.                                                                       | Keep while inherited C++ build uses the upstream toolchain container.                          |
+| Build KuebikoDB                   | `.github/workflows/build-kuebikodb.yaml` | Reusable CI | Installs Nix, enters the C++ shell, and builds the inherited database executable for a requested mode.                         | Keep as reusable CI. Internal target paths still use `scylla` until the build tree is renamed. |
 
 ## Modify
 
 | Workflow                      | File                                        | Category              | Current role                                                      | Recommended change                                                                                                                                     |
 |-------------------------------|---------------------------------------------|-----------------------|-------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
-| clang-tidy                    | `.github/workflows/clang-tidy.yaml`         | Core PR CI            | Runs clang-tidy on C++ changes and relevant CI/toolchain changes. | Keep path-filtered. Continue rebranding user-visible names only; CMake variables such as `Scylla_USE_LINKER` remain inherited build internals for now. |
-| iwyu                          | `.github/workflows/iwyu.yaml`               | Core PR CI            | Runs include-cleaner on C++ paths.                                | Keep path-filtered, but add `.gitmodules`, toolchain, and workflow paths if it should validate submodule/toolchain changes like clang-tidy.            |
-| Check Reproducible Build      | `.github/workflows/reproducible-build.yaml` | Heavy or scheduled CI | Builds twice and compares checksums.                              | Keep manual/scheduled. Consider reducing frequency until full binary rename and release process are settled.                                           |
+| clang-tidy                    | `.github/workflows/clang-tidy.yaml`         | Core PR CI            | Runs clang-tidy on C++ changes through the Nix C++ shell.          | Keep path-filtered. Continue rebranding user-visible names only; CMake variables such as `Scylla_USE_LINKER` remain inherited build internals for now. |
+| iwyu                          | `.github/workflows/iwyu.yaml`               | Core PR CI            | Runs include-cleaner on C++ paths through the Nix C++ shell.       | Keep path-filtered. It now validates submodule, flake, and workflow changes like clang-tidy.                                                          |
+| Check Reproducible Build      | `.github/workflows/reproducible-build.yaml` | Heavy or scheduled CI | Builds twice through the reusable Nix-backed build and compares checksums. | Keep manual/scheduled. Consider reducing frequency until full binary rename and release process are settled.                                           |
 | clang-nightly                 | `.github/workflows/clang-nightly.yaml`      | Heavy or scheduled CI | Builds with a nightly Clang snapshot.                             | Keep manual/scheduled if compiler-forward compatibility matters. Rename workflow once the inherited C++ build has KuebikoDB naming.                    |
-| Build with the latest Seastar | `.github/workflows/seastar.yaml`            | Heavy or scheduled CI | Builds against upstream Seastar.                                  | Keep manual/scheduled while Seastar remains a dependency. Confirm whether this should track ScyllaDB's Seastar fork or a KuebikoDB fork.               |
+| Build with the latest Seastar | `.github/workflows/seastar.yaml`            | Heavy or scheduled CI | Builds against upstream Seastar through the Nix C++ shell.         | Keep manual/scheduled while Seastar remains a dependency. Confirm whether this should track ScyllaDB's Seastar fork or a KuebikoDB fork.               |
 
 ## External Or Generated
 
@@ -50,14 +49,16 @@ changes, and which should be removed.
 - Internal inherited C++ targets still use names such as `scylla`, and some CMake
   variables still contain `Scylla`. Rename those only as part of the broader
   source/build-system rebrand so CI does not diverge from the build tree.
-- External dependency coordinates such as `scylladb/scylla-toolchain` and
-  `scylladb/seastar` are intentionally left as dependency references until this
-  fork provides replacements.
+- External dependency coordinates such as `scylladb/seastar` are intentionally
+  left as dependency references until this fork provides replacements.
 
 ## Runner Notes
 
 - Full inherited C++ builds and C++ source-analysis builds use
   `depot-ubuntu-24.04-8` so build parallelism has enough CPU.
+- Normal PR build, configure, Rust, and relicensing jobs install Nix before
+  running repository tooling so CI follows the same flake-backed shells used by
+  local development.
 - Heavy non-reproducibility builds use `ccache` with GitHub Actions cache.
   Reproducible builds disable compiler caching to preserve a clean comparison.
 - Lightweight validation, relicensing, Rust, Nix, submodule, and reusable

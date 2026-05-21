@@ -16,25 +16,27 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  read-toolchain:
-    name: Read C++ toolchain
-    uses: ./.github/workflows/read-toolchain.yaml
+  nix:
+    name: Nix flake check
+    runs-on: depot-ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@v3
+      - name: Check flake
+        run: nix flake check --print-build-logs
 
   cxx-configure:
     name: C++ configure smoke
-    needs:
-      - read-toolchain
     runs-on: depot-ubuntu-24.04
-    container: ${{ needs.read-toolchain.outputs.image }}
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+      - uses: DeterminateSystems/nix-installer-action@v3
       - name: Configure inherited C++ build
-        run: |
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          ./configure.py --mode dev --with scylla --disable-dpdk
+        run: make cpp-configure
 
   kuebikodb-build:
     name: Build KuebikoDB
@@ -48,11 +50,10 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
-      - name: Install Rust toolchain
-        run: rustup toolchain install stable --profile minimal --component rustfmt
+      - uses: DeterminateSystems/nix-installer-action@v3
       - name: Check Rust formatting
-        run: cargo fmt --check --manifest-path rust/Cargo.toml
+        run: make rust-fmt-check
       - name: Check Rust workspace
-        run: cargo check --locked --manifest-path rust/Cargo.toml
+        run: make rust-check
       - name: Test Rust workspace
-        run: cargo test --locked --manifest-path rust/Cargo.toml
+        run: make rust-test

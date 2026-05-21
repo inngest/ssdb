@@ -20,7 +20,6 @@ path	license_class	spdx	copyright	flags	binary
 .github/workflows/iwyu.yaml	unknown-license				no
 .github/workflows/kuebiko-pr.yaml	unknown-license				no
 .github/workflows/pr-builds.yml	Apache-only	Apache-2.0			no
-.github/workflows/read-toolchain.yaml	unknown-license				no
 .github/workflows/reproducible-build.yaml	unknown-license				no
 .github/workflows/seastar.yaml	unknown-license				no
 .gitignore	unknown-license				no
@@ -1944,7 +1943,6 @@ service/topology_state_machine.hh	dual-licensed	(AGPL-3.0-or-later and Apache-2.
 service/view_update_backlog_broker.hh	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2018-present ScyllaDB		no
 service_permit.hh	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2019-present ScyllaDB		no
 setup.py	unknown-license				no
-shell.nix	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2021-present ScyllaDB		no
 sstables/CMakeLists.txt	unknown-license				no
 sstables/binary_search.hh	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2017-present ScyllaDB		no
 sstables/checksum_utils.hh	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2018-present ScyllaDB		no

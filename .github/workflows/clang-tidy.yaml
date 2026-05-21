@@ -16,8 +16,8 @@ on:
       - 'configure.py'
       - '.gitmodules'
       - '.github/workflows/clang-tidy.yaml'
-      - '.github/workflows/read-toolchain.yaml'
-      - 'tools/toolchain/image'
+      - 'flake.nix'
+      - 'flake.lock'
   workflow_dispatch:
 
 env:
@@ -33,46 +33,36 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  read-toolchain:
-    uses: ./.github/workflows/read-toolchain.yaml
   clang-tidy:
     name: Run clang-tidy
-    needs:
-      - read-toolchain
     runs-on: depot-ubuntu-24.04-8
-    container: ${{ needs.read-toolchain.outputs.image }}
     env:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_MAXSIZE: 2G
       CCACHE_BASEDIR: ${{ github.workspace }}
       CCACHE_NOHASHDIR: true
     steps:
-      - env:
-          IMAGE: ${{ needs.read-toolchain.image }}
-        run: |
-          echo ${{ needs.read-toolchain.image }}
       - uses: actions/checkout@v4
         with:
           submodules: true
-      - run: |
-          sudo dnf -y install ccache clang-tools-extra zstd
+      - uses: DeterminateSystems/nix-installer-action@v3
       - name: Restore ccache
         uses: actions/cache@v4
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ccache-${{ runner.os }}-clang-tidy-${{ env.BUILD_TYPE }}-${{ hashFiles('tools/toolchain/image', 'configure.py', 'CMakeLists.txt', 'cmake/**', '.gitmodules') }}-${{ github.run_id }}
+          key: ccache-${{ runner.os }}-clang-tidy-${{ env.BUILD_TYPE }}-${{ hashFiles('flake.nix', 'flake.lock', 'configure.py', 'CMakeLists.txt', 'cmake/**', '.gitmodules') }}-${{ github.run_id }}
           restore-keys: |
-            ccache-${{ runner.os }}-clang-tidy-${{ env.BUILD_TYPE }}-${{ hashFiles('tools/toolchain/image', 'configure.py', 'CMakeLists.txt', 'cmake/**', '.gitmodules') }}-
+            ccache-${{ runner.os }}-clang-tidy-${{ env.BUILD_TYPE }}-${{ hashFiles('flake.nix', 'flake.lock', 'configure.py', 'CMakeLists.txt', 'cmake/**', '.gitmodules') }}-
             ccache-${{ runner.os }}-clang-tidy-${{ env.BUILD_TYPE }}-
             ccache-${{ runner.os }}-clang-tidy-
       - name: Configure ccache
         run: |
           mkdir -p "$CCACHE_DIR"
-          ccache --max-size="$CCACHE_MAXSIZE"
-          ccache --zero-stats
+          nix develop .#cpp -c ccache --max-size="$CCACHE_MAXSIZE"
+          nix develop .#cpp -c ccache --zero-stats
       - name: Generate the building system
         run: |
-          cmake                                         \
+          nix develop .#cpp -c cmake                    \
             -DCMAKE_BUILD_TYPE=$BUILD_TYPE              \
             -DCMAKE_C_COMPILER=clang                    \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache          \
@@ -89,10 +79,10 @@ jobs:
           echo "::add-matcher::.github/clang-matcher.json"
       - name: Build with clang-tidy enabled
         run: |
-          cmake --build $BUILD_DIR --target scylla
+          nix develop .#cpp -c cmake --build $BUILD_DIR --target scylla
       - run: |
           echo "::remove-matcher owner=clang::"
       - name: Show ccache stats
         if: ${{ always() }}
         run: |
-          ccache --show-stats
+          nix develop .#cpp -c ccache --show-stats

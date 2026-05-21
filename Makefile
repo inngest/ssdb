@@ -52,7 +52,7 @@ rust-fmt-check: ## Check Rust formatting in the current Rust workspace.
 
 .PHONY: cpp-configure
 cpp-configure: ## Configure the inherited C++ build inside the Linux C++ shell.
-	$(NIX) develop .#cpp -c ./configure.py --disable-dpdk
+	$(NIX) develop .#cpp -c ./configure.py --mode dev --with scylla --disable-dpdk
 
 .PHONY: inventory
 inventory: ## Regenerate relicensing inventory files.
