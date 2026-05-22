@@ -1548,6 +1548,8 @@ def get_warning_options(cxx):
         '-Wno-unsupported-friend',
         '-Wno-missing-field-initializers',
         '-Wno-deprecated-copy',
+        '-Wno-deprecated-literal-operator',
+        '-Wno-unused-private-field',
         # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=77728
         '-Wno-psabi',
         '-Wno-enum-constexpr-conversion',
@@ -1676,7 +1678,7 @@ if args.target != '':
     user_cflags += ' -march=' + args.target
 
 if os.environ.get('NIX_CC'):
-    user_cflags += ' -DFMT_CONSTEVAL= -Wno-deprecated-literal-operator -Wno-unused-private-field'
+    user_cflags += ' -DFMT_CONSTEVAL='
 
 user_cflags = user_cflags.strip()
 

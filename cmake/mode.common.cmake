@@ -4,8 +4,10 @@ set(disabled_warnings
   mismatched-tags
   missing-field-initializers
   overloaded-virtual
+  deprecated-literal-operator
   unsupported-friend
   enum-constexpr-conversion
+  unused-private-field
   unused-parameter)
 include(CheckCXXCompilerFlag)
 foreach(warning ${disabled_warnings})

@@ -44,8 +44,6 @@ include(limit_jobs)
 # Configure Seastar compile options to align with Scylla
 if(DEFINED ENV{NIX_CC})
   add_compile_options(-DFMT_CONSTEVAL=)
-  add_compile_options(-Wno-deprecated-literal-operator)
-  add_compile_options(-Wno-unused-private-field)
 endif()
 set(CMAKE_CXX_STANDARD "23" CACHE INTERNAL "")
 set(CMAKE_CXX_EXTENSIONS ON CACHE INTERNAL "")
