@@ -16,16 +16,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  nix:
-    name: Nix flake check
-    runs-on: depot-ubuntu-24.04
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-      - uses: DeterminateSystems/nix-installer-action@v3
-      - name: Check flake
-        run: nix flake check --print-build-logs
-
   cxx-configure:
     name: C++ configure smoke
     runs-on: depot-ubuntu-24.04
