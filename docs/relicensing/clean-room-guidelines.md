@@ -1,7 +1,7 @@
 # Clean Rewrite Guidelines
 
 This document defines what contributors may and may not reference when writing
-Apache-2.0 clean rewrite code for KuebikoDB.
+Apache-2.0 clean rewrite code for SSDB.
 
 It is an engineering provenance guide, not legal advice. When in doubt, keep the
 work separate, document the source of behavior, and ask for review before
@@ -17,7 +17,7 @@ Contributors may use these sources when implementing clean rewrite modules:
 - Independently written behavior specifications.
 - Test fixtures created from public inputs or black-box observations.
 - Benchmarks that describe expected behavior without copying implementation.
-- Original design documents written for KuebikoDB clean rewrite modules.
+- Original design documents written for SSDB clean rewrite modules.
 - Third-party dependencies whose licenses are compatible with the intended
   module license.
 

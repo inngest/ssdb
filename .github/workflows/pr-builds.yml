@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
-name: KuebikoDB Build and Test
+name: SSDB Build and Test
 
 on:
   pull_request:
@@ -28,9 +28,9 @@ jobs:
       - name: Configure inherited C++ build
         run: make cpp-configure
 
-  kuebikodb-build:
-    name: Build KuebikoDB
-    uses: ./.github/workflows/build-kuebikodb.yaml
+  ssdb-build:
+    name: Build SSDB
+    uses: ./.github/workflows/build-ssdb.yaml
     with:
       build_mode: dev
 

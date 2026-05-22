@@ -1,6 +1,6 @@
-# KuebikoDB
+# SSDB
 
-KuebikoDB is a fork of ScyllaDB OSS. This repository currently contains
+SSDB is a fork of ScyllaDB OSS. This repository currently contains
 inherited ScyllaDB-derived C++ code and documentation while the project builds a
 path toward cleanly authored Apache-2.0 Rust components.
 
@@ -11,8 +11,8 @@ may still use Scylla or ScyllaDB names.
 
 ## Relicensing Status
 
-KuebikoDB uses a mixed dual-license model. Inherited ScyllaDB-derived code
-remains AGPL-3.0-or-later. Cleanly authored KuebikoDB rewrite code may be
+SSDB uses a mixed dual-license model. Inherited ScyllaDB-derived code
+remains AGPL-3.0-or-later. Cleanly authored SSDB rewrite code may be
 Apache-2.0 when it follows the provenance rules in
 [docs/relicensing/clean-room-guidelines.md](docs/relicensing/clean-room-guidelines.md).
 The combined distributable remains AGPL-governed while inherited AGPL code is

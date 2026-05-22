@@ -1,5 +1,5 @@
 {
-  description = "KuebikoDB";
+  description = "SSDB";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
@@ -39,7 +39,7 @@
         lib = pkgs.lib;
         llvm = pkgs.llvmPackages;
 
-        antlr3Cpp = pkgs.runCommand "antlr-3.5.2-kuebikodb" { } ''
+        antlr3Cpp = pkgs.runCommand "antlr-3.5.2-ssdb" { } ''
           mkdir -p "$out"
           cp -a ${pkgs.antlr3}/. "$out/"
           chmod -R u+w "$out"
@@ -111,7 +111,7 @@
             ]);
 
           shellHook = lib.optionalString pkgs.stdenv.isDarwin ''
-            echo "KuebikoDB portable macOS dev shell"
+            echo "SSDB portable macOS dev shell"
             echo "The inherited C++ database build is Linux-oriented; use a Linux Nix shell for the full C++ build."
           '';
         };
@@ -163,7 +163,7 @@
             pkgs.mkShell {
               packages = [ ];
               shellHook = ''
-                echo "KuebikoDB full C++ build shell is Linux-only."
+                echo "SSDB full C++ build shell is Linux-only."
                 echo "On macOS, use: nix develop .#portable or nix develop .#rust"
                 return 1
               '';
@@ -176,7 +176,7 @@
             pkgs.mkShell {
               packages = [ ];
               shellHook = ''
-                echo "KuebikoDB macOS shell is Darwin-only."
+                echo "SSDB macOS shell is Darwin-only."
                 echo "On Linux, use: nix develop .#default, nix develop .#cpp, or nix develop .#rust"
                 return 1
               '';
@@ -197,7 +197,7 @@
             ]);
 
           shellHook = ''
-            echo "KuebikoDB Rust dev shell"
+            echo "SSDB Rust dev shell"
             echo "Use this for rust/, rust-next/, cxxbridge, and Apache-2.0 rewrite work."
           '';
         };

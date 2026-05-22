@@ -1,4 +1,4 @@
-name: KuebikoDB PR
+name: SSDB PR
 
 on:
   pull_request:

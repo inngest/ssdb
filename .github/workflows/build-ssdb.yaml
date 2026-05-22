@@ -1,4 +1,4 @@
-name: Build KuebikoDB
+name: Build SSDB
 
 on:
   workflow_call:
@@ -36,11 +36,11 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/.ccache
-          key: ccache-${{ runner.os }}-build-kuebikodb-${{ inputs.build_mode }}-${{ hashFiles('flake.nix', 'flake.lock', 'configure.py', 'CMakeLists.txt', 'cmake/**', '.gitmodules') }}-${{ github.run_id }}
+          key: ccache-${{ runner.os }}-build-ssdb-${{ inputs.build_mode }}-${{ hashFiles('flake.nix', 'flake.lock', 'configure.py', 'CMakeLists.txt', 'cmake/**', '.gitmodules') }}-${{ github.run_id }}
           restore-keys: |
-            ccache-${{ runner.os }}-build-kuebikodb-${{ inputs.build_mode }}-${{ hashFiles('flake.nix', 'flake.lock', 'configure.py', 'CMakeLists.txt', 'cmake/**', '.gitmodules') }}-
-            ccache-${{ runner.os }}-build-kuebikodb-${{ inputs.build_mode }}-
-            ccache-${{ runner.os }}-build-kuebikodb-
+            ccache-${{ runner.os }}-build-ssdb-${{ inputs.build_mode }}-${{ hashFiles('flake.nix', 'flake.lock', 'configure.py', 'CMakeLists.txt', 'cmake/**', '.gitmodules') }}-
+            ccache-${{ runner.os }}-build-ssdb-${{ inputs.build_mode }}-
+            ccache-${{ runner.os }}-build-ssdb-
       - name: Configure ccache
         if: ${{ inputs.enable_ccache }}
         run: |

@@ -52,15 +52,15 @@ It is an audit starting point, not a legal conclusion.
 - `.github/scripts/auto-backport.py`
 - `.github/scripts/label_promoted_commits.py`
 - `.github/scripts/sync_labels.py`
-- `.github/workflows/build-kuebikodb.yaml`
+- `.github/workflows/build-ssdb.yaml`
 - `.github/workflows/clang-nightly.yaml`
 - `.github/workflows/clang-tidy.yaml`
 - `.github/workflows/codespell.yaml`
 - `.github/workflows/commits.yml`
 - `.github/workflows/iwyu.yaml`
-- `.github/workflows/kuebiko-pr.yaml`
 - `.github/workflows/reproducible-build.yaml`
 - `.github/workflows/seastar.yaml`
+- `.github/workflows/ssdb-pr.yaml`
 - `.gitignore`
 - `.gitmodules`
 - `.gitorderfile`

@@ -4,9 +4,9 @@ This file provides guidance to AI coding agents working in this repository.
 
 ## Repository Context
 
-This repository is the KuebikoDB fork of ScyllaDB OSS. It uses a mixed
+This repository is the SSDB fork of ScyllaDB OSS. It uses a mixed
 dual-license model: inherited ScyllaDB-derived code remains AGPL-governed, and
-cleanly authored KuebikoDB rewrite components may be Apache-2.0.
+cleanly authored SSDB rewrite components may be Apache-2.0.
 
 Do not describe the whole repository or final binary as Apache-2.0 while
 inherited AGPL code remains part of the distributed work. New clean rewrite
@@ -16,7 +16,7 @@ provenance rules in `docs/relicensing/clean-room-guidelines.md`.
 ## Commit Titles
 
 Use short, imperative commit titles. Prefer conventional commit types when they
-fit, especially for new KuebikoDB work:
+fit, especially for new SSDB work:
 
 - `feat`
 - `fix`

@@ -1,7 +1,7 @@
 # Module Migration Tracker
 
 This tracker records the licensing and provenance status of each major
-KuebikoDB subsystem during the Apache-2.0 Rust rewrite.
+SSDB subsystem during the Apache-2.0 Rust rewrite.
 
 The status here is intentionally conservative. A subsystem remains
 AGPL-governed while it depends on inherited ScyllaDB-derived implementation

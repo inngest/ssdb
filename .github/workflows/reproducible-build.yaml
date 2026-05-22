@@ -12,12 +12,12 @@ env:
   BUILD_MODE: release
 jobs:
   build-a:
-    uses: ./.github/workflows/build-kuebikodb.yaml
+    uses: ./.github/workflows/build-ssdb.yaml
     with:
       build_mode: release
       enable_ccache: false
   build-b:
-    uses: ./.github/workflows/build-kuebikodb.yaml
+    uses: ./.github/workflows/build-ssdb.yaml
     with:
       build_mode: release
       enable_ccache: false

@@ -87,7 +87,7 @@ those modules can become part of an Apache-only artifact once the AGPL
 dependencies are removed or relicensed.
 
 Assume no ScyllaDB relicensing grant is available to this fork. Inherited
-ScyllaDB-derived code remains AGPL unless KuebikoDB obtains an explicit written
+ScyllaDB-derived code remains AGPL unless SSDB obtains an explicit written
 relicensing grant from ScyllaDB and any other relevant copyright holders. The
 Apache-2.0 path therefore depends on clean Rust replacement or removal of
 inherited AGPL components.
@@ -151,13 +151,10 @@ license inventory.
 
 ** Project identity
 
-Working name: =KuebikoDB=.
+Working name: =SSDB=.
 
-Use the mythological spelling =KuebikoDB= rather than =KubebikoDB= unless there
-is an intentional product reason to evoke Kubernetes. =KubebikoDB= had no exact
-software/database collision in a preliminary public search, but the =kube=
-prefix creates avoidable cloud-native association and should receive additional
-trademark review before use.
+Use the short project name =SSDB= for the fork identity. Treat the name as a
+working brand until a fuller trademark review is complete.
 
 The chosen name should not be confusingly similar to ScyllaDB or Scylla. Use
 that name in:
