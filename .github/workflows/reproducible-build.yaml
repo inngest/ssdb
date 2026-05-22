@@ -4,6 +4,7 @@ on:
   schedule:
     # 5AM every friday
     - cron: '0 5 * * FRI'
+  workflow_dispatch:
 
 permissions: {}
 
@@ -11,16 +12,17 @@ env:
   BUILD_MODE: release
 jobs:
   build-a:
-    uses: ./.github/workflows/build-scylla.yaml
+    uses: ./.github/workflows/build-ssdb.yaml
     with:
       build_mode: release
+      enable_ccache: false
   build-b:
-    uses: ./.github/workflows/build-scylla.yaml
+    uses: ./.github/workflows/build-ssdb.yaml
     with:
       build_mode: release
+      enable_ccache: false
   compare-checksum:
-    if: github.repository == 'scylladb/scylladb'
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04
     needs:
       - build-a
       - build-b

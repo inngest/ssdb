@@ -4,6 +4,7 @@ on:
   schedule:
     # 5AM everyday
     - cron: '0 5 * * *'
+  workflow_dispatch:
 
 permissions: {}
 
@@ -16,9 +17,12 @@ env:
 
 jobs:
   build-with-the-latest-seastar:
-    runs-on: ubuntu-latest
-    # be consistent with tools/toolchain/image
-    container: scylladb/scylla-toolchain:fedora-40-20240621
+    runs-on: depot-ubuntu-24.04-8
+    env:
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_MAXSIZE: 2G
+      CCACHE_BASEDIR: ${{ github.workspace }}
+      CCACHE_NOHASHDIR: true
     strategy:
       matrix:
         build_type:
@@ -29,22 +33,44 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
-      - run: |
+      - uses: DeterminateSystems/nix-installer-action@v3
+      - name: Replace inherited Seastar submodule
+        run: |
           rm -rf seastar
       - uses: actions/checkout@v4
         with:
           repository: scylladb/seastar
           submodules: true
           path: seastar
+      - name: Restore ccache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-${{ runner.os }}-latest-seastar-${{ matrix.build_type }}-${{ hashFiles('flake.nix', 'flake.lock', 'configure.py', 'CMakeLists.txt', 'cmake/**', '.gitmodules') }}-${{ github.run_id }}
+          restore-keys: |
+            ccache-${{ runner.os }}-latest-seastar-${{ matrix.build_type }}-${{ hashFiles('flake.nix', 'flake.lock', 'configure.py', 'CMakeLists.txt', 'cmake/**', '.gitmodules') }}-
+            ccache-${{ runner.os }}-latest-seastar-${{ matrix.build_type }}-
+            ccache-${{ runner.os }}-latest-seastar-
+      - name: Configure ccache
+        run: |
+          mkdir -p "$CCACHE_DIR"
+          nix develop .#cpp -c ccache --max-size="$CCACHE_MAXSIZE"
+          nix develop .#cpp -c ccache --zero-stats
       - name: Generate the building system
         run: |
           git config --global --add safe.directory $GITHUB_WORKSPACE
-          cmake                                         \
+          nix develop .#cpp -c cmake                    \
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
             -DCMAKE_C_COMPILER=clang                    \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache          \
             -DCMAKE_CXX_COMPILER=clang++                \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache        \
             -G Ninja                                    \
             -B $BUILD_DIR                               \
             -S .
       - run: |
-          cmake --build $BUILD_DIR --target scylla
+          nix develop .#cpp -c cmake --build $BUILD_DIR --target scylla
+      - name: Show ccache stats
+        if: ${{ always() }}
+        run: |
+          nix develop .#cpp -c ccache --show-stats

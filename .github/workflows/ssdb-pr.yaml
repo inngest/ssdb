@@ -1,0 +1,26 @@
+name: ssdb PR
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  relicensing:
+    name: Relicensing checks
+    runs-on: depot-ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@v3
+      - name: Run Phase 1 checks
+        run: nix develop .#portable -c make phase1-check
+      - name: Show relicensing status
+        run: nix develop .#portable -c make relicensing-status

@@ -4,8 +4,10 @@ set(disabled_warnings
   mismatched-tags
   missing-field-initializers
   overloaded-virtual
+  deprecated-literal-operator
   unsupported-friend
   enum-constexpr-conversion
+  unused-private-field
   unused-parameter)
 include(CheckCXXCompilerFlag)
 foreach(warning ${disabled_warnings})
@@ -72,7 +74,9 @@ function(get_padded_dynamic_linker_option output length)
     ERROR_VARIABLE driver_command_line
     ERROR_STRIP_TRAILING_WHITESPACE)
   # extract the argument for the "-dynamic-linker" option
-  if(driver_command_line MATCHES ".*\"?${dynamic_linker_option}\"? \"?([^ \"]*)\"? .*")
+  if(driver_command_line MATCHES ".*\"?${dynamic_linker_option}=([^ \"]*)\"?.*")
+    set(dynamic_linker ${CMAKE_MATCH_1})
+  elseif(driver_command_line MATCHES ".*\"?${dynamic_linker_option}\"? \"?([^ \"]*)\"? .*")
     set(dynamic_linker ${CMAKE_MATCH_1})
   else()
     message(FATAL_ERROR "Unable to find ${dynamic_linker_option} in driver-generated command: "

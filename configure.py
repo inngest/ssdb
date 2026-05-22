@@ -741,6 +741,9 @@ arg_parser.add_argument('--enable-alloc-failure-injector', dest='alloc_failure_i
                         help='enable allocation failure injection')
 arg_parser.add_argument('--enable-seastar-debug-allocations', dest='seastar_debug_allocations', action='store_true', default=False,
                         help='enable seastar debug allocations')
+arg_parser.add_argument('--seastar-unused-result-error', dest='seastar_unused_result_error',
+                        action=argparse.BooleanOptionalAction, default=True,
+                        help='treat ignored warn_unused_result calls in Seastar as errors')
 arg_parser.add_argument('--with-antlr3', dest='antlr3_exec', action='store', default="antlr3",
                         help='path to antlr3 executable')
 arg_parser.add_argument('--with-ragel', dest='ragel_exec', action='store', default='ragel',
@@ -1545,6 +1548,8 @@ def get_warning_options(cxx):
         '-Wno-unsupported-friend',
         '-Wno-missing-field-initializers',
         '-Wno-deprecated-copy',
+        '-Wno-deprecated-literal-operator',
+        '-Wno-unused-private-field',
         # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=77728
         '-Wno-psabi',
         '-Wno-enum-constexpr-conversion',
@@ -1672,6 +1677,11 @@ user_cflags = args.user_cflags + f" -ffile-prefix-map={curdir}=."
 if args.target != '':
     user_cflags += ' -march=' + args.target
 
+if os.environ.get('NIX_CC'):
+    user_cflags += ' -DFMT_CONSTEVAL='
+
+user_cflags = user_cflags.strip()
+
 for mode in modes:
     # Those flags are passed not only to Scylla objects, but also to libraries
     # that we compile ourselves.
@@ -1708,7 +1718,7 @@ def configure_seastar(build_dir, mode, mode_config):
         '-DSeastar_CXX_DIALECT=gnu++23',
         '-DSeastar_API_LEVEL=7',
         '-DSeastar_DEPRECATED_OSTREAM_FORMATTERS=OFF',
-        '-DSeastar_UNUSED_RESULT_ERROR=ON',
+        '-DSeastar_UNUSED_RESULT_ERROR={}'.format('ON' if args.seastar_unused_result_error else 'OFF'),
         '-DCMAKE_EXPORT_COMPILE_COMMANDS=ON',
         '-DSeastar_SCHEDULING_GROUPS_COUNT=16',
         '-DSeastar_IO_URING=OFF', # io_uring backend is not stable enough
@@ -1805,11 +1815,11 @@ abseil_libs = ['absl/' + lib for lib in [
 
 def query_seastar_flags(pc_file, use_shared_libs, link_static_cxx=False):
     if use_shared_libs:
-        opt = '--shared'
+        opts = []
     else:
-        opt = '--static'
-    cflags = pkg_config(pc_file, '--cflags', opt)
-    libs = pkg_config(pc_file, '--libs', opt)
+        opts = ['--static']
+    cflags = pkg_config(pc_file, '--cflags', *opts)
+    libs = pkg_config(pc_file, '--libs', *opts)
     if use_shared_libs:
         rpath = os.path.dirname(libs.split()[0])
         libs = f"-Wl,-rpath='{rpath}' {libs}"

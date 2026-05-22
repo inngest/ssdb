@@ -4,6 +4,7 @@ on:
   schedule:
     # only at 5AM Saturday
     - cron: '0 5 * * SAT'
+  workflow_dispatch:
 
 env:
   # use the development branch explicitly
@@ -20,9 +21,13 @@ concurrency:
 jobs:
   clang-dev:
     name: Build with clang nightly
-    if: github.repository == 'scylladb/scylladb'
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-24.04-8
     container: fedora:40
+    env:
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_MAXSIZE: 2G
+      CCACHE_BASEDIR: ${{ github.workspace }}
+      CCACHE_NOHASHDIR: true
     strategy:
       matrix:
         build_type:
@@ -47,13 +52,29 @@ jobs:
             -e 's/(minio_download_jobs)/(true)/' \
             ./install-dependencies.sh
           sudo ./install-dependencies.sh
-          sudo dnf -y install lld
+          sudo dnf -y install ccache lld zstd
+      - name: Restore ccache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-${{ runner.os }}-clang-nightly-${{ env.CLANG_VERSION }}-${{ matrix.build_type }}-${{ hashFiles('configure.py', 'CMakeLists.txt', 'cmake/**', '.gitmodules') }}-${{ github.run_id }}
+          restore-keys: |
+            ccache-${{ runner.os }}-clang-nightly-${{ env.CLANG_VERSION }}-${{ matrix.build_type }}-${{ hashFiles('configure.py', 'CMakeLists.txt', 'cmake/**', '.gitmodules') }}-
+            ccache-${{ runner.os }}-clang-nightly-${{ env.CLANG_VERSION }}-${{ matrix.build_type }}-
+            ccache-${{ runner.os }}-clang-nightly-${{ env.CLANG_VERSION }}-
+      - name: Configure ccache
+        run: |
+          mkdir -p "$CCACHE_DIR"
+          ccache --max-size="$CCACHE_MAXSIZE"
+          ccache --zero-stats
       - name: Generate the building system
         run: |
           cmake                                         \
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
             -DCMAKE_C_COMPILER=clang-$CLANG_VERSION     \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache          \
             -DCMAKE_CXX_COMPILER=clang++-$CLANG_VERSION \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache        \
             -G Ninja                                    \
             -B $BUILD_DIR                               \
             -S .
@@ -64,3 +85,7 @@ jobs:
           cmake --build $BUILD_DIR --target scylla
       - run: |
           echo "::remove-matcher owner=clang::"
+      - name: Show ccache stats
+        if: ${{ always() }}
+        run: |
+          ccache --show-stats

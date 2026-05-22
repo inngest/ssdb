@@ -1,0 +1,58 @@
+# SPDX-License-Identifier: Apache-2.0
+
+name: ssdb Build and Test
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: Detect changed areas
+    runs-on: depot-ubuntu-24.04
+    outputs:
+      cpp: ${{ steps.filter.outputs.cpp }}
+      rust: ${{ steps.filter.outputs.rust }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: filter
+        env:
+          GITHUB_BASE_REF: ${{ github.base_ref || 'main' }}
+        run: .github/scripts/ci-changes.sh
+
+  ssdb-build:
+    name: Build ssdb
+    needs: changes
+    if: needs.changes.outputs.cpp == 'true'
+    uses: ./.github/workflows/build-ssdb.yaml
+    with:
+      build_mode: dev
+      run_smoke_tests: true
+
+  rust:
+    name: Rust checks and tests
+    needs: changes
+    if: needs.changes.outputs.rust == 'true'
+    runs-on: depot-ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@v3
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - name: Check Rust formatting
+        run: make rust-fmt-check
+      - name: Check Rust workspace
+        run: make rust-check
+      - name: Test Rust workspace
+        run: make rust-test

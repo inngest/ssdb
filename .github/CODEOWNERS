@@ -31,10 +31,6 @@ cql3/* @tgrabiec @nuivall @ptrsmrn @KrzaQ
 counters* @nuivall @ptrsmrn @KrzaQ
 tests/counter_test* @nuivall @ptrsmrn @KrzaQ
 
-# DOCS
-docs/* @annastuchlik @tzach
-docs/alternator @annastuchlik @tzach @nyh @nuivall @ptrsmrn @KrzaQ
-
 # GOSSIP
 gms/* @tgrabiec @asias @kbr-scylla
 

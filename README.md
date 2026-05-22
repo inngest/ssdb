@@ -1,33 +1,36 @@
-# Scylla
+# ssdb
 
-[![Slack](https://img.shields.io/badge/slack-scylla-brightgreen.svg?logo=slack)](http://slack.scylladb.com)
-[![Twitter](https://img.shields.io/twitter/follow/ScyllaDB.svg?style=social&label=Follow)](https://twitter.com/intent/follow?screen_name=ScyllaDB)
+ssdb is a fork of ScyllaDB OSS. This repository currently contains
+inherited ScyllaDB-derived C++ code and documentation while the project builds a
+path toward cleanly authored Apache-2.0 Rust components.
 
-## What is Scylla?
+The inherited database remains API-compatible with Apache Cassandra and includes
+the existing DynamoDB-compatible Alternator code path. During the transition,
+internal build targets, binary names, service paths, docs, and package metadata
+may still use Scylla or ScyllaDB names.
 
-Scylla is the real-time big data database that is API-compatible with Apache Cassandra and Amazon DynamoDB.
-Scylla embraces a shared-nothing approach that increases throughput and storage capacity to realize order-of-magnitude performance improvements and reduce hardware costs.
+## Relicensing Status
 
-For more information, please see the [ScyllaDB web site].
-
-[ScyllaDB web site]: https://www.scylladb.com
+ssdb uses a mixed dual-license model. Inherited ScyllaDB-derived code
+remains AGPL-3.0-or-later. Cleanly authored ssdb rewrite code may be
+Apache-2.0 when it follows the provenance rules in
+[docs/relicensing/clean-room-guidelines.md](docs/relicensing/clean-room-guidelines.md).
+The combined distributable remains AGPL-governed while inherited AGPL code is
+part of the shipped work.
 
 ## Build Prerequisites
 
-Scylla is fairly fussy about its build environment, requiring very recent
-versions of the C++23 compiler and of many libraries to build. The document
+The inherited C++ database build is fairly fussy about its build environment,
+requiring very recent versions of the C++23 compiler and of many libraries to
+build. The document
 [HACKING.md](HACKING.md) includes detailed information on building and
-developing Scylla, but to get Scylla building quickly on (almost) any build
-machine, Scylla offers a [frozen toolchain](tools/toolchain/README.md),
-This is a pre-configured Docker image which includes recent versions of all
-the required compilers, libraries and build tools. Using the frozen toolchain
-allows you to avoid changing anything in your build machine to meet Scylla's
-requirements - you just need to meet the frozen toolchain's prerequisites
-(mostly, Docker or Podman being available).
+developing the inherited code. The
+[frozen toolchain](tools/toolchain/README.md) provides a pre-configured Docker
+image with recent compilers, libraries, and build tools.
 
-## Building Scylla
+## Building
 
-Building Scylla with the frozen toolchain `dbuild` is as easy as:
+The current inherited binary target is still named `scylla`:
 
 ```bash
 $ git submodule update --init --force --recursive
@@ -37,25 +40,26 @@ $ ./tools/toolchain/dbuild ninja build/release/scylla
 
 For further information, please see:
 
-* [Developer documentation] for more information on building Scylla.
-* [Build documentation] on how to build Scylla binaries, tests, and packages.
+* [Developer documentation] for more information on building the inherited code.
+* [Build documentation] on how to build binaries, tests, and packages.
 * [Docker image build documentation] for information on how to build Docker images.
 
 [developer documentation]: HACKING.md
 [build documentation]: docs/dev/building.md
 [docker image build documentation]: dist/docker/debian/README.md
 
-## Running Scylla
+## Running
 
-To start Scylla server, run:
+To start the inherited database server, run:
 
 ```bash
 $ ./tools/toolchain/dbuild ./build/release/scylla --workdir tmp --smp 1 --developer-mode 1
 ```
 
-This will start a Scylla node with one CPU core allocated to it and data files stored in the `tmp` directory.
-The `--developer-mode` is needed to disable the various checks Scylla performs at startup to ensure the machine is configured for maximum performance (not relevant on development workstations).
-Please note that you need to run Scylla with `dbuild` if you built it with the frozen toolchain.
+This starts one node with one CPU core and stores data files in `tmp`. The
+`--developer-mode` flag disables startup checks that are not relevant on
+development workstations. Use `dbuild` to run binaries built with the frozen
+toolchain.
 
 For more run options, run:
 
@@ -65,48 +69,31 @@ $ ./tools/toolchain/dbuild ./build/release/scylla --help
 
 ## Testing
 
-[![Build with the latest Seastar](https://github.com/scylladb/scylladb/actions/workflows/seastar.yaml/badge.svg)](https://github.com/scylladb/scylladb/actions/workflows/seastar.yaml) [![Check Reproducible Build](https://github.com/scylladb/scylladb/actions/workflows/reproducible-build.yaml/badge.svg)](https://github.com/scylladb/scylladb/actions/workflows/reproducible-build.yaml) [![clang-nightly](https://github.com/scylladb/scylladb/actions/workflows/clang-nightly.yaml/badge.svg)](https://github.com/scylladb/scylladb/actions/workflows/clang-nightly.yaml)
-
 See [test.py manual](docs/dev/testing.md).
 
-## Scylla APIs and compatibility
-By default, Scylla is compatible with Apache Cassandra and its API - CQL.
-There is also support for the API of Amazon DynamoDB™,
-which needs to be enabled and configured in order to be used. For more
-information on how to enable the DynamoDB™ API in Scylla,
-and the current compatibility of this feature as well as Scylla-specific extensions, see
-[Alternator](docs/alternator/alternator.md) and
-[Getting started with Alternator](docs/alternator/getting-started.md).
+## APIs And Compatibility
+
+The inherited database is compatible with Apache Cassandra and its CQL API.
+There is also inherited support for a DynamoDB-compatible API, which must be
+enabled and configured before use. See [Alternator](docs/alternator/alternator.md)
+and [Getting started with Alternator](docs/alternator/getting-started.md).
 
 ## Documentation
 
-Documentation can be found [here](docs/dev/README.md).
+Inherited developer documentation can be found [here](docs/dev/README.md).
 Seastar documentation can be found [here](http://docs.seastar.io/master/index.html).
-User documentation can be found [here](https://docs.scylladb.com/).
+The restored documentation tree is retained as reference material until each
+page is audited, rewritten, or removed.
 
-## Training
+## License
 
-Training material and online courses can be found at [Scylla University](https://university.scylladb.com/).
-The courses are free, self-paced and include hands-on examples. They cover a variety of topics including Scylla data modeling,
-administration, architecture, basic NoSQL concepts, using drivers for application development, Scylla setup, failover, compactions,
-multi-datacenters and how Scylla integrates with third-party applications.
+See [LICENSE](LICENSE), [LICENSE.AGPL](LICENSE.AGPL), and
+[LICENSE.APACHE](LICENSE.APACHE).
 
-## Contributing to Scylla
+## Contributing
 
-If you want to report a bug or submit a pull request or a patch, please read the [contribution guidelines].
-
-If you are a developer working on Scylla, please read the [developer guidelines].
+Before contributing, read the [contribution guidelines]. For inherited C++
+development details, read the [developer guidelines].
 
 [contribution guidelines]: CONTRIBUTING.md
 [developer guidelines]: HACKING.md
-
-## Contact
-
-* The [community forum] and [Slack channel] are for users to discuss configuration, management, and operations of the ScyllaDB open source.
-* The [developers mailing list] is for developers and people interested in following the development of ScyllaDB to discuss technical topics.
-
-[Community forum]: https://forum.scylladb.com/
-
-[Slack channel]: http://slack.scylladb.com/
-
-[Developers mailing list]: https://groups.google.com/forum/#!forum/scylladb-dev

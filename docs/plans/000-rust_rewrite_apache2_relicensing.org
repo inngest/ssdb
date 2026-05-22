@@ -1,0 +1,365 @@
+#+TITLE: Rust Rewrite And Apache-2.0 Relicensing Path
+#+AUTHOR: Darwin D. Wu
+#+DATE: 2026-05-20
+#+STATUS: Draft
+#+STARTUP: showall
+
+* Overview
+
+Define a practical path for moving this project toward a more permissive,
+Apache-2.0-licensed codebase by replacing inherited ScyllaDB/AGPL code with
+independently authored Rust components.
+
+The licensing benefit comes from clean provenance and independent authorship,
+not from Rust itself. A mechanical C++ to Rust port, or an implementation that
+copies protected expression from the AGPL codebase, should be treated as
+derived from the existing AGPL work.
+
+This document is an engineering and provenance plan. It is not legal advice.
+Before representing the whole project as Apache-2.0, counsel should review the
+license inventory, rewrite process, contribution records, and release artifacts.
+
+* Current State
+
+- The inherited repository is derived from ScyllaDB OSS and currently contains
+  AGPL-licensed code.
+- The top-level license notice is =LICENSE=, with =LICENSE.AGPL= for inherited
+  AGPL code and =LICENSE.APACHE= for clean Apache-2.0 rewrite code.
+- The existing license inventory includes many source files marked
+  =AGPL-3.0-or-later= and some files marked as Apache-2.0 or dual licensed.
+- Existing source and docs contain ScyllaDB/Scylla names, install paths, service
+  names, documentation references, and copyright notices.
+- ScyllaDB and ScyllaDB Cloud are registered trademarks of ScyllaDB, Inc.
+- Rebranding can reduce trademark confusion, but it does not change copyright
+  provenance.
+
+* Goals
+
+- Build a long-term path to a project that can honestly be distributed under
+  Apache-2.0.
+- Keep provenance explicit for every module:
+  - inherited AGPL-derived code;
+  - independently authored Apache-2.0 code;
+  - third-party code under its original license;
+  - generated code and test fixtures.
+- Prefer Rust for new implementation work where it improves maintainability,
+  memory safety, and contributor approachability.
+- Avoid copying protected expression from the inherited AGPL implementation.
+- Preserve protocol and behavioral compatibility where useful.
+- Preserve full Cassandra/CQL compatibility as the long-term product target.
+- Remove avoidable ScyllaDB branding from user-facing surfaces.
+- Preserve required copyright, license, and attribution notices.
+
+* Non-Goals
+
+- Do not claim the current inherited codebase is Apache-2.0 without a verified
+  relicensing grant from the relevant copyright holders.
+- Do not remove copyright notices to make the project look less derived.
+- Do not perform a line-by-line translation of existing C++ into Rust and call
+  it Apache-2.0.
+- Do not use ScyllaDB names, logos, or domains as the new project identity.
+- Do not rewrite everything at once.
+- Do not break wire-level compatibility intentionally unless there is a clear
+  product decision to do so.
+
+* Recommended Model
+
+** Licensing posture
+
+Use a dual-track posture during migration:
+
+- Existing inherited code remains AGPL unless and until a valid relicensing
+  right is obtained.
+- New cleanly authored Rust code is Apache-2.0 from the first commit.
+- The repository and build may contain both tracks during the transition.
+- Rust replacement modules may be linked into the existing final binary as they
+  become production-ready, even while other linked components remain AGPL.
+
+The repository should not describe the combined distributable as Apache-2.0
+while AGPL-derived code remains part of that distributable. It can instead say
+that the project is migrating toward Apache-2.0 through independent rewrites,
+with per-file licensing tracked by SPDX headers.
+
+During the transition, the final binary should be treated as mixed-license and
+AGPL-governed when it includes or links inherited AGPL code. The Apache-2.0
+status of new Rust modules should still be preserved at the crate/file level so
+those modules can become part of an Apache-only artifact once the AGPL
+dependencies are removed or relicensed.
+
+Assume no ScyllaDB relicensing grant is available to this fork. Inherited
+ScyllaDB-derived code remains AGPL unless ssdb obtains an explicit written
+relicensing grant from ScyllaDB and any other relevant copyright holders. The
+Apache-2.0 path therefore depends on clean Rust replacement or removal of
+inherited AGPL components.
+
+** Clean rewrite standard
+
+Treat new Apache-2.0 Rust modules as clean only when:
+
+- they are written by contributors who agree to Apache-2.0 for the contribution;
+- contributors attest they have authority to license the contribution under
+  Apache-2.0;
+- employer-owned or potentially employer-owned work has employer authorization,
+  a corporate CLA, or equivalent written approval before it is treated as clean
+  Apache-2.0 code;
+- implementation is based on public protocols, public documentation, behavior
+  specs, tests, benchmarks, and observed compatibility;
+- authors do not copy existing AGPL code, comments, file structure, or
+  distinctive implementation expression;
+- architecture decisions are documented as independent design choices;
+- provenance is recorded in the module migration table.
+
+High-risk areas should use a clean-room-ish split:
+
+- one person writes behavior specs and tests from public interfaces and observed
+  behavior;
+- another person implements the Rust module without consulting the inherited
+  source for that component.
+
+** Repository structure
+
+Keep the rewrite in this repository, clearly separated from inherited code until
+enough surface has been replaced.
+
+Initial layout:
+
+#+BEGIN_SRC text
+rust-next/
+  LICENSE
+  NOTICE
+  README.md
+  crates/
+    protocol/
+    storage/
+    query/
+    server/
+docs/
+  plans/
+  relicensing/
+    inventory.org
+    module-migration.org
+    clean-room-guidelines.org
+#+END_SRC
+
+The exact Rust workspace layout can change, but Apache-2.0 code should remain
+easy to distinguish from inherited AGPL code in audits and release artifacts.
+The existing build can gradually incorporate Rust replacement modules into the
+normal final binary, but each integration should update the provenance and
+license inventory.
+
+* Branding And Trademark Policy
+
+** Project identity
+
+Working name: =ssdb=.
+
+Use the short project name =ssdb= for the fork identity. Treat the name as a
+working brand until a fuller trademark review is complete.
+
+The chosen name should not be confusingly similar to ScyllaDB or Scylla. Use
+that name in:
+
+- repository description;
+- README and docs;
+- package names;
+- binary names;
+- service names;
+- default paths;
+- Docker images;
+- release artifacts;
+- telemetry and metrics namespaces.
+
+** Nominative references
+
+References to ScyllaDB should be limited to factual provenance and
+compatibility statements, for example:
+
+- "Originally forked from ScyllaDB OSS 6.2.x."
+- "Implements compatibility with selected Cassandra-compatible APIs."
+
+Avoid statements that imply endorsement, affiliation, or continuation of the
+ScyllaDB product line.
+
+** Copyright notices
+
+Do not strip copyright attribution from inherited files. Copyright notices are
+not branding. They are part of legal provenance and should remain intact unless
+counsel approves a different attribution format.
+
+* License Documentation
+
+** During migration
+
+Maintain these files:
+
+- =LICENSE= for the repository-level mixed dual-license notice.
+- =LICENSE.AGPL= for inherited AGPL code.
+- =LICENSE.APACHE= or =rust-next/LICENSE= for Apache-2.0 code.
+- =NOTICE.txt= for inherited notices and third-party attribution.
+- =docs/relicensing/inventory.org= for current license inventory.
+- =docs/relicensing/module-migration.org= for component-level status.
+
+** Target end state
+
+Only after AGPL-derived code is removed from the distributed work, or a valid
+relicensing grant is obtained, the repository can move to:
+
+- top-level =LICENSE= containing Apache-2.0;
+- top-level =NOTICE= preserving required attributions;
+- SPDX headers using =Apache-2.0= for original project code;
+- third-party licenses preserved in =licenses/= or an equivalent directory.
+
+* Module Migration Table
+
+Track every subsystem explicitly.
+
+| Subsystem          | Current Source        | Target          | Status      | Notes                                                 |
+|--------------------+-----------------------+-----------------+-------------+-------------------------------------------------------|
+| CQL protocol       | inherited C++         | Rust Apache-2.0 | first milestone | native protocol framing first; full compatibility target |
+| Storage engine     | inherited C++         | Rust Apache-2.0 | not started | highest risk; needs separate design docs              |
+| Query execution    | inherited C++         | Rust Apache-2.0 | not started | use independent semantics specs                       |
+| Cluster membership | inherited C++         | Rust Apache-2.0 | not started | avoid copying topology/gossip implementation          |
+| Admin/API server   | inherited C++/scripts | Rust Apache-2.0 | not started | good early candidate                                  |
+| Packaging/install  | inherited scripts     | new packaging   | not started | strip ScyllaDB paths and service names                |
+| Docs               | inherited docs retained | rewritten docs  | not started | docs build disabled; retained docs are references until audited |
+| Tests              | inherited tests       | mixed/new       | not started | clean behavioral tests are strategic asset            |
+
+* Phased Implementation Plan
+
+** Phase 1: Provenance baseline
+
+- [X] Generate a complete SPDX and copyright inventory.
+- [X] Identify all AGPL-only, Apache-only, dual-licensed, generated, vendored, and
+  unknown-license files.
+- [X] Decide whether to assume a ScyllaDB relicensing grant is available.
+- [X] Create =docs/relicensing/inventory.md=.
+- [X] Create =docs/relicensing/module-migration.md=.
+- [X] Add contribution guidelines requiring Apache-2.0 and contributor authority
+  attestation for new clean rewrite code.
+- [X] Define what contributors may and may not reference when implementing clean
+  modules.
+
+** Phase 2: Rebrand inherited fork
+
+- [X] Pick the new project name.
+- [X] Remove inherited ScyllaDB docs build and publish workflows.
+- [ ] Audit retained inherited ScyllaDB user-facing docs and decide which pages
+  remain useful references.
+- [ ] Rewrite or remove retained inherited docs before making Apache-2.0 docs
+  claims.
+- [X] Rebrand the top-level README and state the inherited-code caveats.
+- [ ] Replace user-facing ScyllaDB/Scylla branding in package metadata, service
+  names, and install paths.
+- [ ] Keep copyright notices and required attribution intact.
+- [X] Add a clear provenance statement explaining that the inherited code remains
+  AGPL while the rewrite proceeds.
+- [ ] Remove or disable upstream telemetry/housekeeping integrations unless they
+  are intentionally retained and rebranded.
+
+** Phase 3: Establish Rust workspace
+
+- [ ] Add a Rust workspace under =rust-next/= or another clearly separated path.
+- [ ] Add Apache-2.0 license and notice files for new Rust code.
+- [ ] Add linting, formatting, test, and provenance checks.
+- [ ] Add CI that rejects missing SPDX headers in new Rust crates.
+- [X] Define the SPDX policy for future clean =rust-next/= source files.
+- [X] Choose the first Rust milestone.
+- [ ] Start with CQL native protocol framing as the first low-risk component with
+  clear external behavior.
+- [ ] Keep initial Rust replacement crates buildable independently from the
+  inherited binary.
+- [ ] Define the C++/Rust integration path for modules that are ready to ship in
+  the normal final binary.
+
+** Phase 4: Build behavior specs and tests
+
+- [ ] Write public behavior specs for each target subsystem.
+- [ ] Prefer public standards and API docs over inherited implementation details.
+- [ ] Convert compatibility expectations into black-box tests.
+- [ ] Maintain full Cassandra/CQL compatibility as the long-term acceptance
+  standard, even when early Rust milestones implement only a subset.
+- [ ] Store tests in a location that can be used by both inherited and Rust
+  implementations.
+- [ ] Mark tests that are copied from inherited AGPL sources as AGPL-derived unless
+  rewritten independently.
+
+** Phase 5: Rewrite low-risk components
+
+Start with components that are useful and less likely to encode distinctive
+database internals:
+
+- [ ] CQL native protocol framing;
+- [ ] admin/status HTTP endpoints;
+- [ ] config parsing;
+- [ ] CLI tooling;
+- [ ] package metadata generation;
+- [ ] metrics exposition;
+- [ ] test harness utilities.
+
+Each completed module should update the module migration table and include a
+short provenance note.
+
+** Phase 6: Rewrite core subsystems
+
+Proceed only after the clean rewrite process is working.
+
+- [ ] Storage format and compaction.
+- [ ] Query planning and execution.
+- [ ] Replication and consistency.
+- [ ] Membership/topology.
+- [ ] CQL semantics.
+- [ ] Optional DynamoDB-compatible API surface, if retained.
+
+Core subsystem rewrites should have design docs before implementation, because
+these areas are most likely to accidentally copy protected implementation
+structure.
+
+** Phase 7: Distribution split
+
+- [ ] Produce builds that can clearly separate Apache-2.0 Rust components from
+  inherited AGPL components.
+- [ ] If mixed distribution is still necessary, label it as mixed/AGPL-governed.
+- [ ] Permit mixed final binaries during migration, with release notes and
+  license files stating that AGPL obligations still apply while inherited AGPL
+  code remains linked.
+- [ ] If a subsystem becomes fully Apache-original, allow standalone distribution
+  under Apache-2.0.
+- [ ] Keep release notes explicit about license scope.
+
+** Phase 8: Apache-only release readiness
+
+Before claiming Apache-2.0 for the full project:
+
+- [ ] no AGPL-derived source remains in the distributed artifact; or
+- [ ] a valid relicensing grant covers all remaining inherited code;
+- [ ] all third-party licenses are compatible with Apache-2.0 distribution;
+- [ ] copyright and NOTICE obligations are preserved;
+- [ ] counsel reviews the final inventory and release artifact;
+- [ ] CI verifies that no =AGPL-3.0-or-later= SPDX headers remain in the Apache
+  artifact.
+
+* Engineering Guardrails
+
+- [ ] Use SPDX headers on every new source file.
+- [X] Define the SPDX header requirement for future clean rewrite source files.
+- [X] Decide contributor authority requirements for Apache-2.0 clean rewrite
+  work.
+- [ ] Require signed-off contributions or a lightweight contributor agreement that
+  confirms Apache-2.0 inbound licensing and contributor authority.
+- [ ] Keep inherited and clean rewrite code physically separated while both exist.
+- [ ] Reject commits that mechanically translate AGPL source files into Rust.
+- [ ] Keep a provenance note for each rewritten module.
+- [ ] Review docs and comments as carefully as code; copied comments can carry
+  copyright risk.
+- [ ] Treat generated code according to the license of its generator and input
+  templates.
+
+* References
+
+- Apache License 2.0: https://www.apache.org/licenses/LICENSE-2.0.html
+- Apache applying license guidance: https://www.apache.org/legal/apply-license
+- Apache LICENSE/NOTICE guidance: https://infra.apache.org/licensing-howto.html
+- OSI licenses list: https://opensource.org/licenses
+- ScyllaDB source-available FAQ: https://www.scylladb.com/source-available-faq/
+- ScyllaDB contributor agreement:
+  https://www.scylladb.com/wp-content/uploads/scylladb-contributor-license-agreement.pdf
