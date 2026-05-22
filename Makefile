@@ -62,7 +62,7 @@ cpp-configure: ## Configure the inherited C++ build inside the Linux C++ shell.
 cpp-test-smoke: ## Build and run the focused inherited C++ smoke test binary.
 	$(NIX) develop .#cpp -c ./configure.py --mode $(CPP_TEST_MODE) --with scylla $(addprefix --with ,$(CPP_TEST_SMOKE_ARTIFACTS)) --disable-dpdk --no-seastar-unused-result-error
 	$(NIX) develop .#cpp -c ninja build/$(CPP_TEST_MODE)/scylla $(CPP_TEST_SMOKE_TARGETS)
-	$(NIX) develop .#cpp -c build/$(CPP_TEST_MODE)/test/boost/UUID_test --report_level=no --catch_system_errors=no --color_output=false -- --overprovisioned --unsafe-bypass-fsync 1 --kernel-page-cache 1 --blocked-reactor-notify-ms 2000000 --collectd 0 --max-networking-io-control-blocks=100
+	$(NIX) develop .#cpp -c env LD_LIBRARY_PATH="$$PWD/build/$(CPP_TEST_MODE)/seastar$${LD_LIBRARY_PATH:+:$$LD_LIBRARY_PATH}" build/$(CPP_TEST_MODE)/test/boost/UUID_test --report_level=no --catch_system_errors=no --color_output=false -- --overprovisioned --unsafe-bypass-fsync 1 --kernel-page-cache 1 --blocked-reactor-notify-ms 2000000 --collectd 0 --max-networking-io-control-blocks=100
 
 .PHONY: inventory
 inventory: ## Regenerate relicensing inventory files.

@@ -72,7 +72,7 @@ jobs:
       - name: Run inherited smoke tests
         if: ${{ inputs.run_smoke_tests }}
         run: |
-          nix develop .#cpp -c build/${{ inputs.build_mode }}/test/boost/UUID_test \
+          nix develop .#cpp -c env LD_LIBRARY_PATH="$PWD/build/${{ inputs.build_mode }}/seastar${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" build/${{ inputs.build_mode }}/test/boost/UUID_test \
             --report_level=no \
             --catch_system_errors=no \
             --color_output=false \
