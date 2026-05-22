@@ -47,6 +47,8 @@ license inventory, rewrite process, contribution records, and release artifacts.
 - Avoid copying protected expression from the inherited AGPL implementation.
 - Preserve protocol and behavioral compatibility where useful.
 - Preserve full Cassandra/CQL compatibility as the long-term product target.
+- Use a clean Cassandra conformance suite as the acceptance gate for compatibility
+  claims and Rust replacement milestones.
 - Remove avoidable ScyllaDB branding from user-facing surfaces.
 - Preserve required copyright, license, and attribution notices.
 
@@ -273,6 +275,10 @@ Track every subsystem explicitly.
 
 ** Phase 4: Build behavior specs and tests
 
+- [X] Establish the Cassandra conformance suite plan in
+  =docs/plans/001-cassandra_conformance_suite.org=.
+- [ ] Define a versioned Cassandra compatibility profile before claiming full
+  compatibility.
 - [ ] Write public behavior specs for each target subsystem.
 - [ ] Prefer public standards and API docs over inherited implementation details.
 - [ ] Convert compatibility expectations into black-box tests.
@@ -280,6 +286,8 @@ Track every subsystem explicitly.
   standard, even when early Rust milestones implement only a subset.
 - [ ] Store tests in a location that can be used by both inherited and Rust
   implementations.
+- [ ] Use the conformance suite as the acceptance gate for clean Rust replacement
+  modules.
 - [ ] Mark tests that are copied from inherited AGPL sources as AGPL-derived unless
   rewritten independently.
 

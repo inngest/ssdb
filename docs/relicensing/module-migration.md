@@ -29,7 +29,7 @@ has been independently authored, reviewed, tested, and documented.
 | Admin/API server   | inherited C++/scripts          | Rust Apache-2.0 | candidate | Status and health endpoints              | Good early candidate after CQL framing. Public HTTP behavior can be specified independently.                                   |
 | Packaging/install  | inherited scripts              | New packaging   | candidate | Package metadata names and service paths | Rebrand service names, install paths, metrics namespaces, and artifacts while preserving required notices.                     |
 | Docs               | inherited docs retained       | Rewritten docs  | candidate | Provenance and compatibility docs        | Inherited ScyllaDB docs are retained as temporary references; docs build remains disabled. Rewrite public docs cleanly before Apache-2.0 claims. |
-| Tests              | inherited tests plus new tests | Mixed/new       | candidate | Black-box CQL protocol fixtures          | Copied inherited tests remain AGPL-derived unless independently rewritten. New black-box fixtures should record public inputs. |
+| Tests              | inherited tests plus new tests | Mixed/new       | candidate | Cassandra conformance suite              | Copied inherited tests remain AGPL-derived unless independently rewritten. New conformance tests should follow `docs/plans/001-cassandra_conformance_suite.org` and record public inputs. |
 
 ## Required Entry For New Clean Modules
 
@@ -41,6 +41,7 @@ Add or update a row before merging a clean rewrite module. The row should answer
 - Which public references, specs, tests, or observations were used?
 - Did any implementer consult inherited implementation code for this component?
 - Which tests establish compatibility?
+- Which conformance profile entries and test paths establish compatibility?
 - Is the module shipped standalone, mixed with AGPL code, or not shipped yet?
 
 ## First Milestone

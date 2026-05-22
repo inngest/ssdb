@@ -1,0 +1,289 @@
+#+TITLE: Cassandra Conformance Suite
+#+AUTHOR: Darwin D. Wu
+#+DATE: 2026-05-22
+#+STATUS: Draft
+#+STARTUP: showall
+
+* Overview
+
+Create a clean, black-box conformance test suite that can verify ssdb behavior
+against Apache Cassandra compatibility expectations while the Rust rewrite
+proceeds.
+
+The suite should become the acceptance gate for replacement modules. A Rust
+component is not compatibility-complete merely because it builds or matches the
+old inherited implementation. It is complete only when it satisfies the public,
+versioned conformance profile that applies to that component.
+
+This document is an engineering and provenance plan. It is not legal advice.
+
+* Compatibility Target
+
+"100% Cassandra compatible" must mean 100% of an explicit, versioned profile.
+The first conformance milestone should define that profile before claiming
+complete compatibility.
+
+The compatibility profile should record:
+
+- Apache Cassandra release line or lines used as references.
+- CQL native protocol versions in scope.
+- CQL language features in scope.
+- System tables and metadata behavior in scope.
+- Driver behavior and error compatibility expectations.
+- Explicit exclusions, if any, with product rationale and issue links.
+
+The long-term target is complete compatibility with the selected Apache
+Cassandra/CQL profile. Early milestones may cover smaller subsets, but the
+subset must be named and tracked.
+
+* Goals
+
+- Build a reusable conformance suite that can run against Apache Cassandra,
+  inherited ssdb, and clean Rust replacement binaries.
+- Use public Cassandra documentation, public protocol specifications, public
+  driver behavior, and black-box observations as test inputs.
+- Treat conformance tests as clean rewrite assets when independently authored
+  from public sources.
+- Make compatibility regressions visible before replacement modules are shipped.
+- Produce machine-readable reports that show pass, fail, skip, and unsupported
+  status by feature.
+- Keep the suite useful for both module-level testing and full-server testing.
+
+* Non-Goals
+
+- Do not copy inherited AGPL test sources into the clean conformance suite.
+- Do not copy Apache Cassandra implementation code or private implementation
+  details.
+- Do not treat differences from inherited ssdb behavior as authoritative unless
+  Cassandra behavior and the compatibility profile agree.
+- Do not claim whole-project Apache-2.0 status because the test suite is clean.
+- Do not hide intentional incompatibilities; mark them explicitly in the
+  compatibility matrix.
+
+* Provenance Rules
+
+New conformance tests intended to be Apache-2.0 clean should be authored from:
+
+- public Apache Cassandra and CQL documentation;
+- public native protocol documentation;
+- public driver APIs and observed driver behavior;
+- independently written behavior specs;
+- black-box observations against a reference Cassandra server;
+- generated fixtures whose generator inputs are public or independently
+  authored.
+
+Tests copied or mechanically rewritten from inherited AGPL tests must remain
+AGPL-derived and must not be used as evidence for clean Apache-2.0 provenance.
+If retained, keep them outside the clean conformance tree and label them in the
+license inventory.
+
+* Suite Layout
+
+Create the clean suite under a separate path so it can be audited independently:
+
+#+BEGIN_SRC text
+conformance/
+  LICENSE
+  README.md
+  profiles/
+    cassandra/<profile-name>.toml
+  specs/
+    cql-native-protocol.md
+    cql-language.md
+    schema-metadata.md
+  tests/
+    protocol/
+    cql/
+    schema/
+    errors/
+    auth/
+    topology/
+  harness/
+    src/
+  fixtures/
+    public/
+    generated/
+  reports/
+    .gitignore
+#+END_SRC
+
+The exact implementation language is a separate decision. Rust is preferred for
+new harness code if it can use standard Cassandra drivers or low-level protocol
+clients without slowing early test authoring. Python may be useful for first
+black-box CQL coverage if driver ecosystem support is materially better.
+
+* Test Taxonomy
+
+** Protocol conformance
+
+- Native protocol startup, options, authentication negotiation, and error
+  frames.
+- Supported protocol versions, flags, stream IDs, opcodes, and frame length
+  validation.
+- Request and response encoding for prepared statements, batches, paging,
+  tracing flags, warnings, and custom payloads.
+- Malformed frame handling and connection lifecycle behavior.
+
+** CQL language conformance
+
+- Data types, literals, casting, collections, tuples, UDTs, frozen values, and
+  null handling.
+- DDL for keyspaces, tables, indexes, materialized views if in profile, UDF/UDA
+  if in profile, and schema alteration.
+- DML for inserts, updates, deletes, TTL, timestamps, counters, lightweight
+  transactions, batches, paging, ordering, filtering, and conditional results.
+- Error classes, error messages where externally visible, and protocol error
+  codes.
+
+** Metadata and system behavior
+
+- =system_schema=, =system=, and other public system table contents in the
+  selected profile.
+- Prepared metadata, result metadata, schema agreement visibility, and driver
+  discovery behavior.
+- Token metadata and partitioner-visible behavior where required by drivers.
+
+** Cluster behavior
+
+- Consistency levels, read/write availability, timeout/unavailable errors, and
+  retry-visible behavior.
+- Schema agreement across nodes.
+- Node lifecycle behavior that public drivers observe.
+- Authentication and authorization behavior where included in the profile.
+
+** Storage-visible behavior
+
+- Tombstones, TTL expiry, deletion semantics, read-before-write visible effects,
+  range tombstones, compaction-observable behavior, and repair-visible behavior.
+- These are high-risk clean-room areas and should be specified before
+  implementation starts.
+
+* Harness Design
+
+The harness should support three target kinds:
+
+- =reference=: an Apache Cassandra cluster used as the behavioral oracle.
+- =inherited=: the current inherited ssdb binary for regression visibility.
+- =candidate=: a clean Rust module, standalone server, or mixed ssdb binary.
+
+Each test should declare:
+
+- required profile feature flags;
+- required cluster shape;
+- whether it is deterministic, timing-sensitive, or stress-oriented;
+- public references or observation notes used to author the test;
+- expected behavior source: spec, reference observation, or both.
+
+Results should be emitted as JSON plus human-readable summaries. CI should be
+able to fail on new regressions while allowing explicitly tracked unsupported
+features during early milestones.
+
+* Compatibility Matrix
+
+Maintain a machine-readable matrix mapping feature coverage to implementation
+status:
+
+#+BEGIN_SRC text
+conformance/profiles/cassandra/<profile-name>.toml
+docs/relicensing/module-migration.md
+#+END_SRC
+
+Each matrix entry should include:
+
+- feature name;
+- owning subsystem;
+- reference source;
+- test coverage path;
+- status: =untested=, =passing=, =failing=, =unsupported=, or
+  =intentionally-different=;
+- issue or plan link for any non-passing status.
+
+Do not use the matrix to weaken compatibility claims silently. If a feature is
+excluded, the profile name and release notes should make that clear.
+
+* Phased Plan
+
+** Phase 1: Define the conformance profile
+
+- [ ] Choose the initial Apache Cassandra compatibility profile.
+- [ ] Record protocol versions, CQL feature scope, and excluded features.
+- [ ] Add a profile file under =conformance/profiles/cassandra/=.
+- [ ] Document the public references used for the profile.
+- [ ] Add a compatibility matrix status vocabulary.
+
+** Phase 2: Build the harness skeleton
+
+- [ ] Create the =conformance/= tree with Apache-2.0 licensing for clean tests.
+- [ ] Add target configuration for reference, inherited, and candidate servers.
+- [ ] Add JSON and human-readable report output.
+- [ ] Add feature flags, skip reasons, and expected-failure handling.
+- [ ] Add Make targets for local conformance smoke tests.
+
+** Phase 3: Cover the first Rust milestone
+
+- [ ] Add native protocol frame fixtures from public docs and black-box
+  observations.
+- [ ] Add protocol handshake and error-frame tests.
+- [ ] Add encode/decode round-trip tests for the future
+  =rust-next/crates/cql-protocol= crate.
+- [ ] Require protocol conformance tests before marking CQL framing complete in
+  plan 000.
+
+** Phase 4: Add CQL black-box coverage
+
+- [ ] Add schema, type, DML, query, paging, prepared statement, batch, and error
+  behavior tests.
+- [ ] Run each test against the reference Cassandra target before using it as a
+  candidate acceptance test.
+- [ ] Record reference observations that are not fully specified by public docs.
+- [ ] Keep generated fixtures reproducible from clean inputs.
+
+** Phase 5: Add cluster and storage-visible coverage
+
+- [ ] Add multi-node cluster lifecycle and schema agreement tests.
+- [ ] Add consistency-level and failure-mode tests.
+- [ ] Add TTL, tombstone, range deletion, counter, LWT, and repair-visible tests.
+- [ ] Require independent behavior specs before using these tests to guide
+  high-risk Rust subsystem implementation.
+
+** Phase 6: Make conformance a release gate
+
+- [ ] Add CI jobs for conformance smoke coverage.
+- [ ] Add scheduled or manually triggered full conformance jobs.
+- [ ] Publish compatibility reports as CI artifacts.
+- [ ] Require passing status for all in-profile features before claiming full
+  Cassandra compatibility.
+- [ ] Keep unsupported or intentionally different behavior visible in release
+  notes.
+
+* Initial Acceptance Gates
+
+- CQL protocol framing replacement: protocol conformance tests pass for all
+  in-profile frame parsing and encoding behavior.
+- Query execution replacement: CQL language conformance tests pass for all
+  in-profile statements implemented by the replacement.
+- Storage replacement: storage-visible behavior tests pass for TTL, tombstones,
+  counters, collections, range reads, and repair-visible cases in the profile.
+- Full server release: all profile tests pass, or non-passing tests are
+  explicitly outside the claimed profile.
+
+* Open Questions
+
+- Which Apache Cassandra release line is the first concrete compatibility
+  profile?
+- Should the first harness implementation be Rust, Python, or a split between
+  a Rust protocol harness and Python driver-level tests?
+- Which public Cassandra driver should be the primary driver-level oracle?
+- Should inherited ssdb be allowed to fail tests that Cassandra passes, or
+  should those differences immediately become compatibility bugs?
+- Which conformance jobs are practical for local development versus CI?
+
+* References
+
+- Apache Cassandra documentation: https://cassandra.apache.org/doc/
+- Apache Cassandra native protocol specification:
+  https://cassandra.apache.org/doc/latest/cassandra/_attachments/native_protocol_v5.html
+- Apache Cassandra source repository: https://github.com/apache/cassandra
+- Apache Cassandra CEPs:
+  https://cwiki.apache.org/confluence/display/CASSANDRA/Cassandra+Enhancement+Proposals
+- Apache License 2.0: https://www.apache.org/licenses/LICENSE-2.0.html
