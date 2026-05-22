@@ -16,20 +16,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  cxx-configure:
-    name: C++ configure smoke
+  changes:
+    name: Detect changed areas
     runs-on: depot-ubuntu-24.04
-    timeout-minutes: 30
+    outputs:
+      cpp: ${{ steps.filter.outputs.cpp }}
+      rust: ${{ steps.filter.outputs.rust }}
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
-      - uses: DeterminateSystems/nix-installer-action@v3
-      - name: Configure inherited C++ build
-        run: make cpp-configure
+          fetch-depth: 0
+      - id: filter
+        env:
+          GITHUB_BASE_REF: ${{ github.base_ref || 'main' }}
+        run: .github/scripts/ci-changes.sh
 
   ssdb-build:
     name: Build ssdb
+    needs: changes
+    if: needs.changes.outputs.cpp == 'true'
     uses: ./.github/workflows/build-ssdb.yaml
     with:
       build_mode: dev
@@ -37,11 +42,14 @@ jobs:
 
   rust:
     name: Rust checks and tests
+    needs: changes
+    if: needs.changes.outputs.rust == 'true'
     runs-on: depot-ubuntu-24.04
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@v3
+      - uses: DeterminateSystems/magic-nix-cache-action@main
       - name: Check Rust formatting
         run: make rust-fmt-check
       - name: Check Rust workspace

@@ -12,7 +12,7 @@ on:
         type: boolean
         default: true
       run_smoke_tests:
-        description: 'run a focused inherited test.py smoke suite after building'
+        description: 'run a focused inherited test binary after building'
         type: boolean
         default: false
     outputs:
@@ -24,7 +24,7 @@ jobs:
   build:
     runs-on: depot-ubuntu-24.04-8
     env:
-      CCACHE_MAXSIZE: 2G
+      CCACHE_MAXSIZE: 5G
       CCACHE_BASEDIR: ${{ github.workspace }}
       CCACHE_NOHASHDIR: true
       NODISTCC: true
@@ -35,6 +35,7 @@ jobs:
         with:
           submodules: recursive
       - uses: DeterminateSystems/nix-installer-action@v3
+      - uses: DeterminateSystems/magic-nix-cache-action@main
       - name: Restore ccache
         if: ${{ inputs.enable_ccache }}
         uses: actions/cache@v4
@@ -71,7 +72,17 @@ jobs:
       - name: Run inherited smoke tests
         if: ${{ inputs.run_smoke_tests }}
         run: |
-          nix develop .#cpp -c ./test.py --mode ${{ inputs.build_mode }} --jobs 1 --timeout 900 --tmpdir testlog boost/UUID_test
+          nix develop .#cpp -c build/${{ inputs.build_mode }}/test/boost/UUID_test \
+            --report_level=no \
+            --catch_system_errors=no \
+            --color_output=false \
+            -- \
+            --overprovisioned \
+            --unsafe-bypass-fsync 1 \
+            --kernel-page-cache 1 \
+            --blocked-reactor-notify-ms 2000000 \
+            --collectd 0 \
+            --max-networking-io-control-blocks=100
       - name: Upload inherited test logs
         if: ${{ always() && inputs.run_smoke_tests }}
         uses: actions/upload-artifact@v4

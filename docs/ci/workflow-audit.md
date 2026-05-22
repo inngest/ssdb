@@ -20,17 +20,17 @@ changes, and which should be removed.
 
 | Workflow                          | File                                     | Category    | Current role                                                                                                                  | Audit note                                                                                     |
 |-----------------------------------|------------------------------------------|-------------|-------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
-| ssdb Build and Test          | `.github/workflows/pr-builds.yml`        | Core PR CI  | Installs Nix, validates the flake, runs the C++ configure smoke through the C++ shell, runs the reusable inherited binary build with a focused `test.py` smoke test, and runs Rust checks/tests through Makefile/Nix targets. | Keep as the fork's primary PR signal. Expand inherited test coverage and Rust replacement modules as they become testable. |
+| ssdb Build and Test          | `.github/workflows/pr-builds.yml`        | Core PR CI  | Detects changed areas, runs the reusable inherited binary build with a focused inherited C++ test-binary smoke test for C++ changes, and runs Rust checks/tests through Makefile/Nix targets for Rust changes. | Keep as the fork's primary PR signal. Expand inherited test coverage and Rust replacement modules as they become testable. |
 | ssdb PR                      | `.github/workflows/ssdb-pr.yaml`      | Core PR CI  | Runs relicensing Phase 1 checks and prints relicensing status.                                                                | Keep until provenance checks are merged into broader CI.                                       |
 | PR Conventional Commit Validation | `.github/workflows/commits.yml`          | Core PR CI  | Validates conventional PR titles without adding labels.                                                                       | Keep for release-note hygiene.                                                                 |
 | codespell                         | `.github/workflows/codespell.yaml`       | Core PR CI  | Warns on spelling issues.                                                                                                     | Keep, but consider making it fail once inherited false positives are cleaned up.               |
-| Build ssdb                   | `.github/workflows/build-ssdb.yaml` | Reusable CI | Installs Nix, enters the C++ shell, builds the inherited database executable for a requested mode, and can optionally run focused inherited `test.py` smoke tests. | Keep as reusable CI. Internal target paths still use `scylla` until the build tree is renamed. |
+| Build ssdb                   | `.github/workflows/build-ssdb.yaml` | Reusable CI | Installs Nix, enters the C++ shell, builds the inherited database executable for a requested mode, and can optionally run a focused inherited C++ test-binary smoke test. | Keep as reusable CI. Internal target paths still use `scylla` until the build tree is renamed. |
 
 ## Modify
 
 | Workflow                      | File                                        | Category              | Current role                                                      | Recommended change                                                                                                                                     |
 |-------------------------------|---------------------------------------------|-----------------------|-------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
-| clang-tidy                    | `.github/workflows/clang-tidy.yaml`         | Core PR CI            | Runs clang-tidy on C++ changes through the Nix C++ shell.          | Keep path-filtered. Continue rebranding user-visible names only; CMake variables such as `Scylla_USE_LINKER` remain inherited build internals for now. |
+| clang-tidy                    | `.github/workflows/clang-tidy.yaml`         | Core PR CI            | Runs clang-tidy on changed C/C++ translation units for PRs and keeps the full clang-tidy build available by manual dispatch. | Keep path-filtered. Continue rebranding user-visible names only; CMake variables such as `Scylla_USE_LINKER` remain inherited build internals for now. |
 | iwyu                          | `.github/workflows/iwyu.yaml`               | Core PR CI            | Runs include-cleaner on C++ paths through the Nix C++ shell.       | Keep path-filtered. It now validates submodule, flake, and workflow changes like clang-tidy.                                                          |
 | Check Reproducible Build      | `.github/workflows/reproducible-build.yaml` | Heavy or scheduled CI | Builds twice through the reusable Nix-backed build and compares checksums. | Keep manual/scheduled. Consider reducing frequency until full binary rename and release process are settled.                                           |
 | clang-nightly                 | `.github/workflows/clang-nightly.yaml`      | Heavy or scheduled CI | Builds with a nightly Clang snapshot.                             | Keep manual/scheduled if compiler-forward compatibility matters. Rename workflow once the inherited C++ build has ssdb naming.                    |
@@ -56,10 +56,13 @@ changes, and which should be removed.
 
 - Full inherited C++ builds and C++ source-analysis builds use
   `depot-ubuntu-24.04-8` so build parallelism has enough CPU.
-- Normal PR build, configure, Rust, and relicensing jobs install Nix before
+- Normal PR build, Rust, and relicensing jobs install Nix before
   running repository tooling so CI follows the same flake-backed shells used by
   local development.
-- Heavy non-reproducibility builds use `ccache` with GitHub Actions cache.
-  Reproducible builds disable compiler caching to preserve a clean comparison.
+- Nix-backed PR jobs use Magic Nix Cache to reduce repeated shell materialization
+  cost.
+- Heavy non-reproducibility builds use `ccache` with GitHub Actions cache and a
+  5 GiB budget. Reproducible builds disable compiler caching to preserve a clean
+  comparison.
 - Lightweight validation, relicensing, Rust, Nix, submodule, and reusable
   metadata jobs use `depot-ubuntu-24.04`.

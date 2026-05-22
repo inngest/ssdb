@@ -16,6 +16,7 @@ on:
       - 'configure.py'
       - '.gitmodules'
       - '.github/workflows/clang-tidy.yaml'
+      - '.github/scripts/clang-tidy-*.sh'
       - 'flake.nix'
       - 'flake.lock'
   workflow_dispatch:
@@ -25,7 +26,8 @@ env:
   BUILD_DIR: build
   CLANG_TIDY_CHECKS: '-*,bugprone-use-after-move'
 
-permissions: {}
+permissions:
+  contents: read
 
 # cancel the in-progress run upon a repush
 concurrency:
@@ -38,15 +40,17 @@ jobs:
     runs-on: depot-ubuntu-24.04-8
     env:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
-      CCACHE_MAXSIZE: 2G
+      CCACHE_MAXSIZE: 5G
       CCACHE_BASEDIR: ${{ github.workspace }}
       CCACHE_NOHASHDIR: true
       NODISTCC: true
     steps:
       - uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           submodules: true
       - uses: DeterminateSystems/nix-installer-action@v3
+      - uses: DeterminateSystems/magic-nix-cache-action@main
       - name: Restore ccache
         uses: actions/cache@v4
         with:
@@ -62,29 +66,64 @@ jobs:
           nix develop .#cpp -c ccache --max-size="$CCACHE_MAXSIZE"
           nix develop .#cpp -c ccache --zero-stats
       - name: Generate the building system
+        env:
+          GITHUB_BASE_REF: ${{ github.base_ref || 'main' }}
         run: |
-          nix develop .#cpp -c cmake                    \
-            -DCMAKE_BUILD_TYPE=$BUILD_TYPE              \
-            -DCMAKE_C_COMPILER=clang                    \
-            -DCMAKE_C_COMPILER_LAUNCHER=ccache          \
-            -DCMAKE_CXX_FLAGS="-Wno-error=deprecated-builtins" \
-            -DScylla_USE_LINKER=ld.lld                  \
-            -DScylla_SEASTAR_UNUSED_RESULT_ERROR=OFF    \
-            -DCMAKE_CXX_COMPILER=clang++                \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache        \
-            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON          \
-            -DCMAKE_CXX_CLANG_TIDY="bash;$GITHUB_WORKSPACE/.github/scripts/clang-tidy-nix.sh;--checks=$CLANG_TIDY_CHECKS" \
-            -G Ninja                                    \
-            -B $BUILD_DIR                               \
+          cmake_args=(
+            -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+            -DCMAKE_C_COMPILER=clang
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache
+            -DCMAKE_CXX_FLAGS="-Wno-error=deprecated-builtins"
+            -DScylla_USE_LINKER=ld.lld
+            -DScylla_SEASTAR_UNUSED_RESULT_ERROR=OFF
+            -DCMAKE_CXX_COMPILER=clang++
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+            -G Ninja
+            -B "$BUILD_DIR"
             -S .
+          )
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            cmake_args+=(
+              -DCMAKE_CXX_CLANG_TIDY="bash;$GITHUB_WORKSPACE/.github/scripts/clang-tidy-nix.sh;--checks=$CLANG_TIDY_CHECKS"
+            )
+          fi
+          nix develop .#cpp -c cmake "${cmake_args[@]}"
+      - name: Build generated headers
+        if: github.event_name == 'pull_request'
+        run: |
+          nix develop .#cpp -c bash -c '
+            swagger_targets=""
+            for f in api/api-doc/*.json; do
+              if test "${f#*.}" = json; then
+                name=$(basename "$f" .json)
+                if test $name != swagger20_header; then
+                  swagger_targets+=" scylla_swagger_gen_$name"
+                fi
+              fi
+            done
+            cmake                                       \
+              --build build                             \
+              --target seastar_http_request_parser      \
+              --target idl-sources                      \
+              --target $swagger_targets
+          '
       # see https://github.com/actions/toolkit/blob/main/docs/problem-matchers.md
       - run: |
           echo "::add-matcher::.github/clang-matcher.json"
+      - name: Run clang-tidy on changed sources
+        if: github.event_name == 'pull_request'
+        env:
+          GITHUB_BASE_REF: ${{ github.base_ref || 'main' }}
+        run: |
+          nix develop .#cpp -c .github/scripts/clang-tidy-changed.sh
       - name: Build with clang-tidy enabled
+        if: github.event_name == 'workflow_dispatch'
         run: |
           nix develop .#cpp -c cmake --build $BUILD_DIR --target scylla
       - run: |
           echo "::remove-matcher owner=clang::"
+        if: always()
       - name: Show ccache stats
         if: ${{ always() }}
         run: |

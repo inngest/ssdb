@@ -38,7 +38,7 @@ jobs:
     runs-on: depot-ubuntu-24.04-8
     env:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
-      CCACHE_MAXSIZE: 2G
+      CCACHE_MAXSIZE: 5G
       CCACHE_BASEDIR: ${{ github.workspace }}
       CCACHE_NOHASHDIR: true
     steps:
@@ -46,6 +46,7 @@ jobs:
         with:
           submodules: true
       - uses: DeterminateSystems/nix-installer-action@v3
+      - uses: DeterminateSystems/magic-nix-cache-action@main
       - name: Restore ccache
         uses: actions/cache@v4
         with:
