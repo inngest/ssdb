@@ -33,6 +33,7 @@ jobs:
     uses: ./.github/workflows/build-ssdb.yaml
     with:
       build_mode: dev
+      run_smoke_tests: true
 
   rust:
     name: Rust checks and tests

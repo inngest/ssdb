@@ -11,6 +11,10 @@ on:
         description: 'enable ccache for non-reproducibility builds'
         type: boolean
         default: true
+      run_smoke_tests:
+        description: 'run a focused inherited test.py smoke suite after building'
+        type: boolean
+        default: false
     outputs:
       md5sum:
         description: 'the md5sum for the inherited database executable'
@@ -52,10 +56,29 @@ jobs:
       - name: Generate the building system
         run: |
           git config --global --add safe.directory $GITHUB_WORKSPACE
+          artifacts=(--with scylla)
+          if [ "${{ inputs.run_smoke_tests }}" = "true" ]; then
+            artifacts+=(--with test/boost/UUID_test)
+          fi
           # The .#cpp shell's compiler wrappers use ccache when CCACHE_DIR is set.
-          nix develop .#cpp -c ./configure.py --mode ${{ inputs.build_mode }} --with scylla --no-seastar-unused-result-error
+          nix develop .#cpp -c ./configure.py --mode ${{ inputs.build_mode }} "${artifacts[@]}" --no-seastar-unused-result-error
       - run: |
           nix develop .#cpp -c ninja build/${{ inputs.build_mode }}/scylla
+      - name: Build inherited smoke tests
+        if: ${{ inputs.run_smoke_tests }}
+        run: |
+          nix develop .#cpp -c ninja build/${{ inputs.build_mode }}/test/boost/UUID_test
+      - name: Run inherited smoke tests
+        if: ${{ inputs.run_smoke_tests }}
+        run: |
+          nix develop .#cpp -c ./test.py --mode ${{ inputs.build_mode }} --jobs 1 --timeout 900 --tmpdir testlog boost/UUID_test
+      - name: Upload inherited test logs
+        if: ${{ always() && inputs.run_smoke_tests }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: inherited-testlog-${{ inputs.build_mode }}
+          path: testlog
+          if-no-files-found: ignore
       - id: checksum
         run: |
           checksum=$(md5sum build/${{ inputs.build_mode }}/scylla | cut -c -32)

@@ -9,6 +9,10 @@ MAKEFLAGS += --no-builtin-rules
 INVENTORY_GENERATOR := docs/relicensing/generate-inventory.py
 INVENTORY_OUTPUTS := docs/relicensing/inventory.md docs/relicensing/inventory.tsv
 RUST_MANIFEST ?= rust/Cargo.toml
+CPP_TEST_MODE ?= dev
+CPP_TEST_SMOKE ?= boost/UUID_test
+CPP_TEST_SMOKE_ARTIFACTS ?= test/boost/UUID_test
+CPP_TEST_SMOKE_TARGETS ?= build/$(CPP_TEST_MODE)/test/boost/UUID_test
 
 .PHONY: help
 help: ## Show available targets.
@@ -53,6 +57,12 @@ rust-fmt-check: ## Check Rust formatting in the current Rust workspace.
 .PHONY: cpp-configure
 cpp-configure: ## Configure the inherited C++ build inside the Linux C++ shell.
 	$(NIX) develop .#cpp -c ./configure.py --mode dev --with scylla --disable-dpdk
+
+.PHONY: cpp-test-smoke
+cpp-test-smoke: ## Build and run the focused inherited C++ test.py smoke suite.
+	$(NIX) develop .#cpp -c ./configure.py --mode $(CPP_TEST_MODE) --with scylla $(addprefix --with ,$(CPP_TEST_SMOKE_ARTIFACTS)) --disable-dpdk --no-seastar-unused-result-error
+	$(NIX) develop .#cpp -c ninja build/$(CPP_TEST_MODE)/scylla $(CPP_TEST_SMOKE_TARGETS)
+	$(NIX) develop .#cpp -c ./test.py --mode $(CPP_TEST_MODE) --jobs 1 --timeout 900 --tmpdir testlog $(CPP_TEST_SMOKE)
 
 .PHONY: inventory
 inventory: ## Regenerate relicensing inventory files.
