@@ -1,5 +1,5 @@
 {
-  description = "SSDB";
+  description = "ssdb";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
@@ -111,7 +111,7 @@
             ]);
 
           shellHook = lib.optionalString pkgs.stdenv.isDarwin ''
-            echo "SSDB portable macOS dev shell"
+            echo "ssdb portable macOS dev shell"
             echo "The inherited C++ database build is Linux-oriented; use a Linux Nix shell for the full C++ build."
           '';
         };
@@ -163,7 +163,7 @@
             pkgs.mkShell {
               packages = [ ];
               shellHook = ''
-                echo "SSDB full C++ build shell is Linux-only."
+                echo "ssdb full C++ build shell is Linux-only."
                 echo "On macOS, use: nix develop .#portable or nix develop .#rust"
                 return 1
               '';
@@ -176,7 +176,7 @@
             pkgs.mkShell {
               packages = [ ];
               shellHook = ''
-                echo "SSDB macOS shell is Darwin-only."
+                echo "ssdb macOS shell is Darwin-only."
                 echo "On Linux, use: nix develop .#default, nix develop .#cpp, or nix develop .#rust"
                 return 1
               '';
@@ -197,7 +197,7 @@
             ]);
 
           shellHook = ''
-            echo "SSDB Rust dev shell"
+            echo "ssdb Rust dev shell"
             echo "Use this for rust/, rust-next/, cxxbridge, and Apache-2.0 rewrite work."
           '';
         };

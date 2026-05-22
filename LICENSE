@@ -1,13 +1,13 @@
-SSDB Licensing
+ssdb Licensing
 ===================
 
-This repository uses a mixed dual-license model during the SSDB
+This repository uses a mixed dual-license model during the ssdb
 relicensing migration.
 
 Inherited ScyllaDB-derived code remains licensed under the GNU Affero General
 Public License, version 3 or later. See LICENSE.AGPL.
 
-Cleanly authored SSDB rewrite code may be licensed under the Apache
+Cleanly authored ssdb rewrite code may be licensed under the Apache
 License, version 2.0. See LICENSE.APACHE.
 
 Unless a file states a different license with an SPDX license identifier or

@@ -1,4 +1,4 @@
-name: Build SSDB
+name: Build ssdb
 
 on:
   workflow_call:

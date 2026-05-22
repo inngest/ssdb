@@ -1,13 +1,13 @@
 # Contributing to Scylla
 
-## SSDB clean rewrite contributions
+## ssdb clean rewrite contributions
 
-SSDB is migrating inherited AGPL-covered ScyllaDB code toward cleanly
+ssdb is migrating inherited AGPL-covered ScyllaDB code toward cleanly
 authored Apache-2.0 Rust components. This migration does not relicense inherited
 code. New clean rewrite contributions must preserve clear provenance.
 
 The repository uses a mixed dual-license model: inherited code remains
-AGPL-3.0-or-later, and cleanly authored SSDB rewrite code may be
+AGPL-3.0-or-later, and cleanly authored ssdb rewrite code may be
 Apache-2.0 when it satisfies the provenance rules.
 
 For any contribution intended to be Apache-2.0 clean rewrite code, contributors
