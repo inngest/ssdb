@@ -1,0 +1,424 @@
+#+TITLE: Cassandra Conformance Suite
+#+AUTHOR: Darwin D. Wu
+#+DATE: 2026-05-22
+#+STATUS: Draft
+#+STARTUP: showall
+
+* Overview
+
+Create a clean, black-box conformance test suite that can verify ssdb behavior
+against Apache Cassandra compatibility expectations while the Rust rewrite
+proceeds.
+
+The suite should become the acceptance gate for replacement modules. A Rust
+component is not compatibility-complete merely because it builds or matches the
+old inherited implementation. It is complete only when it satisfies the public,
+versioned conformance profile that applies to that component.
+
+This document is an engineering and provenance plan.
+
+* Compatibility Target
+
+"100% Cassandra compatible" must mean 100% of an explicit, versioned profile.
+The first conformance milestone should define that profile before claiming
+complete compatibility.
+
+The compatibility profile should record:
+
+- Apache Cassandra release line or lines used as references.
+- CQL native protocol versions in scope.
+- CQL language features in scope.
+- System tables and metadata behavior in scope.
+- Driver behavior and error compatibility expectations.
+- Explicit exclusions, if any, with product rationale and issue links.
+
+The long-term target is complete compatibility with the selected Apache
+Cassandra/CQL profile. Early milestones may cover smaller subsets, but the
+subset must be named and tracked.
+
+Initial profile decision:
+
+- Profile name: =cassandra-5.0=.
+- Reference build for black-box observations: Apache Cassandra =5.0.8=.
+- Primary protocol scope: native protocol v5.
+- Backward-compatible native protocol v4 negotiation should be tracked
+  separately if needed for driver compatibility.
+
+Rationale:
+
+- Cassandra 5.0 is the current latest GA line.
+- Cassandra 5.0 exercises native protocol v5 and newer CQL behavior, which is
+  the right long-term target for a Rust rewrite.
+- Pinning black-box observations to a patch release makes test provenance
+  reproducible, while naming the profile =cassandra-5.0= avoids baking
+  patch-specific behavior into the compatibility claim.
+- Cassandra 4.1 and 4.0 should become secondary compatibility profiles after
+  the 5.0 profile and harness shape are stable.
+
+* Goals
+
+- Build a reusable conformance suite that can run against Apache Cassandra,
+  inherited ssdb, and clean Rust replacement binaries.
+- Use public Cassandra documentation, public protocol specifications, public
+  driver behavior, and black-box observations as test inputs.
+- Treat conformance tests as clean rewrite assets when independently authored
+  from public sources.
+- Make compatibility regressions visible before replacement modules are shipped.
+- Produce machine-readable reports that show pass, fail, skip, and unsupported
+  status by feature.
+- Keep the suite useful for both module-level testing and full-server testing.
+
+* Non-Goals
+
+- Do not copy inherited AGPL test sources into the clean conformance suite.
+- Do not copy Apache Cassandra implementation code or private implementation
+  details.
+- Do not treat differences from inherited ssdb behavior as authoritative unless
+  Cassandra behavior and the compatibility profile agree.
+- Do not claim whole-project Apache-2.0 status because the test suite is clean.
+- Do not hide intentional incompatibilities; mark them explicitly in the
+  compatibility matrix.
+
+* Provenance Rules
+
+New conformance tests intended to be Apache-2.0 clean should be authored from:
+
+- public Apache Cassandra and CQL documentation;
+- public native protocol documentation;
+- public driver APIs and observed driver behavior;
+- independently written behavior specs;
+- black-box observations against a reference Cassandra server;
+- generated fixtures whose generator inputs are public or independently
+  authored.
+
+Tests copied or mechanically rewritten from inherited AGPL tests must remain
+AGPL-derived and must not be used as evidence for clean Apache-2.0 provenance.
+If retained, keep them outside the clean conformance tree and label them in the
+license inventory.
+
+* Suite Layout
+
+Create the clean suite under a separate path so it can be audited independently:
+
+#+BEGIN_SRC text
+conformance/
+  LICENSE
+  README.md
+  profiles/
+    cassandra/<profile-name>.toml
+  specs/
+    cql-native-protocol.md
+    cql-language.md
+    schema-metadata.md
+  tests/
+    protocol/
+    cql/
+    schema/
+    errors/
+    auth/
+    topology/
+  harness/
+    src/
+  fixtures/
+    public/
+    generated/
+  golden/
+    cassandra-5.0/
+      cassandra-5.0.8/
+        manifest.json
+  reports/
+    .gitignore
+#+END_SRC
+
+Harness implementation decision:
+
+- Use a split harness.
+- Write the native protocol harness in Rust so frame-level tests can share
+  fixtures and low-level assertions with =rust-next/crates/cql-protocol=.
+- Write first driver-level black-box CQL tests in Go using Apache Cassandra
+  GoCQL, so schema, query, metadata, and error behavior can be covered against
+  reference, inherited, and candidate targets with the same driver stack used by
+  Go applications.
+- Use Apache Cassandra GoCQL as the primary driver-level oracle for the first
+  conformance profile.
+- Keep the profile, fixtures, and report schema language-neutral so tests can
+  move between harness implementations without changing compatibility claims.
+
+* Golden Data
+
+The suite should keep checked-in golden data.
+
+Golden data should capture reference Apache Cassandra observations for a
+specific profile and reference build:
+
+#+BEGIN_SRC text
+conformance/golden/
+  cassandra-5.0/
+    cassandra-5.0.8/
+      manifest.json
+      protocol/
+      cql/
+      schema/
+      errors/
+#+END_SRC
+
+Use goldens for stable, externally visible behavior:
+
+- native protocol response bytes or canonical decoded frames;
+- GoCQL-observed result sets, metadata, paging behavior, and errors;
+- schema/system table observations after deterministic setup;
+- normalized error classes, protocol error codes, and selected message text;
+- compatibility reports for fixed fixture datasets.
+
+Do not use goldens for behavior that is intentionally nondeterministic unless
+the harness records an explicit normalization rule. Examples include generated
+UUIDs, timestamps, node addresses, schema-version identifiers, token ownership
+details, result ordering without =ORDER BY=, and timing-sensitive failures.
+
+Each golden directory must include a manifest with:
+
+- compatibility profile name;
+- reference Cassandra version and image or binary identifier;
+- native protocol version;
+- GoCQL driver version;
+- fixture dataset hash;
+- recording command and timestamp;
+- normalization rules;
+- public references or observation notes;
+- list of generated files and their hashes.
+
+Goldens are compatibility evidence, not implementation input. They must be
+generated from public specs, public fixtures, and black-box reference Cassandra
+observations. They must not be copied from inherited AGPL tests.
+
+* Test Taxonomy
+
+** Protocol conformance
+
+- Native protocol startup, options, authentication negotiation, and error
+  frames.
+- Supported protocol versions, flags, stream IDs, opcodes, and frame length
+  validation.
+- Request and response encoding for prepared statements, batches, paging,
+  tracing flags, warnings, and custom payloads.
+- Malformed frame handling and connection lifecycle behavior.
+
+** CQL language conformance
+
+- Data types, literals, casting, collections, tuples, UDTs, frozen values, and
+  null handling.
+- DDL for keyspaces, tables, indexes, materialized views if in profile, UDF/UDA
+  if in profile, and schema alteration.
+- DML for inserts, updates, deletes, TTL, timestamps, counters, lightweight
+  transactions, batches, paging, ordering, filtering, and conditional results.
+- Error classes, error messages where externally visible, and protocol error
+  codes.
+
+** Metadata and system behavior
+
+- =system_schema=, =system=, and other public system table contents in the
+  selected profile.
+- Prepared metadata, result metadata, schema agreement visibility, and driver
+  discovery behavior.
+- Token metadata and partitioner-visible behavior where required by drivers.
+
+** Cluster behavior
+
+- Consistency levels, read/write availability, timeout/unavailable errors, and
+  retry-visible behavior.
+- Schema agreement across nodes.
+- Node lifecycle behavior that public drivers observe.
+- Authentication and authorization behavior where included in the profile.
+
+** Storage-visible behavior
+
+- Tombstones, TTL expiry, deletion semantics, read-before-write visible effects,
+  range tombstones, compaction-observable behavior, and repair-visible behavior.
+- These are high-risk clean-room areas and should be specified before
+  implementation starts.
+
+* Harness Design
+
+The harness should support three target kinds:
+
+- =reference=: an Apache Cassandra cluster used as the behavioral oracle.
+- =inherited=: the current inherited ssdb binary for regression visibility.
+- =candidate=: a clean Rust module, standalone server, or mixed ssdb binary.
+
+Each test should declare:
+
+- required profile feature flags;
+- required cluster shape;
+- whether it is deterministic, timing-sensitive, or stress-oriented;
+- public references or observation notes used to author the test;
+- expected behavior source: spec, reference observation, or both.
+
+Results should be emitted as JSON plus human-readable summaries. CI should be
+able to fail on new regressions while allowing explicitly tracked unsupported
+features during early milestones.
+
+Inherited ssdb divergence policy:
+
+- Apache Cassandra reference behavior is authoritative for in-profile
+  conformance.
+- An inherited ssdb failure for a test that passes against the Cassandra
+  reference does not block initial suite development.
+- Each Cassandra-pass/inherited-fail result must be recorded as a compatibility
+  gap unless the feature is explicitly outside the profile or marked
+  =intentionally-different= with product rationale.
+- Clean Rust candidates should not copy inherited divergent behavior unless the
+  compatibility matrix records that divergence as intentional.
+- Full Cassandra compatibility claims require all in-profile tests to pass
+  against the candidate target, regardless of inherited ssdb behavior.
+
+* Compatibility Matrix
+
+Maintain a machine-readable matrix mapping feature coverage to implementation
+status:
+
+#+BEGIN_SRC text
+conformance/profiles/cassandra/<profile-name>.toml
+docs/relicensing/module-migration.md
+#+END_SRC
+
+Each matrix entry should include:
+
+- feature name;
+- owning subsystem;
+- reference source;
+- test coverage path;
+- status: =untested=, =passing=, =failing=, =unsupported=, or
+  =intentionally-different=;
+- issue or plan link for any non-passing status.
+
+Do not use the matrix to weaken compatibility claims silently. If a feature is
+excluded, the profile name and release notes should make that clear.
+
+* Conformance Job Tiers
+
+Use tiered jobs so the suite is useful in local development without making every
+change wait for a full Cassandra compatibility run.
+
+** Local smoke
+
+- Purpose: fast developer feedback.
+- Scope: parser/encoder unit tests, profile validation, fixture validation, and
+  a small single-node CQL smoke set.
+- Target: candidate target when available; otherwise harness self-tests.
+- Expected runtime: under two minutes once implemented.
+- Entry point: =make conformance-smoke=.
+
+** Pull request conformance
+
+- Purpose: prevent ordinary compatibility regressions.
+- Scope: local smoke plus single-node Cassandra reference comparison for touched
+  feature areas.
+- Target: reference and candidate targets.
+- Expected runtime: under fifteen minutes.
+- Entry point: =make conformance-pr=.
+
+** Nightly full conformance
+
+- Purpose: find broad regressions and inherited/candidate divergences.
+- Scope: all stable in-profile tests, including multi-node and timing-sensitive
+  tests that are too expensive for every pull request.
+- Target: reference, inherited, and candidate targets where available.
+- Expected runtime: allowed to be long-running.
+- Entry point: =make conformance-full=.
+
+** Release gate
+
+- Purpose: support compatibility claims.
+- Scope: all in-profile tests required by the release profile, with reports
+  archived as release artifacts.
+- Target: reference and release candidate; inherited target is optional context.
+- Requirement: no failing in-profile tests unless the release notes explicitly
+  exclude the feature from the claimed profile.
+- Entry point: =make conformance-release=.
+
+* Phased Plan
+
+** Phase 1: Define the conformance profile
+
+- [X] Choose the initial Apache Cassandra compatibility profile.
+- [ ] Record protocol versions, CQL feature scope, and excluded features.
+- [ ] Add a profile file under =conformance/profiles/cassandra/=.
+- [ ] Document the public references used for the profile.
+- [ ] Add a compatibility matrix status vocabulary.
+
+** Phase 2: Build the harness skeleton
+
+- [X] Choose the first harness implementation strategy.
+- [X] Choose the primary public Cassandra driver-level oracle.
+- [X] Define inherited ssdb divergence policy.
+- [X] Decide whether to keep checked-in golden data.
+- [ ] Create the =conformance/= tree with Apache-2.0 licensing for clean tests.
+- [ ] Add target configuration for reference, inherited, and candidate servers.
+- [ ] Add JSON and human-readable report output.
+- [ ] Add feature flags, skip reasons, and expected-failure handling.
+- [ ] Add golden recording and verification commands.
+- [ ] Add Make targets for local conformance smoke tests.
+
+** Phase 3: Cover the first Rust milestone
+
+- [ ] Add native protocol frame fixtures from public docs and black-box
+  observations.
+- [ ] Add protocol handshake and error-frame tests.
+- [ ] Add encode/decode round-trip tests for the future
+  =rust-next/crates/cql-protocol= crate.
+- [ ] Require protocol conformance tests before marking CQL framing complete in
+  plan 000.
+
+** Phase 4: Add CQL black-box coverage
+
+- [ ] Add schema, type, DML, query, paging, prepared statement, batch, and error
+  behavior tests.
+- [ ] Run each test against the reference Cassandra target before using it as a
+  candidate acceptance test.
+- [ ] Record reference observations that are not fully specified by public docs.
+- [ ] Keep generated fixtures reproducible from clean inputs.
+
+** Phase 5: Add cluster and storage-visible coverage
+
+- [ ] Add multi-node cluster lifecycle and schema agreement tests.
+- [ ] Add consistency-level and failure-mode tests.
+- [ ] Add TTL, tombstone, range deletion, counter, LWT, and repair-visible tests.
+- [ ] Require independent behavior specs before using these tests to guide
+  high-risk Rust subsystem implementation.
+
+** Phase 6: Make conformance a release gate
+
+- [X] Define local, pull request, nightly, and release conformance job tiers.
+- [ ] Add CI jobs for conformance smoke coverage.
+- [ ] Add scheduled or manually triggered full conformance jobs.
+- [ ] Publish compatibility reports as CI artifacts.
+- [ ] Require passing status for all in-profile features before claiming full
+  Cassandra compatibility.
+- [ ] Keep unsupported or intentionally different behavior visible in release
+  notes.
+
+* Initial Acceptance Gates
+
+- CQL protocol framing replacement: protocol conformance tests pass for all
+  in-profile frame parsing and encoding behavior.
+- Query execution replacement: CQL language conformance tests pass for all
+  in-profile statements implemented by the replacement.
+- Storage replacement: storage-visible behavior tests pass for TTL, tombstones,
+  counters, collections, range reads, and repair-visible cases in the profile.
+- Full server release: all profile tests pass, or non-passing tests are
+  explicitly outside the claimed profile.
+
+* References
+
+- Apache Cassandra documentation: https://cassandra.apache.org/doc/
+- Apache Cassandra downloads: https://cassandra.apache.org/_/download
+- Apache Cassandra client drivers:
+  https://cassandra.apache.org/doc/stable/cassandra/getting-started/drivers.html
+- Apache Cassandra GoCQL driver:
+  https://github.com/apache/cassandra-gocql-driver
+- Apache Cassandra native protocol specification:
+  https://cassandra.apache.org/doc/latest/cassandra/_attachments/native_protocol_v5.html
+- Apache Cassandra source repository: https://github.com/apache/cassandra
+- Apache Cassandra CEPs:
+  https://cwiki.apache.org/confluence/display/CASSANDRA/Cassandra+Enhancement+Proposals
+- Apache License 2.0: https://www.apache.org/licenses/LICENSE-2.0.html
