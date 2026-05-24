@@ -42,11 +42,11 @@ Initial artifacts:
 - relocatable server tarball from =ninja dist-server-tar=;
 - Debian packages from =ninja dist-server-deb=;
 - RPM packages from =ninja dist-server-rpm=;
+- multi-arch container images published to GitHub Container Registry;
 - SHA-256 checksums for uploaded artifacts.
 
 Future artifacts:
 
-- container images built from the Debian packages;
 - APT/YUM repository publishing;
 - SBOM and provenance attestations;
 - statically linked Rust rewrite binaries where a crate can actually support
@@ -59,7 +59,8 @@ The implemented flow follows the Atlas/Inngest pattern:
 1. =auto-release-pr.yml= creates or refreshes =release/next=.
 2. The release PR title is =chore(release): vYYYY-MM-DD.NN=.
 3. =release-tag.yml= tags the merged release PR commit.
-4. =release-artifacts.yaml= builds and publishes tar, Debian, and RPM artifacts.
+4. =release-artifacts.yaml= builds and publishes tar, Debian, RPM, and GHCR
+   container artifacts for =x86_64= and =aarch64=.
 
 The release tag is date-indexed rather than semver. That avoids implying API or
 storage-format stability while this fork is still in early packaging and
@@ -73,8 +74,11 @@ the inherited product/version metadata is deliberately rebranded.
 - Keep release PRs going through normal branch protection and CI.
 - Release builds require Linux runners; macOS is intentionally limited to the
   portable/Rust shell.
-- Release artifact builds are expensive and should use an 8-core runner with
-  ccache enabled.
+- Release artifact builds are expensive and should use native =x86_64= and
+  =aarch64= runners with ccache enabled.
+- The workflow currently expects =depot-ubuntu-24.04-8= and
+  =depot-ubuntu-24.04-arm-8= runner labels.
+- GHCR publishing requires =packages: write= workflow permission.
 
 * Open Checklist
 
@@ -85,13 +89,14 @@ the inherited product/version metadata is deliberately rebranded.
   RPM packages, and checksums.
 - [X] Document why the inherited server should not be treated as a static
   binary release.
-- [ ] Verify =make release-artifacts= on a Linux runner.
+- [X] Add native =x86_64= and =aarch64= release artifact jobs.
+- [X] Add GHCR container image publishing from generated Debian packages.
+- [ ] Verify =make release-artifacts= on native =x86_64= and =aarch64= Linux
+  runners.
 - [ ] Confirm generated Debian package names and install paths are acceptable
   while =SCYLLA-VERSION-GEN= still emits =scylla= as the product name.
 - [ ] Rebrand product metadata before public ssdb package distribution if
   =scylla-*= package names are not intended.
-- [ ] Add container-image publishing after package names and install paths are
-  settled.
 - [ ] Add package repository publishing for APT/YUM after package signing is
   ready.
 - [ ] Add SBOM and provenance attestations after artifact shape stabilizes.

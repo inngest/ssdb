@@ -785,6 +785,7 @@ dist/debuginfo/CMakeLists.txt	unknown-license				no
 dist/debuginfo/install.sh	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2022-present ScyllaDB		no
 dist/debuginfo/scripts/create-relocatable-package.py	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2022-present ScyllaDB		no
 dist/docker/commandlineparser.py	unknown-license				no
+dist/docker/debian/Dockerfile.release	AGPL-only	AGPL-3.0-or-later			no
 dist/docker/debian/README.md	unknown-license				no
 dist/docker/debian/build_docker.sh	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2021-present ScyllaDB		no
 dist/docker/docker-entrypoint.py	unknown-license				no
@@ -1271,6 +1272,7 @@ docs/operating-scylla/security/security-checklist.rst	unknown-license				no
 docs/operating-scylla/system-configuration/index.rst	unknown-license				no
 docs/operating-scylla/system-configuration/snitch.rst	unknown-license				no
 docs/plans/000-rust_rewrite_apache2_relicensing.org	unknown-license		Copyright notices | copyright | copyright and NOTICE obligations are preserved; | copyright attribution from inherited files. Copyright notices are | copyright holders. | copyright holders. The | copyright inventory. | copyright notices and required attribution intact. | copyright notices to make the project look less derived. | copyright notices. | copyright risk. | copyright, license, and attribution notices.		no
+docs/plans/001-cassandra_conformance_suite.org	unknown-license				no
 docs/plans/002-release_flow.org	Apache-only	Apache-2.0			no
 docs/pyproject.toml	unknown-license				no
 docs/reference/_common/enterprise-vs-oss-matrix-link.rst	unknown-license				no
