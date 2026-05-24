@@ -21,7 +21,7 @@ It is an audit starting point, not a legal conclusion.
 
 | Category  | Files |
 |-----------|-------|
-| generated | 73    |
+| generated | 74    |
 | gitlink   | 6     |
 | vendored  | 12    |
 
@@ -67,6 +67,7 @@ It is an audit starting point, not a legal conclusion.
 
 ## Generated Examples
 
+- `CHANGELOG.md`
 - `Doxyfile`
 - `LICENSE.APACHE`
 - `alternator/expressions.g`
@@ -91,7 +92,6 @@ It is an audit starting point, not a legal conclusion.
 - `api/api-doc/raft.json`
 - `api/api-doc/storage_proxy.json`
 - `api/api-doc/storage_service.json`
-- `api/api-doc/stream_manager.json`
 
 ## Vendored Examples
 

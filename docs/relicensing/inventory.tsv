@@ -33,7 +33,7 @@ path	license_class	spdx	copyright	flags	binary
 .gitorderfile	unknown-license				no
 .mailmap	unknown-license				no
 AGENTS.md	unknown-license				no
-CHANGELOG.md	Apache-only	Apache-2.0			no
+CHANGELOG.md	Apache-only	Apache-2.0	copyright | copyright and change notices | copyright and license statements to production_snitch_base.cc | copyright banner | copyright statement | copyright statement to use ScyllaDB rather than old name | copyright statements to present day | copyright to gms/gossiper.cc | copyright' message on building ubuntu package | copyright/license | copyright/license blurb to tests	generated	no
 CLAUDE.md	unknown-license				no
 CMakeLists.txt	unknown-license				no
 CONTRIBUTING.md	unknown-license				no
