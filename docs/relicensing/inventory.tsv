@@ -15,6 +15,7 @@ path	license_class	spdx	copyright	flags	binary
 .github/scripts/clang-tidy-nix.sh	dual-licensed	AGPL-3.0-or-later OR Apache-2.0			no
 .github/scripts/label_promoted_commits.py	unknown-license				no
 .github/scripts/sync_labels.py	unknown-license				no
+.github/workflows/auto-release-pr.yml	Apache-only	Apache-2.0			no
 .github/workflows/build-ssdb.yaml	unknown-license				no
 .github/workflows/clang-nightly.yaml	unknown-license				no
 .github/workflows/clang-tidy.yaml	unknown-license				no
@@ -22,6 +23,8 @@ path	license_class	spdx	copyright	flags	binary
 .github/workflows/commits.yml	unknown-license				no
 .github/workflows/iwyu.yaml	unknown-license				no
 .github/workflows/pr-builds.yml	Apache-only	Apache-2.0			no
+.github/workflows/release-artifacts.yaml	Apache-only	Apache-2.0			no
+.github/workflows/release-tag.yml	Apache-only	Apache-2.0			no
 .github/workflows/reproducible-build.yaml	unknown-license				no
 .github/workflows/seastar.yaml	unknown-license				no
 .github/workflows/ssdb-pr.yaml	unknown-license				no
@@ -30,6 +33,7 @@ path	license_class	spdx	copyright	flags	binary
 .gitorderfile	unknown-license				no
 .mailmap	unknown-license				no
 AGENTS.md	unknown-license				no
+CHANGELOG.md	Apache-only	Apache-2.0			no
 CLAUDE.md	unknown-license				no
 CMakeLists.txt	unknown-license				no
 CONTRIBUTING.md	unknown-license				no
@@ -223,6 +227,7 @@ cell_locking.hh	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2017-present ScyllaDB	
 checked-file-impl.hh	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2016-present ScyllaDB		no
 client_data.cc	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2019-present ScyllaDB		no
 client_data.hh	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2019-present ScyllaDB		no
+cliff.toml	Apache-only	Apache-2.0			no
 clocks-impl.cc	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2015-present ScyllaDB		no
 clocks-impl.hh	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2017-present ScyllaDB		no
 clustering_bounds_comparator.hh	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2016-present ScyllaDB		no
@@ -1266,6 +1271,7 @@ docs/operating-scylla/security/security-checklist.rst	unknown-license				no
 docs/operating-scylla/system-configuration/index.rst	unknown-license				no
 docs/operating-scylla/system-configuration/snitch.rst	unknown-license				no
 docs/plans/000-rust_rewrite_apache2_relicensing.org	unknown-license		Copyright notices | copyright | copyright and NOTICE obligations are preserved; | copyright attribution from inherited files. Copyright notices are | copyright holders. | copyright holders. The | copyright inventory. | copyright notices and required attribution intact. | copyright notices to make the project look less derived. | copyright notices. | copyright risk. | copyright, license, and attribution notices.		no
+docs/plans/002-release_flow.org	Apache-only	Apache-2.0			no
 docs/pyproject.toml	unknown-license				no
 docs/reference/_common/enterprise-vs-oss-matrix-link.rst	unknown-license				no
 docs/reference/_common/reference-toc.rst	unknown-license				no
