@@ -91,12 +91,12 @@ the inherited product/version metadata is deliberately rebranded.
   binary release.
 - [X] Add native =x86_64= and =aarch64= release artifact jobs.
 - [X] Add GHCR container image publishing from generated Debian packages.
+- [X] Set generated product metadata to =ssdb= so release filenames and package
+  names use =ssdb-*=.
 - [ ] Verify =make release-artifacts= on native =x86_64= and =aarch64= Linux
   runners.
-- [ ] Confirm generated Debian package names and install paths are acceptable
-  while =SCYLLA-VERSION-GEN= still emits =scylla= as the product name.
-- [ ] Rebrand product metadata before public ssdb package distribution if
-  =scylla-*= package names are not intended.
+- [ ] Rebrand inherited service names, systemd units, users, install paths, and
+  runtime configuration paths where doing so is safe.
 - [ ] Add package repository publishing for APT/YUM after package signing is
   ready.
 - [ ] Add SBOM and provenance attestations after artifact shape stabilizes.
