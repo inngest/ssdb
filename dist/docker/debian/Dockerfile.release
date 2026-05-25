@@ -1,0 +1,57 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+FROM ubuntu:24.04
+
+ARG RELEASE=unknown
+
+LABEL org.opencontainers.image.title="ssdb"
+LABEL org.opencontainers.image.description="ssdb database server"
+LABEL org.opencontainers.image.version="${RELEASE}"
+
+COPY release-artifacts/*.deb /packages/
+COPY dist/docker/etc /etc/
+COPY dist/docker/scylla-housekeeping-service.sh /scylla-housekeeping-service.sh
+COPY dist/docker/scyllasetup.py /scyllasetup.py
+COPY dist/docker/commandlineparser.py /commandlineparser.py
+COPY dist/docker/docker-entrypoint.py /docker-entrypoint.py
+COPY dist/docker/scylla_bashrc /scylla_bashrc
+COPY dist/common/supervisor/scylla-server.sh \
+     dist/common/supervisor/scylla-node-exporter.sh \
+     dist/common/supervisor/scylla_util.sh \
+     /opt/scylladb/supervisor/
+
+RUN apt-get -y clean \
+    && apt-get -y update \
+    && apt-get -y upgrade \
+    && apt-get -y --no-install-suggests install dialog apt-utils \
+    && echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections \
+    && rm -f /etc/rsyslog.conf \
+    && apt-get -y --no-install-suggests install \
+        ca-certificates \
+        curl \
+        hostname \
+        python3 \
+        python3-yaml \
+        rsyslog \
+        sudo \
+        supervisor \
+        systemd \
+    && echo LANG=C.UTF-8 > /etc/default/locale \
+    && (dpkg -i /packages/*.deb || apt-get -f -y install) \
+    && apt-get -y clean \
+    && rm -rf /var/lib/apt/lists/* /packages \
+    && cat /scylla_bashrc >> /etc/bash.bashrc \
+    && mkdir -p /etc/supervisor.conf.d /var/log/scylla /opt/scylladb/supervisor \
+    && chown -R scylla:scylla /var/lib/scylla \
+    && sed -i -e 's/^SCYLLA_ARGS=".*"$/SCYLLA_ARGS="--log-to-syslog 0 --log-to-stdout 1 --network-stack posix"/' /etc/default/scylla-server \
+    && touch /opt/scylladb/SCYLLA-CONTAINER-FILE
+
+ENV PATH=/opt/scylladb/python3/bin:/usr/bin:/usr/sbin
+ENV LANG=C.UTF-8
+ENV LANGUAGE=
+ENV LC_ALL=C.UTF-8
+
+EXPOSE 10000 9042 9160 9180 7000 7001 22
+VOLUME ["/var/lib/scylla"]
+
+ENTRYPOINT ["/docker-entrypoint.py"]

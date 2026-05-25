@@ -6,22 +6,22 @@ It is an audit starting point, not a legal conclusion.
 - Source: tracked files in the current working tree
 - Generator: `docs/relicensing/generate-inventory.py`
 - Complete per-file inventory: `inventory.tsv`
-- Tracked files scanned: `5956`
+- Tracked files scanned: `5964`
 
 ## License Classes
 
 | Category        | Files |
 |-----------------|-------|
-| AGPL-only       | 1694  |
-| Apache-only     | 41    |
+| AGPL-only       | 1695  |
+| Apache-only     | 47    |
 | dual-licensed   | 372   |
-| unknown-license | 3849  |
+| unknown-license | 3850  |
 
 ## File Flags
 
 | Category  | Files |
 |-----------|-------|
-| generated | 73    |
+| generated | 74    |
 | gitlink   | 6     |
 | vendored  | 12    |
 
@@ -67,6 +67,7 @@ It is an audit starting point, not a legal conclusion.
 
 ## Generated Examples
 
+- `CHANGELOG.md`
 - `Doxyfile`
 - `LICENSE.APACHE`
 - `alternator/expressions.g`
@@ -91,7 +92,6 @@ It is an audit starting point, not a legal conclusion.
 - `api/api-doc/raft.json`
 - `api/api-doc/storage_proxy.json`
 - `api/api-doc/storage_service.json`
-- `api/api-doc/stream_manager.json`
 
 ## Vendored Examples
 

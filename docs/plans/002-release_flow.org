@@ -1,0 +1,102 @@
+# SPDX-License-Identifier: Apache-2.0
+#+TITLE: Release Flow
+#+AUTHOR: Darwin D. Wu
+#+DATE: 2026-05-24
+#+STATUS: Draft
+#+STARTUP: showall
+
+* Overview
+
+Prepare an ssdb release flow modeled after the release automation in the local
+=inngest= and =atlas= repositories, but adapted to this repository's inherited
+C++ build and package model.
+
+The important difference is artifact shape. =inngest= and =atlas= release
+mostly static Go binaries through GoReleaser. The current inherited ssdb server
+is not set up as a single fully static binary. It is a Linux C++/Seastar server
+with dynamic shared-library dependencies and existing Scylla-derived packaging
+rules.
+
+* Static Binary Assessment
+
+The current build supports only partial static linking flags:
+
+- =--static-stdc++= for libgcc/libstdc++;
+- =--static-boost= for selected Boost/ICU linkage;
+- =--static-yaml-cpp= for yaml-cpp;
+- zstd is already forced through a static linker block.
+
+There is no first-class full-static =scylla= target. The generated linker flags
+explicitly set a dynamic linker path, and
+=scripts/create-relocatable-package.py= shells out to =ldd= to collect shared
+libraries and the loader into a relocatable tarball.
+
+Conclusion: ship the inherited server as Linux release packages and
+relocatable tarballs first. Treat a true static binary as future work, not as a
+blocking release requirement.
+
+* Artifact Strategy
+
+Initial artifacts:
+
+- relocatable server tarball from =ninja dist-server-tar=;
+- Debian packages from =ninja dist-server-deb=;
+- RPM packages from =ninja dist-server-rpm=;
+- multi-arch container images published to GitHub Container Registry;
+- SHA-256 checksums for uploaded artifacts.
+
+Future artifacts:
+
+- APT/YUM repository publishing;
+- SBOM and provenance attestations;
+- statically linked Rust rewrite binaries where a crate can actually support
+  that shape.
+
+* Release Automation
+
+The implemented flow follows the Atlas/Inngest pattern:
+
+1. =auto-release-pr.yml= creates or refreshes =release/next=.
+2. The release PR title is =chore(release): vYYYY-MM-DD.NN=.
+3. =release-tag.yml= tags the merged release PR commit.
+4. =release-artifacts.yaml= builds and publishes tar, Debian, RPM, and GHCR
+   container artifacts for =x86_64= and =aarch64=.
+
+The release tag is date-indexed rather than semver. That avoids implying API or
+storage-format stability while this fork is still in early packaging and
+rewrite work. Package version files still come from =SCYLLA-VERSION-GEN= until
+the inherited product/version metadata is deliberately rebranded.
+
+* Operational Requirements
+
+- Configure a =RELEASE_TOKEN= repository secret backed by a bot token that can
+  push =release/next=, create tags, and dispatch workflows.
+- Keep release PRs going through normal branch protection and CI.
+- Release builds require Linux runners; macOS is intentionally limited to the
+  portable/Rust shell.
+- Release artifact builds are expensive and should use native =x86_64= and
+  =aarch64= runners with ccache enabled.
+- The workflow currently expects =depot-ubuntu-24.04-8= and
+  =depot-ubuntu-24.04-arm-8= runner labels.
+- GHCR publishing requires =packages: write= workflow permission.
+
+* Open Checklist
+
+- [X] Add Make targets for release configuration and package artifact builds.
+- [X] Add date-indexed release PR automation.
+- [X] Add tag automation for merged release PRs.
+- [X] Add release artifact workflow for relocatable tarballs, Debian packages,
+  RPM packages, and checksums.
+- [X] Document why the inherited server should not be treated as a static
+  binary release.
+- [X] Add native =x86_64= and =aarch64= release artifact jobs.
+- [X] Add GHCR container image publishing from generated Debian packages.
+- [X] Set generated product metadata to =ssdb= so release filenames and package
+  names use =ssdb-*=.
+- [ ] Verify =make release-artifacts= on native =x86_64= and =aarch64= Linux
+  runners.
+- [ ] Rebrand inherited service names, systemd units, users, install paths, and
+  runtime configuration paths where doing so is safe.
+- [ ] Add package repository publishing for APT/YUM after package signing is
+  ready.
+- [ ] Add SBOM and provenance attestations after artifact shape stabilizes.

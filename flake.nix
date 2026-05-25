@@ -108,6 +108,7 @@
               pythonEnv
               wabt
               zstd
+              git-cliff
             ]);
 
           shellHook = lib.optionalString pkgs.stdenv.isDarwin ''

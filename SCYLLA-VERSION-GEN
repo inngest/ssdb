@@ -76,8 +76,8 @@ if [ -z "$DATE" ]; then
   DATE=$(date --utc +%Y%m%d)
 fi
 
-# Default scylla product/version tags
-PRODUCT=scylla
+# Default ssdb product/version tags
+PRODUCT=ssdb
 VERSION=6.2.3
 
 if test -f version

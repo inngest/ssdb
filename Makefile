@@ -13,6 +13,12 @@ CPP_TEST_MODE ?= dev
 CPP_TEST_SMOKE ?= boost/UUID_test
 CPP_TEST_SMOKE_ARTIFACTS ?= test/boost/UUID_test
 CPP_TEST_SMOKE_TARGETS ?= build/$(CPP_TEST_MODE)/test/boost/UUID_test
+RELEASE_MODE ?= release
+RELEASE_DATE_STAMP ?=
+RELEASE_CONFIGURE_FLAGS := --mode $(RELEASE_MODE) --with scylla --enable-dist --no-seastar-unused-result-error
+ifneq ($(strip $(RELEASE_DATE_STAMP)),)
+RELEASE_CONFIGURE_FLAGS += --date-stamp $(RELEASE_DATE_STAMP)
+endif
 
 .PHONY: help
 help: ## Show available targets.
@@ -63,6 +69,26 @@ cpp-test-smoke: ## Build and run the focused inherited C++ smoke test binary.
 	$(NIX) develop .#cpp -c ./configure.py --mode $(CPP_TEST_MODE) --with scylla $(addprefix --with ,$(CPP_TEST_SMOKE_ARTIFACTS)) --disable-dpdk --no-seastar-unused-result-error
 	$(NIX) develop .#cpp -c ninja build/$(CPP_TEST_MODE)/scylla $(CPP_TEST_SMOKE_TARGETS)
 	$(NIX) develop .#cpp -c env LD_LIBRARY_PATH="$$PWD/build/$(CPP_TEST_MODE)/seastar$${LD_LIBRARY_PATH:+:$$LD_LIBRARY_PATH}" build/$(CPP_TEST_MODE)/test/boost/UUID_test --report_level=no --catch_system_errors=no --color_output=false -- --overprovisioned --unsafe-bypass-fsync 1 --kernel-page-cache 1 --blocked-reactor-notify-ms 2000000 --collectd 0 --max-networking-io-control-blocks=100
+
+.PHONY: release-configure
+release-configure: ## Configure the inherited Linux release/package build.
+	$(NIX) develop .#cpp -c ./configure.py $(RELEASE_CONFIGURE_FLAGS)
+
+.PHONY: release-server-tar
+release-server-tar: release-configure ## Build the inherited relocatable server tarball.
+	$(NIX) develop .#cpp -c ninja dist-server-tar
+
+.PHONY: release-server-deb
+release-server-deb: release-configure ## Build inherited Debian packages from the relocatable package.
+	$(NIX) develop .#cpp -c ninja dist-server-deb
+
+.PHONY: release-server-rpm
+release-server-rpm: release-configure ## Build inherited RPM packages from the relocatable package.
+	$(NIX) develop .#cpp -c ninja dist-server-rpm
+
+.PHONY: release-artifacts
+release-artifacts: release-configure ## Build release tarball, Debian packages, and RPM packages.
+	$(NIX) develop .#cpp -c ninja dist-server-tar dist-server-deb dist-server-rpm
 
 .PHONY: inventory
 inventory: ## Regenerate relicensing inventory files.
