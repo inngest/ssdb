@@ -72,6 +72,7 @@ commit_parsers = [
     { message = "^refactor", group = "<!-- 2 -->🚜 Refactor" },
     { message = "^style", group = "<!-- 5 -->🎨 Styling" },
     { message = "^test", group = "<!-- 6 -->🧪 Testing" },
+    { message = "^chore\\(release\\): v[0-9]+\\.[0-9]+\\.[0-9]+$", skip = true },
     { message = "^chore\\(release\\): prepare for", skip = true },
     { message = "^chore\\(deps.*\\)", skip = true },
     { message = "^chore\\(pr\\)", skip = true },

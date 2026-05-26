@@ -57,15 +57,15 @@ Future artifacts:
 The implemented flow follows the Atlas/Inngest pattern:
 
 1. =auto-release-pr.yml= creates or refreshes =release/next=.
-2. The release PR title is =chore(release): vYYYY-MM-DD.NN=.
+2. The release PR title is =chore(release): vMAJOR.MINOR.PATCH=.
 3. =release-tag.yml= tags the merged release PR commit.
 4. =release-artifacts.yaml= builds and publishes tar, Debian, RPM, and GHCR
    container artifacts for =x86_64= and =aarch64=.
 
-The release tag is date-indexed rather than semver. That avoids implying API or
-storage-format stability while this fork is still in early packaging and
-rewrite work. Package version files still come from =SCYLLA-VERSION-GEN= until
-the inherited product/version metadata is deliberately rebranded.
+The release tag follows the existing semver history, with =v6.2.3= as the
+current baseline. Package version files come from =SCYLLA-VERSION-GEN=, and the
+generated product metadata is rebranded to =ssdb= for release filenames and
+package names.
 
 * Operational Requirements
 
@@ -83,7 +83,7 @@ the inherited product/version metadata is deliberately rebranded.
 * Open Checklist
 
 - [X] Add Make targets for release configuration and package artifact builds.
-- [X] Add date-indexed release PR automation.
+- [X] Add semver release PR automation.
 - [X] Add tag automation for merged release PRs.
 - [X] Add release artifact workflow for relocatable tarballs, Debian packages,
   RPM packages, and checksums.
