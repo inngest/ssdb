@@ -217,6 +217,8 @@ class MinioServer:
         msgs = []
         for key in self._get_environs():
             value = os.environ[key]
+            if key in (self.ENV_ACCESS_KEY, self.ENV_SECRET_KEY):
+                value = '<redacted>'
             msgs.append(f'export {key}={value}')
         print('\n'.join(msgs))
 
