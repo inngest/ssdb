@@ -4,7 +4,7 @@
 name = "ssdb-python"
 version = "0.0.0"
 description = "Python tooling, test, documentation, and packaging dependencies for ssdb"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
     "aiohttp",
     "boto3",
