@@ -40,6 +40,12 @@ jobs:
           submodules: recursive
       - uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25 # v22
       - uses: DeterminateSystems/magic-nix-cache-action@565684385bcd71bad329742eefe8d12f2e765b39 # v13
+      - name: Patch Seastar context switching for CI glibc
+        run: |
+          # glibc 2.42 aborts on Seastar's cross-stack longjmp path in the
+          # GitHub runner. Use ucontext switching for this CI build instead.
+          perl -0pi -e 's/#else\n    jmp_buf jmpbuf;\n#endif/#else\n    ucontext_t context;\n#endif/' seastar/include/seastar/core/thread_impl.hh
+          perl -0pi -e 's|#else\n\ninline void jmp_buf_link::initial_switch_in\(ucontext_t\* initial_context, const void\*, size_t\)\n\{\n    auto prev = std::exchange\(g_current_context, this\);\n    link = prev;\n    if \(setjmp\(prev->jmpbuf\) == 0\) \{\n        setcontext\(initial_context\);\n    \}\n\}\n\ninline void jmp_buf_link::switch_in\(\)\n\{\n    auto prev = std::exchange\(g_current_context, this\);\n    link = prev;\n    if \(setjmp\(prev->jmpbuf\) == 0\) \{\n        longjmp\(jmpbuf, 1\);\n    \}\n\}\n\ninline void jmp_buf_link::switch_out\(\)\n\{\n    g_current_context = link;\n    if \(setjmp\(jmpbuf\) == 0\) \{\n        longjmp\(g_current_context->jmpbuf, 1\);\n    \}\n\}\n\ninline void jmp_buf_link::initial_switch_in_completed\(\)\n\{\n\}\n\ninline void jmp_buf_link::final_switch_out\(\)\n\{\n    g_current_context = link;\n    longjmp\(g_current_context->jmpbuf, 1\);\n\}\n\n#endif|#else\n\ninline void jmp_buf_link::initial_switch_in(ucontext_t* initial_context, const void*, size_t)\n{\n    auto prev = std::exchange(g_current_context, this);\n    link = prev;\n    swapcontext(&prev->context, initial_context);\n}\n\ninline void jmp_buf_link::switch_in()\n{\n    auto prev = std::exchange(g_current_context, this);\n    link = prev;\n    swapcontext(&prev->context, &context);\n}\n\ninline void jmp_buf_link::switch_out()\n{\n    g_current_context = link;\n    swapcontext(&context, &g_current_context->context);\n}\n\ninline void jmp_buf_link::initial_switch_in_completed()\n{\n}\n\ninline void jmp_buf_link::final_switch_out()\n{\n    g_current_context = link;\n    setcontext(&g_current_context->context);\n}\n\n#endif|s' seastar/src/core/thread.cc
       - name: Restore ccache
         if: ${{ inputs.enable_ccache }}
         uses: actions/cache@v4
