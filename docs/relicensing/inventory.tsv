@@ -1274,7 +1274,6 @@ docs/operating-scylla/system-configuration/snitch.rst	unknown-license				no
 docs/plans/000-rust_rewrite_apache2_relicensing.org	unknown-license		Copyright notices | copyright | copyright and NOTICE obligations are preserved; | copyright attribution from inherited files. Copyright notices are | copyright holders. | copyright holders. The | copyright inventory. | copyright notices and required attribution intact. | copyright notices to make the project look less derived. | copyright notices. | copyright risk. | copyright, license, and attribution notices.		no
 docs/plans/001-cassandra_conformance_suite.org	unknown-license				no
 docs/plans/002-release_flow.org	Apache-only	Apache-2.0			no
-docs/pyproject.toml	unknown-license				no
 docs/reference/_common/enterprise-vs-oss-matrix-link.rst	unknown-license				no
 docs/reference/_common/reference-toc.rst	unknown-license				no
 docs/reference/api-reference.rst	unknown-license				no
@@ -1687,6 +1686,7 @@ partition_slice_builder.hh	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2015-presen
 partition_snapshot_reader.hh	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2017-present ScyllaDB		no
 partition_snapshot_row_cursor.hh	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2017-present ScyllaDB		no
 protocol_server.hh	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2021-present ScyllaDB		no
+pyproject.toml	Apache-only	Apache-2.0			no
 querier.cc	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2018-present ScyllaDB		no
 querier.hh	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2018-present ScyllaDB		no
 query-request.hh	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2015-present ScyllaDB		no
@@ -1850,6 +1850,7 @@ scripts/apply-mail.py	unknown-license				no
 scripts/base36-uuid.py	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2023-present ScyllaDB		no
 scripts/build-help.sh	unknown-license				no
 scripts/check-plan-status.sh	unknown-license				no
+scripts/check-python-env.py	Apache-only	Apache-2.0			no
 scripts/coverage.py	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2021-present ScyllaDB		no
 scripts/cpp-name-format.py	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2019-present ScyllaDB		no
 scripts/create-relocatable-package.py	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2018-present ScyllaDB		no
@@ -5956,6 +5957,7 @@ utils/value_or_reference.hh	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2024-prese
 utils/variant_element.hh	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2021-present ScyllaDB		no
 utils/vle.hh	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2021 ScyllaDB		no
 utils/xx_hasher.hh	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2018-present ScyllaDB		no
+uv.lock	unknown-license				no
 validation.cc	dual-licensed	(AGPL-3.0-or-later and Apache-2.0)	Copyright (C) 2015-present ScyllaDB		no
 validation.hh	dual-licensed	(AGPL-3.0-or-later and Apache-2.0)	Copyright (C) 2015-present ScyllaDB		no
 version.hh	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2015-present ScyllaDB		no
