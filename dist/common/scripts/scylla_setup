@@ -353,16 +353,16 @@ if __name__ == '__main__':
                 cfg = sysconfig_parser(sysconfdir_p() / 'scylla-housekeeping')
                 repo_files = cfg.get('REPO_FILES')
                 for f in glob.glob(repo_files):
-                    os.chmod(f, 0o640)
+                    os.chmod(f, 0o600)
                 with open('/etc/scylla.d/housekeeping.cfg', 'w') as f:
                     f.write('[housekeeping]\ncheck-version: True\n')
-                os.chmod('/etc/scylla.d/housekeeping.cfg', 0o640)
+                os.chmod('/etc/scylla.d/housekeeping.cfg', 0o600)
                 systemd_unit('scylla-housekeeping-daily.timer').unmask()
                 systemd_unit('scylla-housekeeping-restart.timer').unmask()
             else:
                 with open('/etc/scylla.d/housekeeping.cfg', 'w') as f:
                     f.write('[housekeeping]\ncheck-version: False\n')
-                os.chmod('/etc/scylla.d/housekeeping.cfg', 0o640)
+                os.chmod('/etc/scylla.d/housekeeping.cfg', 0o600)
                 hk_daily = systemd_unit('scylla-housekeeping-daily.timer')
                 hk_daily.mask()
                 hk_daily.stop()

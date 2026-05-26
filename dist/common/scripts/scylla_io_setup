@@ -200,5 +200,5 @@ if __name__ == "__main__":
     cpudata = scylla_cpuinfo()
     if not is_developer_mode():
         run_iotune()
-        os.chmod(etcdir() + '/scylla.d/io_properties.yaml', 0o640)
-        os.chmod(etcdir() + '/scylla.d/io.conf', 0o640)
+        os.chmod(etcdir() + '/scylla.d/io_properties.yaml', 0o600)
+        os.chmod(etcdir() + '/scylla.d/io.conf', 0o600)
