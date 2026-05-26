@@ -1,4 +1,11 @@
 find_package(Python3 COMPONENTS QUIET REQUIRED Interpreter)
+find_program(UV_EXECUTABLE uv)
+if(UV_EXECUTABLE)
+  set(SCYLLA_PYTHON_COMMAND
+    ${UV_EXECUTABLE} run --locked --project ${CMAKE_SOURCE_DIR} python)
+else()
+  set(SCYLLA_PYTHON_COMMAND ${Python3_EXECUTABLE})
+endif()
 
 # Create C++ bindings for IDL serializers
 function(compile_idl input)
@@ -16,7 +23,7 @@ function(compile_idl input)
   set(output "${directory}/${basename}.dist.hh")
   add_custom_command(
     OUTPUT ${output}
-    COMMAND ${Python3_EXECUTABLE} ${idl_compiler} --ns ser -f ${input} -o ${output}
+    COMMAND ${SCYLLA_PYTHON_COMMAND} ${idl_compiler} --ns ser -f ${input} -o ${output}
     DEPENDS ${idle_compiler} ${input})
   set(${parsed_args_SOURCES} ${output} PARENT_SCOPE)
 endfunction(compile_idl)
