@@ -15,6 +15,10 @@ on:
         description: 'run a focused inherited test binary after building'
         type: boolean
         default: false
+      regression_suites:
+        description: 'space-separated test.py regression suites to run after building'
+        type: string
+        default: ''
     outputs:
       md5sum:
         description: 'the md5sum for the inherited database executable'
@@ -83,11 +87,24 @@ jobs:
             --blocked-reactor-notify-ms 2000000 \
             --collectd 0 \
             --max-networking-io-control-blocks=100
-      - name: Upload inherited test logs
-        if: ${{ always() && inputs.run_smoke_tests }}
+      - name: Run regression tests
+        if: ${{ inputs.regression_suites != '' }}
+        env:
+          UV_CACHE_DIR: ${{ github.workspace }}/.cache/uv
+          UV_PROJECT_ENVIRONMENT: ${{ github.workspace }}/.venv
+        run: |
+          regression_ld_path="$PWD/build/${{ inputs.build_mode }}/seastar${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+          nix develop .#cpp -c env LD_LIBRARY_PATH="$regression_ld_path" uv run --locked --group test ./test.py \
+            --mode "${{ inputs.build_mode }}" \
+            --jobs 4 \
+            --timeout 3600 \
+            --markers "not veryslow" \
+            ${{ inputs.regression_suites }}
+      - name: Upload test logs
+        if: ${{ always() && (inputs.run_smoke_tests || inputs.regression_suites != '') }}
         uses: actions/upload-artifact@v4
         with:
-          name: inherited-testlog-${{ inputs.build_mode }}
+          name: testlog-${{ inputs.build_mode }}
           path: testlog
           if-no-files-found: ignore
       - id: checksum

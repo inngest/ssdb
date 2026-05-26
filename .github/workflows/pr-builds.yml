@@ -21,6 +21,7 @@ jobs:
     runs-on: depot-ubuntu-24.04
     outputs:
       cpp: ${{ steps.filter.outputs.cpp }}
+      regression: ${{ steps.filter.outputs.regression }}
       rust: ${{ steps.filter.outputs.rust }}
     steps:
       - uses: actions/checkout@v4
@@ -34,11 +35,12 @@ jobs:
   ssdb-build:
     name: Build ssdb
     needs: changes
-    if: needs.changes.outputs.cpp == 'true'
+    if: needs.changes.outputs.cpp == 'true' || needs.changes.outputs.regression == 'true'
     uses: ./.github/workflows/build-ssdb.yaml
     with:
       build_mode: dev
       run_smoke_tests: true
+      regression_suites: ${{ needs.changes.outputs.regression == 'true' && 'cql-pytest alternator rest_api' || '' }}
 
   rust:
     name: Rust checks and tests
