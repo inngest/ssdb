@@ -19,15 +19,16 @@ dependencies = [
     "python-magic",
     "pyudev; sys_platform == 'linux'",
     "pyyaml",
-    "requests",
+    "requests>=2.33.0",
     "scylla-api-client",
     "scylla-driver",
-    "setuptools",
+    "setuptools>=78.1.1",
     "six",
     "tabulate",
     "traceback-with-variables",
     "treelib",
     "unidiff",
+    "urllib3>=2.7.0",
     "urwid",
 ]
 
@@ -40,7 +41,7 @@ test = [
     "redis",
 ]
 docs = [
-    "pygments==2.15.1",
+    "pygments>=2.20.0,<3.0.0",
     "redirects-cli~=0.1.2",
     "sphinx==7.2.6",
     "sphinx-autobuild==2021.3.14",
