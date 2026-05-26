@@ -13,6 +13,8 @@
 
 import requests
 
+from test.alternator.util import alternator_request_verify
+
 # If the request does not have a "Origin" header, the reply should not
 # have any of the CORS headers. We test this for the GET, POST and
 # OPTIONS methods.
@@ -26,7 +28,7 @@ def test_cors_not_used(dynamodb):
         'Access-Control-Allow-Headers']
     url = dynamodb.meta.client._endpoint.host
     for f in [requests.options, requests.get, requests.post]:
-        response = f(url, verify=False)
+        response = f(url, verify=alternator_request_verify(url))
         for h in cors_headers:
             assert not h in response.headers
 
@@ -37,7 +39,7 @@ def test_cors_allow_origin(dynamodb):
     headers = {'Origin': 'http://example.com/'}
     url = dynamodb.meta.client._endpoint.host
     for f in [requests.options, requests.get, requests.post]:
-        response = f(url, headers=headers, verify=False)
+        response = f(url, headers=headers, verify=alternator_request_verify(url))
         assert 'Access-Control-Allow-Origin' in response.headers
         assert response.headers['Access-Control-Allow-Origin'] == '*'
         assert 'Access-Control-Expose-Headers' in response.headers
@@ -60,7 +62,7 @@ def test_cors_allow_requested(dynamodb):
     }
     url = dynamodb.meta.client._endpoint.host
     for f in [requests.options, requests.get, requests.post]:
-        response = f(url, headers=headers, verify=False)
+        response = f(url, headers=headers, verify=alternator_request_verify(url))
         assert 'Access-Control-Allow-Origin' in response.headers
         assert response.headers['Access-Control-Allow-Origin'] == '*'
         assert 'Access-Control-Expose-Headers' in response.headers

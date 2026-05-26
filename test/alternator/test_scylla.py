@@ -10,13 +10,15 @@ import requests
 import json
 import urllib.parse
 
+from test.alternator.util import alternator_request_verify
+
 # Test that the "/localnodes" request works, returning at least the one node.
 # See more elaborate tests for /localnodes, requiring multiple nodes,
 # datacenters, or different configurations, in
 # test_topology_experimental_raft/test_alternator.py
 def test_localnodes(scylla_only, dynamodb):
     url = dynamodb.meta.client._endpoint.host
-    response = requests.get(url + '/localnodes', verify=False)
+    response = requests.get(url + '/localnodes', verify=alternator_request_verify(url + '/localnodes'))
     assert response.ok
     j = json.loads(response.content.decode('utf-8'))
     assert isinstance(j, list)

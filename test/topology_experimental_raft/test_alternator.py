@@ -23,6 +23,7 @@ from botocore.exceptions import ClientError
 import requests
 import json
 from cassandra.auth import PlainTextAuthProvider
+from test.alternator.util import alternator_request_verify
 
 from test.pylib.manager_client import ManagerClient
 from test.pylib.util import wait_for
@@ -219,7 +220,7 @@ async def test_localnodes_broadcast_rpc_address(manager: ManagerClient):
         timeout = time.time() + 60
         while True:
             assert time.time() < timeout
-            response = requests.get(url, verify=False)
+            response = requests.get(url, verify=alternator_request_verify(url))
             j = json.loads(response.content.decode('utf-8'))
             if j == ['1.2.3.4', '1.2.3.4']:
                 break # done

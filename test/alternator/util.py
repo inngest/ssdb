@@ -30,6 +30,10 @@ def random_string(length=10, chars=string.ascii_uppercase + string.digits):
 def random_bytes(length=10):
     return bytearray(global_random.getrandbits(8) for _ in range(length))
 
+def alternator_request_verify(url):
+    # Local HTTPS Alternator tests use self-signed certificates.
+    return not url.startswith('https://')
+
 # Utility functions for scan and query into an array of items, reading
 # the full (possibly requiring multiple requests to read successive pages).
 # For convenience, ConsistentRead=True is used by default, as most tests
