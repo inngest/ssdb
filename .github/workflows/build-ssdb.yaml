@@ -16,7 +16,7 @@ on:
         type: boolean
         default: false
       regression_suites:
-        description: 'space-separated test.py regression suites to run after building'
+        description: 'space-separated test.py regression selectors to run after building'
         type: string
         default: ''
     outputs:
@@ -75,6 +75,11 @@ jobs:
           nix develop .#cpp -c ./configure.py --mode ${{ inputs.build_mode }} "${artifacts[@]}" --no-seastar-unused-result-error
       - run: |
           nix develop .#cpp -c ninja build/${{ inputs.build_mode }}/scylla
+      - name: Prepare regression build artifacts
+        if: ${{ inputs.regression_suites != '' }}
+        run: |
+          nix develop .#cpp -c ninja wasm
+          nix develop .#cpp -c patchelf --add-rpath "$PWD/build/${{ inputs.build_mode }}/seastar" build/${{ inputs.build_mode }}/scylla
       - name: Build inherited smoke tests
         if: ${{ inputs.run_smoke_tests }}
         run: |

@@ -38,6 +38,14 @@
 
         lib = pkgs.lib;
         llvm = pkgs.llvmPackages;
+        wasiRust = pkgs.pkgsCross.wasi32.buildPackages;
+        cargoWasm = pkgs.writeShellScriptBin "cargo-wasm" ''
+          export PATH=${wasiRust.rustc}/bin:${wasiRust.cargo}/bin:"$PATH"
+          exec ${wasiRust.cargo}/bin/cargo "$@"
+        '';
+        clangWasm = pkgs.writeShellScriptBin "clang-wasm" ''
+          exec ${llvm.clang-unwrapped}/bin/clang "$@"
+        '';
 
         antlr3Cpp = pkgs.runCommand "antlr-3.5.2-ssdb" { } ''
           mkdir -p "$out"
@@ -89,6 +97,8 @@
             ++ pythonTools
             ++ (with pkgs; [
               antlr3_4
+              binaryen
+              clangWasm
               file
               git
               jdk11_headless
@@ -139,6 +149,10 @@
                   doxygen
                   rapidxml
                   colordiff
+                  binaryen
+                  cargoWasm
+                  clangWasm
+                  patchelf
                   wabt
                 ];
             }
