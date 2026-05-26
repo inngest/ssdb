@@ -15,7 +15,7 @@ import requests
 import re
 
 from test.pylib.report_plugin import ReportPlugin
-from test.alternator.util import create_test_table, is_aws, scylla_log
+from test.alternator.util import alternator_request_verify, create_test_table, is_aws, scylla_log
 from urllib.parse import urlparse
 from functools import cache
 
@@ -186,7 +186,7 @@ def dynamodb_test_connection(dynamodb, request, optional_rest_api):
         # We want to run a do-nothing DynamoDB command. The health-check
         # URL is the fastest one.
         url = dynamodb.meta.client._endpoint.host
-        response = requests.get(url, verify=False)
+        response = requests.get(url, verify=alternator_request_verify(url))
         assert response.ok
     except:
         pytest.exit(f"Scylla appears to have crashed in test {request.node.parent.name}::{request.node.name}")

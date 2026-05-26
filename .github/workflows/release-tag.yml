@@ -67,13 +67,17 @@ jobs:
 
       - name: Create and push tag
         if: steps.release.outputs.skip == 'false'
+        env:
+          TAG_NAME: ${{ steps.release.outputs.tag_name }}
         run: |
-          git tag "${{ steps.release.outputs.tag_name }}"
-          git push origin "${{ steps.release.outputs.tag_name }}"
+          git tag "${TAG_NAME}"
+          git push origin "${TAG_NAME}"
 
       - name: Dispatch release artifact build
         if: steps.release.outputs.skip == 'false'
+        env:
+          TAG_NAME: ${{ steps.release.outputs.tag_name }}
         run: |
           gh workflow run release-artifacts.yaml \
-            --ref "${{ steps.release.outputs.tag_name }}" \
-            -f release_tag="${{ steps.release.outputs.tag_name }}"
+            --ref "${TAG_NAME}" \
+            -f release_tag="${TAG_NAME}"

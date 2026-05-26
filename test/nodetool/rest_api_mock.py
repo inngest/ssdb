@@ -198,7 +198,7 @@ async def run_server(ip, port):
             except Exception as e:
                 tb = traceback.format_exc()
                 logger.error(f'Exception when executing {handler.__name__}: {e}\n{tb}')
-                return aiohttp.web.Response(status=500, text=str(e))
+                return aiohttp.web.Response(status=500, text="Internal server error")
         return catching_handler
 
     app.router.add_routes([

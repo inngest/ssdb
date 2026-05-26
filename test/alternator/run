@@ -16,10 +16,13 @@ if '--aws' in sys.argv:
     success = run.run_pytest(sys.path[0], sys.argv[1:])
     exit(0 if success else 1)
 
-# check_alternator() below uses verify=False to accept self-signed SSL
+# check_alternator() below accepts self-signed SSL
 # certificates but then we get scary warnings. This trick disables them:
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+def alternator_request_verify(url):
+    return not url.startswith('https://')
 
 print('Scylla is: ' + run.find_scylla() + '.')
 
@@ -89,7 +92,7 @@ else:
 # CQL for setting up authentication.
 def check_alternator(url):
     try:
-        requests.get(url, verify=False)
+        requests.get(url, verify=alternator_request_verify(url))
     except requests.ConnectionError:
         raise run.NotYetUp
     # Any other exception may indicate a problem, and is passed to the caller.

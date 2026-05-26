@@ -10,6 +10,7 @@ import requests
 from botocore.exceptions import ClientError
 
 from test.alternator.test_manual_requests import get_signed_request
+from test.alternator.util import alternator_request_verify
 
 
 # Test that trying to perform an operation signed with a wrong key
@@ -44,7 +45,7 @@ def test_expired_signature(dynamodb, test_table):
                'X-Amz-Target': 'DynamoDB_20120810.DescribeEndpoints',
                'Authorization': 'AWS4-HMAC-SHA256 Credential=cassandra/2/3/4/aws4_request SignedHeaders=x-amz-date;host Signature=123'
     }
-    response = requests.post(url, headers=headers, verify=False)
+    response = requests.post(url, headers=headers, verify=alternator_request_verify(url))
     assert not response.ok
     assert "InvalidSignatureException" in response.text and "Signature expired" in response.text
 
@@ -57,7 +58,7 @@ def test_no_authorization_header(dynamodb, test_table):
                'X-Amz-Date': '20170101T010101Z',
                'X-Amz-Target': 'DynamoDB_20120810.DescribeEndpoints',
     }
-    response = requests.post(url, headers=headers, verify=False)
+    response = requests.post(url, headers=headers, verify=alternator_request_verify(url))
     assert not response.ok
     assert "MissingAuthenticationTokenException" in response.text
 
@@ -71,7 +72,7 @@ def test_signature_too_futuristic(dynamodb, test_table):
                'X-Amz-Target': 'DynamoDB_20120810.DescribeEndpoints',
                'Authorization': 'AWS4-HMAC-SHA256 Credential=cassandra/2/3/4/aws4_request SignedHeaders=x-amz-date;host Signature=123'
     }
-    response = requests.post(url, headers=headers, verify=False)
+    response = requests.post(url, headers=headers, verify=alternator_request_verify(url))
     assert not response.ok
     assert "InvalidSignatureException" in response.text and "Signature not yet current" in response.text
 
@@ -88,5 +89,5 @@ def test_authorization_no_whitespace(dynamodb, test_table):
     # signature algorithm name from the rest) and check the result still works:
     a = req.headers['Authorization'].split()
     req.headers['Authorization'] = a[0] + ' ' + ''.join(a[1:])
-    response = requests.post(req.url, headers=req.headers, data=req.body, verify=False)
+    response = requests.post(req.url, headers=req.headers, data=req.body, verify=alternator_request_verify(req.url))
     assert response.ok

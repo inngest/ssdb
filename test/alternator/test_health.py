@@ -6,10 +6,12 @@
 
 import requests
 
+from test.alternator.util import alternator_request_verify
+
 # Test that a health check can be performed with a GET packet
 def test_health_works(dynamodb):
     url = dynamodb.meta.client._endpoint.host
-    response = requests.get(url, verify=False)
+    response = requests.get(url, verify=alternator_request_verify(url))
     assert response.ok
     assert response.content.decode('utf-8').strip()  == 'healthy: {}'.format(url.replace('https://', '').replace('http://', ''))
 
@@ -18,5 +20,5 @@ def test_health_only_works_for_root_path(dynamodb):
     url = dynamodb.meta.client._endpoint.host
     for suffix in ['/abc', '/-', '/index.htm', '/health']:
         print(url + suffix)
-        response = requests.get(url + suffix, verify=False)
+        response = requests.get(url + suffix, verify=alternator_request_verify(url + suffix))
         assert response.status_code in range(400, 405)

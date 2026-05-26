@@ -106,7 +106,8 @@ pub struct Instance {
 
 fn create_instance(engine: &Engine, module: &Module, store: &mut Store) -> Result<Box<Instance>> {
     let mut linker = wasmtime::Linker::new(&engine.wasmtime_engine);
-    wasmtime_wasi::add_to_linker(&mut linker, |s| s).context("Failed to add wasi to linker")?;
+    wasmtime_wasi::preview1::add_to_linker_async(&mut linker, |s| s)
+        .context("Failed to add wasi to linker")?;
     let wasmtime_module = module
         .wasmtime_module
         .as_ref()
@@ -186,16 +187,14 @@ impl Module {
 }
 
 pub struct Store {
-    wasmtime_store: wasmtime::Store<wasmtime_wasi::WasiCtx>,
+    wasmtime_store: wasmtime::Store<wasmtime_wasi::preview1::WasiP1Ctx>,
 }
 
 fn create_store(engine: &mut Engine, total_fuel: u64, yield_fuel: u64) -> Result<Box<Store>> {
-    let wasi = wasmtime_wasi::WasiCtxBuilder::new().build();
+    let wasi = wasmtime_wasi::WasiCtxBuilder::new().build_p1();
     let mut store = wasmtime::Store::new(&engine.wasmtime_engine, wasi);
-    store.out_of_fuel_async_yield(
-        ((total_fuel + yield_fuel - 1) / yield_fuel) as u64,
-        yield_fuel,
-    );
+    store.set_fuel(total_fuel)?;
+    store.fuel_async_yield_interval(Some(yield_fuel))?;
     Ok(Box::new(Store {
         wasmtime_store: store,
     }))
@@ -333,6 +332,7 @@ impl Val {
             wasmtime::Val::V128(_) => Ok(ffi::ValKind::V128),
             wasmtime::Val::FuncRef(_) => Ok(ffi::ValKind::FuncRef),
             wasmtime::Val::ExternRef(_) => Ok(ffi::ValKind::ExternRef),
+            wasmtime::Val::AnyRef(_) => Err(anyhow!("AnyRef values are not supported")),
         }
     }
     fn i32(&self) -> Result<i32> {

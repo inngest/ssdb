@@ -19,7 +19,7 @@ jobs:
     runs-on: depot-ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - uses: DeterminateSystems/nix-installer-action@v3
+      - uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25 # v22
       - name: Run Phase 1 checks
         run: nix develop .#portable -c make phase1-check
       - name: Show relicensing status

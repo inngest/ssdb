@@ -32,7 +32,7 @@ import requests
 from botocore.exceptions import ClientError
 
 from test.alternator.test_manual_requests import get_signed_request
-from test.alternator.util import random_string, new_test_table, is_aws
+from test.alternator.util import alternator_request_verify, random_string, new_test_table, is_aws
 
 
 # Fixture for checking if we are able to test Scylla metrics. Scylla metrics
@@ -316,7 +316,7 @@ def test_streams_latency(dynamodb, dynamodbstreams, metrics):
 def test_unsupported_operation(dynamodb, metrics):
     with check_increases_metric(metrics, ['scylla_alternator_unsupported_operations', 'scylla_alternator_total_operations']):
         req = get_signed_request(dynamodb, 'BoguousOperationName', '{}')
-        requests.post(req.url, headers=req.headers, data=req.body, verify=False)
+        requests.post(req.url, headers=req.headers, data=req.body, verify=alternator_request_verify(req.url))
 
 # Test that also supported operations (such as DescribeEndPoints in this
 # example) increment the total_operations metric:

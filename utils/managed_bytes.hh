@@ -245,16 +245,11 @@ public:
             auto first = new (p) multi_chunk_blob_storage(&_u.multi_chunk_ref, size, now);
             auto last = first;
             size -= now;
-            try {
-                while (size) {
-                    auto now = std::min(size_t(size), maxseg);
-                    void* p = alctr.alloc<multi_chunk_blob_storage>(sizeof(multi_chunk_blob_storage) + now);
-                    last = new (p) multi_chunk_blob_storage(&last->next, 0, now);
-                    size -= now;
-                }
-            } catch (...) {
-                free_chain(first);
-                throw;
+            while (size) {
+                auto now = std::min(size_t(size), maxseg);
+                void* p = alctr.alloc<multi_chunk_blob_storage>(sizeof(multi_chunk_blob_storage) + now);
+                last = new (p) multi_chunk_blob_storage(&last->next, 0, now);
+                size -= now;
             }
           }
         }

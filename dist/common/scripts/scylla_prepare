@@ -115,7 +115,7 @@ def create_perftune_conf(cfg):
         yaml = out('/opt/scylladb/scripts/perftune.py ' + params)
         with open('/etc/scylla.d/perftune.yaml', 'w') as f:
             f.write(yaml)
-        os.chmod('/etc/scylla.d/perftune.yaml', 0o644)
+        os.chmod('/etc/scylla.d/perftune.yaml', 0o600)
         return True
     else:
         return False
