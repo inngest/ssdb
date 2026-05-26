@@ -5491,6 +5491,34 @@ test/resource/wasm/rust/test_complex_null_values.rs	unknown-license				no
 test/resource/wasm/rust/test_functions_with_frozen_types.rs	unknown-license				no
 test/resource/wasm/rust/test_short_ints.rs	unknown-license				no
 test/resource/wasm/rust/test_types_with_and_without_nulls.rs	unknown-license				no
+test/resource/wasm/rust/vendor/scylla-cql/Cargo.toml	unknown-license			generated	no
+test/resource/wasm/rust/vendor/scylla-cql/README.md	unknown-license				no
+test/resource/wasm/rust/vendor/scylla-cql/src/errors.rs	unknown-license				no
+test/resource/wasm/rust/vendor/scylla-cql/src/frame/frame_errors.rs	unknown-license				no
+test/resource/wasm/rust/vendor/scylla-cql/src/frame/mod.rs	unknown-license				no
+test/resource/wasm/rust/vendor/scylla-cql/src/frame/protocol_features.rs	unknown-license				no
+test/resource/wasm/rust/vendor/scylla-cql/src/frame/request/auth_response.rs	unknown-license				no
+test/resource/wasm/rust/vendor/scylla-cql/src/frame/request/batch.rs	unknown-license				no
+test/resource/wasm/rust/vendor/scylla-cql/src/frame/request/execute.rs	unknown-license				no
+test/resource/wasm/rust/vendor/scylla-cql/src/frame/request/mod.rs	unknown-license				no
+test/resource/wasm/rust/vendor/scylla-cql/src/frame/request/options.rs	unknown-license				no
+test/resource/wasm/rust/vendor/scylla-cql/src/frame/request/prepare.rs	unknown-license				no
+test/resource/wasm/rust/vendor/scylla-cql/src/frame/request/query.rs	unknown-license				no
+test/resource/wasm/rust/vendor/scylla-cql/src/frame/request/register.rs	unknown-license				no
+test/resource/wasm/rust/vendor/scylla-cql/src/frame/request/startup.rs	unknown-license				no
+test/resource/wasm/rust/vendor/scylla-cql/src/frame/response/authenticate.rs	unknown-license				no
+test/resource/wasm/rust/vendor/scylla-cql/src/frame/response/cql_to_rust.rs	unknown-license				no
+test/resource/wasm/rust/vendor/scylla-cql/src/frame/response/error.rs	unknown-license				no
+test/resource/wasm/rust/vendor/scylla-cql/src/frame/response/event.rs	unknown-license				no
+test/resource/wasm/rust/vendor/scylla-cql/src/frame/response/mod.rs	unknown-license				no
+test/resource/wasm/rust/vendor/scylla-cql/src/frame/response/result.rs	unknown-license				no
+test/resource/wasm/rust/vendor/scylla-cql/src/frame/response/supported.rs	unknown-license				no
+test/resource/wasm/rust/vendor/scylla-cql/src/frame/server_event_type.rs	unknown-license				no
+test/resource/wasm/rust/vendor/scylla-cql/src/frame/types.rs	unknown-license				no
+test/resource/wasm/rust/vendor/scylla-cql/src/frame/value.rs	unknown-license				no
+test/resource/wasm/rust/vendor/scylla-cql/src/frame/value_tests.rs	unknown-license				no
+test/resource/wasm/rust/vendor/scylla-cql/src/lib.rs	unknown-license				no
+test/resource/wasm/rust/vendor/scylla-cql/src/macros.rs	unknown-license				no
 test/rest_api/README.md	unknown-license				no
 test/rest_api/__init__.py	unknown-license				no
 test/rest_api/conftest.py	AGPL-only	AGPL-3.0-or-later	Copyright 2021-present ScyllaDB		no
