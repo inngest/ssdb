@@ -90,6 +90,7 @@ in derive ({
     cargo
     cmake
     cxx-rs
+    file
     gcc
     openjdk11_headless
     libtool
@@ -98,24 +99,8 @@ in derive ({
     ninja
     pkg-config
     python2
-    (python3.withPackages (ps: with ps; [
-      aiohttp
-      boto3
-      colorama
-      distro
-      magic
-      psutil
-      pyparsing
-      pytest
-      pytest-asyncio
-      pyudev
-      pyyaml
-      requests
-      scylla-driver
-      setuptools
-      tabulate
-      urwid
-    ]))
+    python3
+    uv
     ragel
     rustc
     stow

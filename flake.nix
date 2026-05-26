@@ -55,23 +55,10 @@
           fi
         '';
 
-        pythonEnv = pkgs.python3.withPackages (
-          ps: with ps; [
-            aiohttp
-            boto3
-            colorama
-            distro
-            psutil
-            pyparsing
-            pytest
-            pytest-asyncio
-            pyyaml
-            requests
-            setuptools
-            tabulate
-            urwid
-          ]
-        );
+        pythonTools = with pkgs; [
+          python3
+          uv
+        ];
 
         rustTools = with pkgs; [
           cargo
@@ -99,13 +86,14 @@
           packages =
             cppTools
             ++ rustTools
+            ++ pythonTools
             ++ (with pkgs; [
               antlr3_4
+              file
               git
               jdk11_headless
               lz4
               protobuf
-              pythonEnv
               wabt
               zstd
               git-cliff
@@ -186,15 +174,16 @@
         rustDevShell = pkgs.mkShell {
           packages =
             rustTools
+            ++ pythonTools
             ++ (with pkgs; [
               cmake
               ccache
+              file
               git
               llvm.clang
               ninja
               openssl
               pkg-config
-              pythonEnv
             ]);
 
           shellHook = ''

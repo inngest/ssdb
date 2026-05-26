@@ -3,7 +3,11 @@
 .DEFAULT_GOAL := help
 
 NIX ?= nix
-PYTHON ?= python3
+UV ?= uv
+UV_CACHE_DIR ?= .cache/uv
+PYTHON ?= $(UV) run python
+PYTEST ?= $(UV) run pytest
+export UV_CACHE_DIR
 MAKEFLAGS += --no-builtin-rules
 
 INVENTORY_GENERATOR := docs/relicensing/generate-inventory.py
@@ -60,19 +64,31 @@ rust-fmt: ## Format Rust code in the current Rust workspace.
 rust-fmt-check: ## Check Rust formatting in the current Rust workspace.
 	$(NIX) develop .#rust -c cargo fmt --check --manifest-path $(RUST_MANIFEST)
 
+.PHONY: python-sync
+python-sync: ## Synchronize the uv-managed Python environment.
+	$(UV) sync --all-groups
+
+.PHONY: python-check
+python-check: ## Verify uv-managed Python imports and entry-point syntax.
+	$(UV) run python scripts/check-python-env.py
+
+.PHONY: python-test-smoke
+python-test-smoke: ## Run a small pytest suite through uv.
+	$(PYTEST) test/pylib_test
+
 .PHONY: cpp-configure
 cpp-configure: ## Configure the inherited C++ build inside the Linux C++ shell.
-	$(NIX) develop .#cpp -c ./configure.py --mode dev --with scylla --disable-dpdk
+	$(NIX) develop .#cpp -c $(UV) run ./configure.py --mode dev --with scylla --disable-dpdk
 
 .PHONY: cpp-test-smoke
 cpp-test-smoke: ## Build and run the focused inherited C++ smoke test binary.
-	$(NIX) develop .#cpp -c ./configure.py --mode $(CPP_TEST_MODE) --with scylla $(addprefix --with ,$(CPP_TEST_SMOKE_ARTIFACTS)) --disable-dpdk --no-seastar-unused-result-error
+	$(NIX) develop .#cpp -c $(UV) run ./configure.py --mode $(CPP_TEST_MODE) --with scylla $(addprefix --with ,$(CPP_TEST_SMOKE_ARTIFACTS)) --disable-dpdk --no-seastar-unused-result-error
 	$(NIX) develop .#cpp -c ninja build/$(CPP_TEST_MODE)/scylla $(CPP_TEST_SMOKE_TARGETS)
 	$(NIX) develop .#cpp -c env LD_LIBRARY_PATH="$$PWD/build/$(CPP_TEST_MODE)/seastar$${LD_LIBRARY_PATH:+:$$LD_LIBRARY_PATH}" build/$(CPP_TEST_MODE)/test/boost/UUID_test --report_level=no --catch_system_errors=no --color_output=false -- --overprovisioned --unsafe-bypass-fsync 1 --kernel-page-cache 1 --blocked-reactor-notify-ms 2000000 --collectd 0 --max-networking-io-control-blocks=100
 
 .PHONY: release-configure
 release-configure: ## Configure the inherited Linux release/package build.
-	$(NIX) develop .#cpp -c ./configure.py $(RELEASE_CONFIGURE_FLAGS)
+	$(NIX) develop .#cpp -c $(UV) run ./configure.py $(RELEASE_CONFIGURE_FLAGS)
 
 .PHONY: release-server-tar
 release-server-tar: release-configure ## Build the inherited relocatable server tarball.

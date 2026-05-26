@@ -733,8 +733,8 @@ arg_parser.add_argument('--tests-debuginfo', action='store', dest='tests_debugin
                         help='Enable(1)/disable(0)compiler debug information generation for tests')
 arg_parser.add_argument('--perf-tests-debuginfo', action='store', dest='perf_tests_debuginfo', type=int, default=0,
                         help='Enable(1)/disable(0)compiler debug information generation for perf tests')
-arg_parser.add_argument('--python', action='store', dest='python', default='python3',
-                        help='Python3 path')
+arg_parser.add_argument('--python', action='store', dest='python', default='uv run --locked --project . python',
+                        help='Python3 command')
 arg_parser.add_argument('--split-dwarf', dest='split_dwarf', action='store_true', default=False,
                         help='use of split dwarf (https://gcc.gnu.org/wiki/DebugFission) to speed up linking')
 arg_parser.add_argument('--enable-alloc-failure-injector', dest='alloc_failure_injector', action='store_true', default=False,
