@@ -216,10 +216,10 @@ class MinioServer:
     def print_environ(self):
         msgs = []
         for key in self._get_environs():
-            value = os.environ[key]
             if key in (self.ENV_ACCESS_KEY, self.ENV_SECRET_KEY):
-                value = '<redacted>'
-            msgs.append(f'export {key}={value}')
+                msgs.append(f'export {key}=<redacted>')
+            else:
+                msgs.append(f'export {key}={os.environ[key]}')
         print('\n'.join(msgs))
 
     async def start(self):
