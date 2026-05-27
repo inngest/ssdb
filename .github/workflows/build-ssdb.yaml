@@ -118,6 +118,7 @@ jobs:
         env:
           UV_CACHE_DIR: ${{ github.workspace }}/.cache/uv
           UV_PROJECT_ENVIRONMENT: ${{ github.workspace }}/.venv
+          SSDB_TEST_DISABLE_UNSHARE: "1"
         run: |
           regression_ld_path="$PWD/build/${{ inputs.build_mode }}/seastar${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
           nix develop .#cpp -c env LD_LIBRARY_PATH="$regression_ld_path" uv run --locked --group test ./test.py \
