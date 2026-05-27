@@ -1098,7 +1098,8 @@ class ToolTest(Test):
     def _launcher(self) -> str:
         launcher = self.suite.cfg.get("launcher", "pytest")
         if os.getenv("SSDB_TEST_DISABLE_UNSHARE") == "1" and launcher.startswith("unshare -rn "):
-            return launcher.removeprefix("unshare -rn ")
+            launcher = launcher.removeprefix("unshare -rn ")
+            return launcher.replace(" --run-within-unshare", "")
         return launcher
 
     def _prepare_pytest_params(self, options: argparse.Namespace):

@@ -164,7 +164,8 @@ class ManagerClient():
             log_file = await self.server_open_log(server_id=server.server_id)
             shutil.copyfile(log_file.file, failed_test_path_dir / f"{pathlib.Path(log_file.file).name}")
         for name, log in logs.items():
-            shutil.copyfile(log, failed_test_path_dir / name)
+            if log.exists():
+                shutil.copyfile(log, failed_test_path_dir / name)
 
     async def is_manager_up(self) -> bool:
         """Check if Manager server is up"""
