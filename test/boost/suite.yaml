@@ -51,3 +51,5 @@ run_in_debug:
 skip_in_dev:
     # https://github.com/inngest/ssdb/issues/9
     - logalloc_test
+    # https://github.com/inngest/ssdb/issues/12
+    - cache_algorithm_test::test_index_is_cached_in_big_partition_workload

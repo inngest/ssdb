@@ -359,6 +359,9 @@ class BoostTestSuite(UnitTestSuite):
     def __init__(self, path, cfg: dict, options: argparse.Namespace, mode) -> None:
         super().__init__(path, cfg, options, mode)
 
+    def is_disabled_case(self, shortname: str, casename: str) -> bool:
+        return f"{shortname}::{casename}" in self.disabled_tests
+
     async def create_test(self, shortname: str, casename: str, suite, args) -> None:
         exe = path_to(suite.mode, "test", suite.name, shortname)
         if not os.access(exe, os.X_OK):
@@ -392,13 +395,19 @@ class BoostTestSuite(UnitTestSuite):
 
             case_list = self._case_cache[fqname]
             if len(case_list) == 1:
+                if self.is_disabled_case(shortname, case_list[0]):
+                    return
                 test = BoostTest(self.next_id((shortname, self.suite_key)), shortname, suite, args, None, allows_compaction_groups)
                 self.tests.append(test)
             else:
                 for case in case_list:
+                    if self.is_disabled_case(shortname, case):
+                        continue
                     test = BoostTest(self.next_id((shortname, self.suite_key, case)), shortname, suite, args, case, allows_compaction_groups)
                     self.tests.append(test)
         else:
+            if casename is not None and self.is_disabled_case(shortname, casename):
+                return
             test = BoostTest(self.next_id((shortname, self.suite_key)), shortname, suite, args, casename, allows_compaction_groups)
             self.tests.append(test)
 
