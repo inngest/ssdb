@@ -2674,6 +2674,7 @@ test/pylib_test/__init__.py	unknown-license				no
 test/pylib_test/pytest.ini	unknown-license				no
 test/pylib_test/run	unknown-license				no
 test/pylib_test/suite.yaml	unknown-license				no
+test/pylib_test/test_host_registry.py	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2026-present Inngest, Inc.		no
 test/pylib_test/test_util.py	unknown-license				no
 test/raft/CMakeLists.txt	unknown-license				no
 test/raft/discovery_test.cc	AGPL-only	AGPL-3.0-or-later	Copyright (C) 2021-present ScyllaDB		no

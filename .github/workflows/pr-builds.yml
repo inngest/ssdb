@@ -21,6 +21,7 @@ jobs:
     runs-on: depot-ubuntu-24.04
     outputs:
       cpp: ${{ steps.filter.outputs.cpp }}
+      regression: ${{ steps.filter.outputs.regression }}
       rust: ${{ steps.filter.outputs.rust }}
     steps:
       - uses: actions/checkout@v4
@@ -34,11 +35,13 @@ jobs:
   ssdb-build:
     name: Build ssdb
     needs: changes
-    if: needs.changes.outputs.cpp == 'true'
+    if: needs.changes.outputs.cpp == 'true' || needs.changes.outputs.regression == 'true'
     uses: ./.github/workflows/build-ssdb.yaml
     with:
       build_mode: dev
       run_smoke_tests: true
+      # scylla_gdb is release-only and topology_random_failures is debug-only in their suite manifests.
+      regression_suites: ${{ needs.changes.outputs.regression == 'true' && 'alternator/ auth_cluster/ boost/ broadcast_tables/ cql/ cql-pytest/ nodetool/ object_store/ pylib_test/ raft/ rest_api/ topology/ topology_custom/ topology_experimental_raft/ topology_tasks/ unit/' || '' }}
 
   rust:
     name: Rust checks and tests

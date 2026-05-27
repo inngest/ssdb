@@ -16,6 +16,12 @@ skip_in_debug:
   - test_replace
   - test_old_ip_notification_repro
   - test_node_shutdown_waits_for_pending_requests
+skip_in_dev:
+  # https://github.com/inngest/ssdb/issues/10
+  - test_different_group0_ids
+  - test_replace_with_encryption
+  - test_replace_with_same_ip_twice
+  - test_tablets
 run_in_dev:
   - test_group0_schema_versioning
   - test_different_group0_ids

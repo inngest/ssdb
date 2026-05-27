@@ -229,6 +229,7 @@ class MinioServer:
 
         self.log_file = self.log_filename.open("wb")
         os.mkdir(self.rootdir)
+        os.mkdir(self.mcdir)
 
         retries = 42  # just retry a fixed number of times
         for port in self._get_local_ports(retries):
@@ -249,9 +250,9 @@ class MinioServer:
         try:
             alias = 'local'
             self.log_to_file(f'Configuring access to {self.address}:{self.port}')
-            await self.mc('config', 'host', 'rm', alias, ignore_failure=True)
+            await self.mc('alias', 'remove', alias, ignore_failure=True)
             # wait for the server to be ready when running the first command which should not fail
-            await self.mc('config', 'host', 'add', alias, f'http://{self.address}:{self.port}', self.default_user, self.default_pass, timeout=30)
+            await self.mc('alias', 'set', alias, f'http://{self.address}:{self.port}', self.default_user, self.default_pass, timeout=30)
             self.log_to_file(f'Creating user with key {self.access_key}')
             await self.mc('admin', 'user', 'add', alias, self.access_key, self.secret_key)
             self.log_to_file(f'Configuring bucket {self.bucket_name}')

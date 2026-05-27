@@ -47,7 +47,7 @@ def test_fib(cql, test_keyspace, table1, scylla_with_wasm_only):
   (func ${fib_name} (param $n i64) (result i64)
     (if
       (i64.lt_s (local.get $n) (i64.const 2))
-      (return (local.get $n))
+      (then (return (local.get $n)))
     )
     (i64.add
       (call ${fib_name} (i64.sub (local.get $n) (i64.const 1)))
@@ -134,7 +134,6 @@ def test_infinite_loop(cql, test_keyspace, table1, scylla_with_wasm_only):
       br 0 (;@1;)
     end)
   (table (;0;) 1 1 funcref)
-  (table (;1;) 32 externref)
   (memory (;0;) 17)
   (export "memory" (memory 0))
   (export "{inf_loop_name}" (func ${inf_loop_name}))
@@ -165,7 +164,6 @@ def test_f64_param(cql, test_keyspace, table1, scylla_with_wasm_only):
     f64.const -0x1p+0 (;=-1;)
     f64.add)
   (table (;0;) 1 1 funcref)
-  (table (;1;) 32 externref)
   (memory (;0;) 17)
   (export "memory" (memory 0))
   (export "{dec_double_name}" (func ${dec_double_name}))
@@ -192,7 +190,6 @@ def test_f32_param(cql, test_keyspace, table1, scylla_with_wasm_only):
     f32.const 0x1p+0 (;=1;)
     f32.add)
   (table (;0;) 1 1 funcref)
-  (table (;1;) 32 externref)
   (memory (;0;) 17)
   (export "memory" (memory 0))
   (export "{inc_float_name}" (func ${inc_float_name}))
@@ -218,7 +215,6 @@ def test_bool_negate(cql, test_keyspace, table1, scylla_with_wasm_only):
     local.get 0
     i32.eqz)
   (table (;0;) 1 1 funcref)
-  (table (;1;) 32 externref)
   (memory (;0;) 17)
   (export "memory" (memory 0))
   (export "{negate_name}" (func ${negate_name}))
@@ -249,7 +245,6 @@ def test_short_ints(cql, test_keyspace, table1, scylla_with_wasm_only):
     local.get 0
     i32.add)
   (table (;0;) 1 1 funcref)
-  (table (;1;) 32 externref)
   (memory (;0;) 17)
   (export "memory" (memory 0))
   (export "{plus_name}" (func ${plus_name}))
@@ -343,7 +338,6 @@ def test_9_params(cql, test_keyspace, table1, scylla_with_wasm_only):
     local.get 8
     i32.add)
   (table (;0;) 1 1 funcref)
-  (table (;1;) 32 externref)
   (memory (;0;) 17)
   (export "memory" (memory 0))
   (export "{sum9_name}" (func ${sum9_name}))
@@ -392,7 +386,6 @@ def test_not_exported(cql, test_keyspace, table1, scylla_with_wasm_only):
     f32.const 0x1p+0 (;=1;)
     f32.add)
   (table (;0;) 1 1 funcref)
-  (table (;1;) 32 externref)
   (memory (;0;) 17)
   (elem (;0;) (i32.const 0) func))
 """
@@ -411,7 +404,6 @@ def test_not_a_function(cql, test_keyspace, table1, scylla_with_wasm_only):
     f32.const 0x1p+0 (;=1;)
     f32.add)
   (table (;0;) 1 1 funcref)
-  (table (;1;) 32 externref)
   (memory (;0;) 17)
   (global (;0;) (mut i32) (i32.const 1048576))
   (global (;1;) i32 (i32.const 1024))
@@ -436,7 +428,6 @@ def test_validate_params(cql, test_keyspace, table1, scylla_with_wasm_only):
     f32.const 0x1p+0 (;=1;)
     f32.add)
   (table (;0;) 1 1 funcref)
-  (table (;1;) 32 externref)
   (memory (;0;) 17)
   (global (;0;) i32 (i32.const 1024))
   (export "memory" (memory 0))

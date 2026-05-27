@@ -15,6 +15,10 @@ on:
         description: 'run a focused inherited test binary after building'
         type: boolean
         default: false
+      regression_suites:
+        description: 'space-separated test.py regression selectors to run after building'
+        type: string
+        default: ''
     outputs:
       md5sum:
         description: 'the md5sum for the inherited database executable'
@@ -22,6 +26,7 @@ on:
 
 jobs:
   build:
+    name: Build
     runs-on: depot-ubuntu-24.04-8
     env:
       CCACHE_MAXSIZE: 5G
@@ -36,6 +41,12 @@ jobs:
           submodules: recursive
       - uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25 # v22
       - uses: DeterminateSystems/magic-nix-cache-action@565684385bcd71bad329742eefe8d12f2e765b39 # v13
+      - name: Patch Seastar context switching for CI glibc
+        run: |
+          # glibc 2.42 aborts on Seastar's cross-stack longjmp path in the
+          # GitHub runner. Use ucontext switching for this CI build instead.
+          perl -0pi -e 's/#else\n    jmp_buf jmpbuf;\n#endif/#else\n    ucontext_t context;\n#endif/' seastar/include/seastar/core/thread_impl.hh
+          perl -0pi -e 's|#else\n\ninline void jmp_buf_link::initial_switch_in\(ucontext_t\* initial_context, const void\*, size_t\)\n\{\n    auto prev = std::exchange\(g_current_context, this\);\n    link = prev;\n    if \(setjmp\(prev->jmpbuf\) == 0\) \{\n        setcontext\(initial_context\);\n    \}\n\}\n\ninline void jmp_buf_link::switch_in\(\)\n\{\n    auto prev = std::exchange\(g_current_context, this\);\n    link = prev;\n    if \(setjmp\(prev->jmpbuf\) == 0\) \{\n        longjmp\(jmpbuf, 1\);\n    \}\n\}\n\ninline void jmp_buf_link::switch_out\(\)\n\{\n    g_current_context = link;\n    if \(setjmp\(jmpbuf\) == 0\) \{\n        longjmp\(g_current_context->jmpbuf, 1\);\n    \}\n\}\n\ninline void jmp_buf_link::initial_switch_in_completed\(\)\n\{\n\}\n\ninline void jmp_buf_link::final_switch_out\(\)\n\{\n    g_current_context = link;\n    longjmp\(g_current_context->jmpbuf, 1\);\n\}\n\n#endif|#else\n\ninline void jmp_buf_link::initial_switch_in(ucontext_t* initial_context, const void*, size_t)\n{\n    auto prev = std::exchange(g_current_context, this);\n    link = prev;\n    swapcontext(&prev->context, initial_context);\n}\n\ninline void jmp_buf_link::switch_in()\n{\n    auto prev = std::exchange(g_current_context, this);\n    link = prev;\n    swapcontext(&prev->context, &context);\n}\n\ninline void jmp_buf_link::switch_out()\n{\n    g_current_context = link;\n    swapcontext(&context, &g_current_context->context);\n}\n\ninline void jmp_buf_link::initial_switch_in_completed()\n{\n}\n\ninline void jmp_buf_link::final_switch_out()\n{\n    g_current_context = link;\n    setcontext(&g_current_context->context);\n}\n\n#endif|s' seastar/src/core/thread.cc
       - name: Restore ccache
         if: ${{ inputs.enable_ccache }}
         uses: actions/cache@v4
@@ -61,16 +72,83 @@ jobs:
           if [ "${{ inputs.run_smoke_tests }}" = "true" ]; then
             artifacts+=(--with test/boost/UUID_test)
           fi
+          if [ "${{ inputs.regression_suites }}" != "" ]; then
+            while IFS= read -r artifact; do
+              artifacts+=(--with "$artifact")
+            done < <(
+              find test/boost test/raft test/unit -maxdepth 1 -type f -name '*_test.cc' \
+                | sed 's|\.cc$||' \
+                | sort
+            )
+          fi
           # The .#cpp shell's compiler wrappers use ccache when CCACHE_DIR is set.
           nix develop .#cpp -c ./configure.py --mode ${{ inputs.build_mode }} "${artifacts[@]}" --no-seastar-unused-result-error
       - run: |
           nix develop .#cpp -c ninja build/${{ inputs.build_mode }}/scylla
+      - name: Prepare regression build artifacts
+        if: ${{ inputs.regression_suites != '' }}
+        run: |
+          nix develop .#cpp -c ninja wasm
+          mapfile -t cxx_test_targets < <(
+            find test/boost test/raft test/unit -maxdepth 1 -type f -name '*_test.cc' \
+              | sed 's|\.cc$||; s|^|build/${{ inputs.build_mode }}/|' \
+              | sort
+          )
+          nix develop .#cpp -c ninja "${cxx_test_targets[@]}"
+          nix develop .#cpp -c patchelf --add-rpath "$PWD/build/${{ inputs.build_mode }}/seastar" build/${{ inputs.build_mode }}/scylla
       - name: Build inherited smoke tests
         if: ${{ inputs.run_smoke_tests }}
         run: |
           nix develop .#cpp -c ninja build/${{ inputs.build_mode }}/test/boost/UUID_test
+      - name: Pack build artifacts
+        if: ${{ inputs.run_smoke_tests || inputs.regression_suites != '' }}
+        run: |
+          mkdir -p ci-artifacts
+          tar \
+            --exclude='*.o' \
+            --exclude='*.a' \
+            --exclude='*.d' \
+            --zstd \
+            -cf ci-artifacts/ssdb-build-${{ inputs.build_mode }}.tar.zst \
+            build \
+            build.ninja
+      - name: Upload build artifacts
+        if: ${{ inputs.run_smoke_tests || inputs.regression_suites != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ssdb-build-${{ inputs.build_mode }}
+          path: ci-artifacts/ssdb-build-${{ inputs.build_mode }}.tar.zst
+          if-no-files-found: error
+          retention-days: 1
+      - id: checksum
+        run: |
+          checksum=$(md5sum build/${{ inputs.build_mode }}/scylla | cut -c -32)
+          echo "md5sum=$checksum" >> $GITHUB_OUTPUT
+      - name: Show ccache stats
+        if: ${{ always() && inputs.enable_ccache }}
+        run: |
+          nix develop .#cpp -c ccache --show-stats
+
+  smoke-tests:
+    name: Smoke tests
+    needs: build
+    if: ${{ inputs.run_smoke_tests }}
+    runs-on: depot-ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25 # v22
+      - uses: DeterminateSystems/magic-nix-cache-action@565684385bcd71bad329742eefe8d12f2e765b39 # v13
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ssdb-build-${{ inputs.build_mode }}
+          path: ci-artifacts
+      - name: Unpack build artifacts
+        run: |
+          tar --zstd -xf ci-artifacts/ssdb-build-${{ inputs.build_mode }}.tar.zst
       - name: Run inherited smoke tests
-        if: ${{ inputs.run_smoke_tests }}
         run: |
           nix develop .#cpp -c env LD_LIBRARY_PATH="$PWD/build/${{ inputs.build_mode }}/seastar${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" build/${{ inputs.build_mode }}/test/boost/UUID_test \
             --report_level=no \
@@ -83,18 +161,90 @@ jobs:
             --blocked-reactor-notify-ms 2000000 \
             --collectd 0 \
             --max-networking-io-control-blocks=100
-      - name: Upload inherited test logs
-        if: ${{ always() && inputs.run_smoke_tests }}
+
+  regression-tests:
+    name: Regression tests (${{ matrix.name }})
+    needs: build
+    if: ${{ inputs.regression_suites != '' }}
+    runs-on: depot-ubuntu-24.04-8
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: alternator
+            selector: alternator/
+          - name: auth-cluster
+            selector: auth_cluster/
+          - name: boost
+            selector: boost/
+          - name: broadcast-tables
+            selector: broadcast_tables/
+          - name: cql
+            selector: cql/
+          - name: cql-pytest
+            selector: cql-pytest/
+          - name: nodetool
+            selector: nodetool/
+          - name: object-store
+            selector: object_store/
+          - name: pylib-test
+            selector: pylib_test/
+          - name: raft
+            selector: raft/
+          - name: rest-api
+            selector: rest_api/
+          - name: scylla-gdb
+            selector: scylla_gdb/
+          - name: topology
+            selector: topology/
+          - name: topology-custom
+            selector: topology_custom/
+          - name: topology-experimental-raft
+            selector: topology_experimental_raft/
+          - name: topology-random-failures
+            selector: topology_random_failures/
+          - name: topology-tasks
+            selector: topology_tasks/
+          - name: unit
+            selector: unit/
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25 # v22
+      - uses: DeterminateSystems/magic-nix-cache-action@565684385bcd71bad329742eefe8d12f2e765b39 # v13
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ssdb-build-${{ inputs.build_mode }}
+          path: ci-artifacts
+      - name: Unpack build artifacts
+        run: |
+          tar --zstd -xf ci-artifacts/ssdb-build-${{ inputs.build_mode }}.tar.zst
+      - name: Install MinIO server
+        if: ${{ matrix.selector == 'boost/' || matrix.selector == 'object_store/' }}
+        run: |
+          mkdir -p ci-tools
+          curl -fsSL -o ci-tools/minio https://dl.min.io/server/minio/release/linux-amd64/minio
+          chmod +x ci-tools/minio
+      - name: Run regression tests
+        if: ${{ contains(format(' {0} ', inputs.regression_suites), format(' {0} ', matrix.selector)) }}
+        env:
+          UV_CACHE_DIR: ${{ github.workspace }}/.cache/uv
+          UV_PROJECT_ENVIRONMENT: ${{ github.workspace }}/.venv
+          SSDB_TEST_DISABLE_UNSHARE: "1"
+        run: |
+          regression_ld_path="$PWD/build/${{ inputs.build_mode }}/seastar${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+          nix develop .#cpp -c bash -c 'export PATH="$PWD/ci-tools:$PATH"; exec env LD_LIBRARY_PATH="$1" uv run --locked --group test ./test.py \
+            --mode "${{ inputs.build_mode }}" \
+            --jobs 4 \
+            --timeout 3600 \
+            --markers "not veryslow" \
+            $2' bash "$regression_ld_path" "${{ matrix.selector }}"
+      - name: Upload test logs
+        if: ${{ always() && contains(format(' {0} ', inputs.regression_suites), format(' {0} ', matrix.selector)) }}
         uses: actions/upload-artifact@v4
         with:
-          name: inherited-testlog-${{ inputs.build_mode }}
+          name: testlog-${{ inputs.build_mode }}-${{ matrix.name }}
           path: testlog
           if-no-files-found: ignore
-      - id: checksum
-        run: |
-          checksum=$(md5sum build/${{ inputs.build_mode }}/scylla | cut -c -32)
-          echo "md5sum=$checksum" >> $GITHUB_OUTPUT
-      - name: Show ccache stats
-        if: ${{ always() && inputs.enable_ccache }}
-        run: |
-          nix develop .#cpp -c ccache --show-stats

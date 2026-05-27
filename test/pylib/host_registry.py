@@ -20,10 +20,9 @@ class HostRegistry:
     all shared external resources within this class to make sure
     nothing is leaked by the harness. Lease addresses with lease_host(),
     release with release_host(). Each returned address is from a unique
-    class-C subnet created just for this test run, so each address
-    is quaranteed to have a unique 4th component. I.e. in X.Y.Z.W
-    X.Y.Z is unique for each test.py invocation, and W is unique
-    across all hosts in a single run.
+    127.X.0.0/16 subnet created just for this test run. Released hosts are
+    retired instead of reused so late process teardown cannot collide with
+    a fresh Scylla process binding fixed per-host ports such as 9180.
     """
 
     def __init__(self) -> None:
@@ -50,8 +49,7 @@ class HostRegistry:
             # Avoid 127.0.*.* since CCM (a different test framework)
             # assumes it will be available for it to run Scylla
             # instances. 127.255.255.255 is also illegal.
-            self.subnet = "127.{}.{}".format(random.randrange(1, 254),
-                                             random.randrange(0, 255))
+            self.subnet = "127.{}".format(random.randrange(1, 254))
             self.lock_filename: Optional[Path] = Path(os.getenv('TMPDIR', '/tmp')) / ('scylla-' + self.subnet)
             self.lock_file = self.lock_filename.open('w')
             try:
@@ -65,18 +63,21 @@ class HostRegistry:
 
             self.lock_file.close()
 
-        self.subnet += ".{}"
+        self.subnet += ".{}.{}"
         self.next_host_id = 0
 
         async def create_host() -> Host:
             self.next_host_id += 1
-            return Host(self.subnet.format(self.next_host_id))
+            third_octet, fourth_octet = divmod(self.next_host_id - 1, 254)
+            if third_octet >= 255:
+                raise RuntimeError("HostRegistry exhausted the 127.X.0.0/16 subnet allocated to this test run")
+            return Host(self.subnet.format(third_octet, fourth_octet + 1))
 
         async def destroy_host(h: Host) -> None:
-            # Doesn't matter, we never return hosts to the pool as 'dirty'.
+            # Released hosts are retired, but there is no external resource to destroy.
             pass
 
-        self.pool = Pool[Host](254, create_host, destroy_host)
+        self.pool = Pool[Host](255 * 254, create_host, destroy_host)
 
         async def cleanup() -> None:
             if self.lock_filename:
@@ -89,5 +90,4 @@ class HostRegistry:
         return await self.pool.get()
 
     async def release_host(self, host: Host) -> None:
-        return await self.pool.put(host, is_dirty=False)
-
+        return await self.pool.put(host, is_dirty=True)

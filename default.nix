@@ -51,6 +51,14 @@ let
   boost = pkgs.boost175;
 
   llvm = pkgs.llvmPackages_15;
+  wasiRust = pkgs.pkgsCross.wasi32.buildPackages;
+  cargoWasm = pkgs.writeShellScriptBin "cargo-wasm" ''
+    export PATH=${wasiRust.rustc}/bin:${wasiRust.cargo}/bin:"$PATH"
+    exec ${wasiRust.cargo}/bin/cargo "$@"
+  '';
+  clangWasm = pkgs.writeShellScriptBin "clang-wasm" ''
+    exec ${llvm.clang-unwrapped}/bin/clang "$@"
+  '';
 
   stdenvUnwrapped = llvm.stdenv;
 
@@ -86,8 +94,11 @@ in derive ({
     antlr3Package
   ] ++ (with pkgs; [
     ant
+    binaryen
     boost
     cargo
+    cargoWasm
+    clangWasm
     cmake
     cxx-rs
     file
@@ -104,6 +115,7 @@ in derive ({
     ragel
     rustc
     stow
+    wabt
   ]) ++ (devInputs { inherit pkgs llvm; });
 
   buildInputs = [

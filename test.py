@@ -1090,13 +1090,20 @@ class ToolTest(Test):
 
     def __init__(self, test_no: int, shortname: str, suite) -> None:
         super().__init__(test_no, shortname, suite)
-        launcher = self.suite.cfg.get("launcher", "pytest")
+        launcher = self._launcher()
         self.path = launcher.split(maxsplit=1)[0]
         self.xmlout = os.path.join(self.suite.options.tmpdir, self.mode, "xml", self.uname + ".xunit.xml")
         ToolTest._reset(self)
 
-    def _prepare_pytest_params(self, options: argparse.Namespace):
+    def _launcher(self) -> str:
         launcher = self.suite.cfg.get("launcher", "pytest")
+        if os.getenv("SSDB_TEST_DISABLE_UNSHARE") == "1" and launcher.startswith("unshare -rn "):
+            launcher = launcher.removeprefix("unshare -rn ")
+            return launcher.replace(" --run-within-unshare", "")
+        return launcher
+
+    def _prepare_pytest_params(self, options: argparse.Namespace):
+        launcher = self._launcher()
         self.args = launcher.split()[1:]
         self.args += [
             "-s",  # don't capture print() output inside pytest

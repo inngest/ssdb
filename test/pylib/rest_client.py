@@ -9,7 +9,6 @@ from __future__ import annotations                           # Type hints as str
 from abc import ABCMeta
 from collections.abc import Mapping
 import logging
-import os.path
 from typing import Any, Optional, AsyncIterator
 from contextlib import asynccontextmanager
 from aiohttp import request, BaseConnector, UnixConnector, ClientTimeout
@@ -126,10 +125,10 @@ class UnixRESTClient(RESTClient):
     """An async helper for REST API operations using AF_UNIX socket"""
 
     def __init__(self, sock_path: str):
-        # NOTE: using Python requests style URI for Unix domain sockets to avoid using "localhost"
-        #       host parameter is ignored but set to socket name as convention
-        self.uri_scheme: str = "http+unix"
-        self.default_host: str = f"{os.path.basename(sock_path)}"
+        # UnixConnector handles the socket path; newer aiohttp/yarl rejects
+        # non-standard URL schemes such as http+unix before the connector runs.
+        self.uri_scheme: str = "http"
+        self.default_host: str = "localhost"
         self.connector = UnixConnector(path=sock_path)
 
     async def shutdown(self):
