@@ -15,6 +15,7 @@ run_first:
 no_parallel_cases:
     - logalloc_test
     - logalloc_standard_allocator_segment_pool_backend_test
+    - cache_algorithm_test
 # Enable compaction groups on tests except on a few, listed below
 all_can_run_compaction_groups_except:
     - exceptions_optimized_test
