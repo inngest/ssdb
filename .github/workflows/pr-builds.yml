@@ -40,7 +40,7 @@ jobs:
     with:
       build_mode: dev
       run_smoke_tests: true
-      regression_suites: ${{ needs.changes.outputs.regression == 'true' && 'cql-pytest/ alternator/ rest_api/' || '' }}
+      regression_suites: ${{ needs.changes.outputs.regression == 'true' && 'alternator/ auth_cluster/ boost/ broadcast_tables/ cql/ cql-pytest/ nodetool/ object_store/ pylib_test/ raft/ rest_api/ scylla_gdb/ topology/ topology_custom/ topology_experimental_raft/ topology_random_failures/ topology_tasks/ unit/' || '' }}
 
   rust:
     name: Rust checks and tests

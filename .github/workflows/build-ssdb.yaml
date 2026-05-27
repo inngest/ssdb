@@ -71,6 +71,15 @@ jobs:
           if [ "${{ inputs.run_smoke_tests }}" = "true" ]; then
             artifacts+=(--with test/boost/UUID_test)
           fi
+          if [ "${{ inputs.regression_suites }}" != "" ]; then
+            while IFS= read -r artifact; do
+              artifacts+=(--with "$artifact")
+            done < <(
+              find test/boost test/raft test/unit -maxdepth 1 -type f -name '*_test.cc' \
+                | sed 's|\.cc$||' \
+                | sort
+            )
+          fi
           # The .#cpp shell's compiler wrappers use ccache when CCACHE_DIR is set.
           nix develop .#cpp -c ./configure.py --mode ${{ inputs.build_mode }} "${artifacts[@]}" --no-seastar-unused-result-error
       - run: |
@@ -79,6 +88,12 @@ jobs:
         if: ${{ inputs.regression_suites != '' }}
         run: |
           nix develop .#cpp -c ninja wasm
+          mapfile -t cxx_test_targets < <(
+            find test/boost test/raft test/unit -maxdepth 1 -type f -name '*_test.cc' \
+              | sed 's|\.cc$||; s|^|build/${{ inputs.build_mode }}/|' \
+              | sort
+          )
+          nix develop .#cpp -c ninja "${cxx_test_targets[@]}"
           nix develop .#cpp -c patchelf --add-rpath "$PWD/build/${{ inputs.build_mode }}/seastar" build/${{ inputs.build_mode }}/scylla
       - name: Build inherited smoke tests
         if: ${{ inputs.run_smoke_tests }}
