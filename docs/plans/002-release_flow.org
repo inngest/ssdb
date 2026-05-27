@@ -62,6 +62,13 @@ The implemented flow follows the Atlas/Inngest pattern:
 4. =release-artifacts.yaml= builds and publishes tar, Debian, RPM, and GHCR
    container artifacts for =x86_64= and =aarch64=.
 
+Release candidates can be exercised before merging a release PR by commenting
+=/pre-release rc= on the release PR. The comment workflow validates that the
+commenter has repository write access, derives the base version from the release
+PR title, creates the next =vMAJOR.MINOR.PATCH-rc.N= tag on the PR head, and
+dispatches the same release artifact workflow. RC releases are marked as GitHub
+prereleases and publish versioned GHCR tags without updating =latest=.
+
 The release tag follows the existing semver history, with =v6.2.3= as the
 current baseline. Package version files come from =SCYLLA-VERSION-GEN=, and the
 generated product metadata is rebranded to =ssdb= for release filenames and
@@ -79,6 +86,8 @@ package names.
 - The workflow currently expects =depot-ubuntu-24.04-8= and
   =depot-ubuntu-24.04-arm-8= runner labels.
 - GHCR publishing requires =packages: write= workflow permission.
+- Comment-triggered release candidates require the same =RELEASE_TOKEN= secret
+  as the stable release tag workflow.
 
 * Open Checklist
 
@@ -93,6 +102,7 @@ package names.
 - [X] Add GHCR container image publishing from generated Debian packages.
 - [X] Set generated product metadata to =ssdb= so release filenames and package
   names use =ssdb-*=.
+- [X] Add comment-triggered release candidate publishing for release PRs.
 - [ ] Verify =make release-artifacts= on native =x86_64= and =aarch64= Linux
   runners.
 - [ ] Rebrand inherited service names, systemd units, users, install paths, and
