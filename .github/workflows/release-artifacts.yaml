@@ -47,13 +47,21 @@ jobs:
         env:
           RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
         run: |
-          if ! printf '%s\n' "${RELEASE_TAG}" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+          if printf '%s\n' "${RELEASE_TAG}" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            base_tag="${RELEASE_TAG}"
+            is_prerelease="false"
+          elif printf '%s\n' "${RELEASE_TAG}" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+$'; then
+            base_tag="$(printf '%s\n' "${RELEASE_TAG}" | sed -E 's/-rc\.[0-9]+$//')"
+            is_prerelease="true"
+          else
             echo "Release tag is not valid: ${RELEASE_TAG}"
             exit 1
           fi
 
           date_stamp="$(date -u +%Y%m%d)"
           echo "tag=${RELEASE_TAG}" >> "$GITHUB_OUTPUT"
+          echo "base_tag=${base_tag}" >> "$GITHUB_OUTPUT"
+          echo "is_prerelease=${is_prerelease}" >> "$GITHUB_OUTPUT"
           echo "date_stamp=${date_stamp}" >> "$GITHUB_OUTPUT"
           image_name="$(printf 'ghcr.io/%s\n' "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')"
           echo "image_name=${image_name}" >> "$GITHUB_OUTPUT"
@@ -154,13 +162,21 @@ jobs:
         env:
           RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
         run: |
-          if ! printf '%s\n' "${RELEASE_TAG}" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+          if printf '%s\n' "${RELEASE_TAG}" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            base_tag="${RELEASE_TAG}"
+            is_prerelease="false"
+          elif printf '%s\n' "${RELEASE_TAG}" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+$'; then
+            base_tag="$(printf '%s\n' "${RELEASE_TAG}" | sed -E 's/-rc\.[0-9]+$//')"
+            is_prerelease="true"
+          else
             echo "Release tag is not valid: ${RELEASE_TAG}"
             exit 1
           fi
 
           image_name="$(printf 'ghcr.io/%s\n' "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')"
           echo "tag=${RELEASE_TAG}" >> "$GITHUB_OUTPUT"
+          echo "base_tag=${base_tag}" >> "$GITHUB_OUTPUT"
+          echo "is_prerelease=${is_prerelease}" >> "$GITHUB_OUTPUT"
           echo "image_name=${image_name}" >> "$GITHUB_OUTPUT"
 
       - name: Checkout
@@ -185,15 +201,29 @@ jobs:
       - name: Write release notes
         env:
           RELEASE_TAG: ${{ steps.tag.outputs.tag }}
+          BASE_TAG: ${{ steps.tag.outputs.base_tag }}
+          IS_PRERELEASE: ${{ steps.tag.outputs.is_prerelease }}
           IMAGE_NAME: ${{ steps.tag.outputs.image_name }}
         run: |
-          awk -v version="## [${RELEASE_TAG}]" '
+          awk -v version="## [${BASE_TAG}]" '
             index($0, version) == 1 { found=1; print; next }
             found && /^## \[/ { exit }
             found { print }
-          ' CHANGELOG.md > RELEASE_NOTES.md
+          ' CHANGELOG.md > /tmp/release-changelog.md
 
-          if [ ! -s RELEASE_NOTES.md ]; then
+          if [ -s /tmp/release-changelog.md ]; then
+            if [ "${IS_PRERELEASE}" = "true" ]; then
+              {
+                echo "## ${RELEASE_TAG}"
+                echo
+                echo "Release candidate for ${BASE_TAG}."
+                echo
+                cat /tmp/release-changelog.md
+              } > RELEASE_NOTES.md
+            else
+              cp /tmp/release-changelog.md RELEASE_NOTES.md
+            fi
+          else
             {
               echo "## ${RELEASE_TAG}"
               echo
@@ -224,10 +254,15 @@ jobs:
         env:
           IMAGE_NAME: ${{ steps.tag.outputs.image_name }}
           RELEASE_TAG: ${{ steps.tag.outputs.tag }}
+          IS_PRERELEASE: ${{ steps.tag.outputs.is_prerelease }}
         run: |
+          tags=(--tag "${IMAGE_NAME}:${RELEASE_TAG}")
+          if [ "${IS_PRERELEASE}" != "true" ]; then
+            tags+=(--tag "${IMAGE_NAME}:latest")
+          fi
+
           docker buildx imagetools create \
-            --tag "${IMAGE_NAME}:${RELEASE_TAG}" \
-            --tag "${IMAGE_NAME}:latest" \
+            "${tags[@]}" \
             "${IMAGE_NAME}:${RELEASE_TAG}-amd64" \
             "${IMAGE_NAME}:${RELEASE_TAG}-arm64"
 
@@ -235,6 +270,7 @@ jobs:
         uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
         with:
           tag_name: ${{ steps.tag.outputs.tag }}
+          prerelease: ${{ steps.tag.outputs.is_prerelease }}
           body_path: RELEASE_NOTES.md
           files: release-artifacts/*
           fail_on_unmatched_files: true
