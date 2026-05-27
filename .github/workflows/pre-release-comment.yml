@@ -91,40 +91,34 @@ jobs:
           echo "head_ref=${head_ref}" >> "$GITHUB_OUTPUT"
           echo "head_sha=${head_sha}" >> "$GITHUB_OUTPUT"
 
-      - name: Checkout release PR head
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ steps.pr.outputs.head_sha }}
-          token: ${{ env.RELEASE_TOKEN }}
-
       - name: Create RC tag
         id: rc
         env:
+          GH_TOKEN: ${{ env.RELEASE_TOKEN }}
           BASE_TAG: ${{ steps.pr.outputs.base_tag }}
           HEAD_SHA: ${{ steps.pr.outputs.head_sha }}
         run: |
-          git fetch --tags origin
-
           base_re="$(printf '%s\n' "${BASE_TAG}" | sed -E 's/[][(){}.^$*+?|\\]/\\&/g')"
           last_rc="$(
-            git tag -l "${BASE_TAG}-rc.*" \
-              | sed -nE "s/^${base_re}-rc\.([0-9]+)$/\1/p" \
+            gh api "repos/${GITHUB_REPOSITORY}/git/matching-refs/tags/${BASE_TAG}-rc." \
+              --jq '.[].ref' \
+              | sed -nE "s|^refs/tags/${base_re}-rc\.([0-9]+)$|\1|p" \
               | sort -n \
               | tail -n 1
           )"
           next_rc="$(( ${last_rc:-0} + 1 ))"
           rc_tag="${BASE_TAG}-rc.${next_rc}"
 
-          while git rev-parse -q --verify "refs/tags/${rc_tag}" >/dev/null; do
+          while gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${rc_tag}" >/dev/null 2>&1; do
             next_rc="$((next_rc + 1))"
             rc_tag="${BASE_TAG}-rc.${next_rc}"
           done
 
-          git config user.name 'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
-          git tag "${rc_tag}" "${HEAD_SHA}"
-          git push origin "${rc_tag}"
+          gh api \
+            --method POST \
+            "repos/${GITHUB_REPOSITORY}/git/refs" \
+            -f ref="refs/tags/${rc_tag}" \
+            -f sha="${HEAD_SHA}"
 
           echo "tag=${rc_tag}" >> "$GITHUB_OUTPUT"
 

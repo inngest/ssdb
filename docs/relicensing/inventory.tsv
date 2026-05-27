@@ -24,6 +24,7 @@ path	license_class	spdx	copyright	flags	binary
 .github/workflows/commits.yml	unknown-license				no
 .github/workflows/iwyu.yaml	unknown-license				no
 .github/workflows/pr-builds.yml	Apache-only	Apache-2.0			no
+.github/workflows/pre-release-comment.yml	Apache-only	Apache-2.0			no
 .github/workflows/release-artifacts.yaml	Apache-only	Apache-2.0			no
 .github/workflows/release-tag.yml	Apache-only	Apache-2.0			no
 .github/workflows/reproducible-build.yaml	unknown-license				no
