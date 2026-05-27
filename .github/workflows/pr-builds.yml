@@ -40,7 +40,8 @@ jobs:
     with:
       build_mode: dev
       run_smoke_tests: true
-      regression_suites: ${{ needs.changes.outputs.regression == 'true' && 'alternator/ auth_cluster/ boost/ broadcast_tables/ cql/ cql-pytest/ nodetool/ object_store/ pylib_test/ raft/ rest_api/ scylla_gdb/ topology/ topology_custom/ topology_experimental_raft/ topology_random_failures/ topology_tasks/ unit/' || '' }}
+      # scylla_gdb is release-only and topology_random_failures is debug-only in their suite manifests.
+      regression_suites: ${{ needs.changes.outputs.regression == 'true' && 'alternator/ auth_cluster/ boost/ broadcast_tables/ cql/ cql-pytest/ nodetool/ object_store/ pylib_test/ raft/ rest_api/ topology/ topology_custom/ topology_experimental_raft/ topology_tasks/ unit/' || '' }}
 
   rust:
     name: Rust checks and tests
