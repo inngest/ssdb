@@ -103,6 +103,7 @@
               git
               jdk11_headless
               lz4
+              minio-client
               protobuf
               wabt
               zstd
@@ -143,6 +144,7 @@
                   elfutils
                   llvm.llvm
                   lz4
+                  minio-client
 
                   # etc
                   diffutils
