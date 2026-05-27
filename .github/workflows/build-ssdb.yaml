@@ -110,7 +110,8 @@ jobs:
             --exclude='*.d' \
             --zstd \
             -cf ci-artifacts/ssdb-build-${{ inputs.build_mode }}.tar.zst \
-            build
+            build \
+            build.ninja
       - name: Upload build artifacts
         if: ${{ inputs.run_smoke_tests || inputs.regression_suites != '' }}
         uses: actions/upload-artifact@v4
@@ -220,6 +221,12 @@ jobs:
       - name: Unpack build artifacts
         run: |
           tar --zstd -xf ci-artifacts/ssdb-build-${{ inputs.build_mode }}.tar.zst
+      - name: Install MinIO server
+        if: ${{ matrix.selector == 'boost/' || matrix.selector == 'object_store/' }}
+        run: |
+          mkdir -p ci-tools
+          curl -fsSL -o ci-tools/minio https://dl.min.io/server/minio/release/linux-amd64/minio
+          chmod +x ci-tools/minio
       - name: Run regression tests
         if: ${{ contains(format(' {0} ', inputs.regression_suites), format(' {0} ', matrix.selector)) }}
         env:
@@ -228,12 +235,12 @@ jobs:
           SSDB_TEST_DISABLE_UNSHARE: "1"
         run: |
           regression_ld_path="$PWD/build/${{ inputs.build_mode }}/seastar${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-          nix develop .#cpp -c env LD_LIBRARY_PATH="$regression_ld_path" uv run --locked --group test ./test.py \
+          nix develop .#cpp -c bash -c 'export PATH="$PWD/ci-tools:$PATH"; exec env LD_LIBRARY_PATH="$1" uv run --locked --group test ./test.py \
             --mode "${{ inputs.build_mode }}" \
             --jobs 4 \
             --timeout 3600 \
             --markers "not veryslow" \
-            ${{ matrix.selector }}
+            $2' bash "$regression_ld_path" "${{ matrix.selector }}"
       - name: Upload test logs
         if: ${{ always() && contains(format(' {0} ', inputs.regression_suites), format(' {0} ', matrix.selector)) }}
         uses: actions/upload-artifact@v4
