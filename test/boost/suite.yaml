@@ -49,4 +49,5 @@ custom_args:
 run_in_debug:
     - logalloc_standard_allocator_segment_pool_backend_test
 skip_in_dev:
+    # https://github.com/inngest/ssdb/issues/9
     - logalloc_test
