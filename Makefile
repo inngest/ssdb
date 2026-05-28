@@ -19,6 +19,7 @@ CPP_TEST_SMOKE_ARTIFACTS ?= test/boost/UUID_test
 CPP_TEST_SMOKE_TARGETS ?= build/$(CPP_TEST_MODE)/test/boost/UUID_test
 RELEASE_MODE ?= release
 RELEASE_DATE_STAMP ?=
+NODE_EXPORTER_DIR ?= $(CURDIR)/build/dependencies
 RELEASE_CONFIGURE_FLAGS := --mode $(RELEASE_MODE) --with scylla --enable-dist --no-seastar-unused-result-error
 ifneq ($(strip $(RELEASE_DATE_STAMP)),)
 RELEASE_CONFIGURE_FLAGS += --date-stamp $(RELEASE_DATE_STAMP)
@@ -86,9 +87,13 @@ cpp-test-smoke: ## Build and run the focused inherited C++ smoke test binary.
 	$(NIX) develop .#cpp -c ninja build/$(CPP_TEST_MODE)/scylla $(CPP_TEST_SMOKE_TARGETS)
 	$(NIX) develop .#cpp -c env LD_LIBRARY_PATH="$$PWD/build/$(CPP_TEST_MODE)/seastar$${LD_LIBRARY_PATH:+:$$LD_LIBRARY_PATH}" build/$(CPP_TEST_MODE)/test/boost/UUID_test --report_level=no --catch_system_errors=no --color_output=false -- --overprovisioned --unsafe-bypass-fsync 1 --kernel-page-cache 1 --blocked-reactor-notify-ms 2000000 --collectd 0 --max-networking-io-control-blocks=100
 
+.PHONY: release-node-exporter
+release-node-exporter: ## Download node_exporter for release packaging.
+	$(NIX) develop .#cpp -c env NODE_EXPORTER_DIR="$(NODE_EXPORTER_DIR)" ./install-dependencies.sh --download-node-exporter
+
 .PHONY: release-configure
-release-configure: ## Configure the inherited Linux release/package build.
-	$(NIX) develop .#cpp -c $(UV) run ./configure.py $(RELEASE_CONFIGURE_FLAGS)
+release-configure: release-node-exporter ## Configure the inherited Linux release/package build.
+	$(NIX) develop .#cpp -c env NODE_EXPORTER_DIR="$(NODE_EXPORTER_DIR)" $(UV) run ./configure.py $(RELEASE_CONFIGURE_FLAGS)
 
 .PHONY: release-server-tar
 release-server-tar: release-configure ## Build the inherited relocatable server tarball.

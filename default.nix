@@ -100,6 +100,7 @@ in derive ({
     cargoWasm
     clangWasm
     cmake
+    curl
     cxx-rs
     file
     gcc
@@ -107,6 +108,7 @@ in derive ({
     libtool
     llvm.bintools
     maven
+    meson
     ninja
     pkg-config
     python2
