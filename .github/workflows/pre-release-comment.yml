@@ -1,0 +1,143 @@
+# SPDX-License-Identifier: Apache-2.0
+
+name: PR Pre-release
+
+on:
+  issue_comment:
+    types:
+      - created
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+env:
+  RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+  RELEASE_BRANCH: release/next
+
+concurrency:
+  group: pre-release-pr-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  rc:
+    if: github.event.issue.pull_request && startsWith(github.event.comment.body, '/pre-release')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate command
+        id: command
+        env:
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        run: |
+          if ! printf '%s\n' "${COMMENT_BODY}" | grep -Eq '^/pre-release[[:space:]]+rc[[:space:]]*$'; then
+            echo "Unsupported pre-release command: ${COMMENT_BODY}"
+            exit 1
+          fi
+
+      - name: Validate release token
+        run: |
+          if [ -z "${RELEASE_TOKEN}" ]; then
+            echo "::error title=Missing RELEASE_TOKEN::Configure a release bot token as the RELEASE_TOKEN repository secret."
+            exit 1
+          fi
+
+      - name: Validate commenter access
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ACTOR: ${{ github.event.comment.user.login }}
+        run: |
+          permission="$(gh api "repos/${GITHUB_REPOSITORY}/collaborators/${ACTOR}/permission" --jq '.permission' 2>/dev/null || true)"
+          case "${permission}" in
+            admin|maintain|write)
+              ;;
+            *)
+              gh issue comment "${{ github.event.issue.number }}" \
+                --body "Cannot create a pre-release for @${ACTOR}: write access to this repository is required."
+              exit 1
+              ;;
+          esac
+
+      - name: Inspect release PR
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          pr_json="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}")"
+          state="$(jq -r '.state' <<< "${pr_json}")"
+          title="$(jq -r '.title' <<< "${pr_json}")"
+          head_repo="$(jq -r '.head.repo.full_name' <<< "${pr_json}")"
+          head_ref="$(jq -r '.head.ref' <<< "${pr_json}")"
+          head_sha="$(jq -r '.head.sha' <<< "${pr_json}")"
+
+          if [ "${state}" != "open" ]; then
+            echo "PR #${PR_NUMBER} is not open"
+            exit 1
+          fi
+
+          if [ "${head_repo}" != "${GITHUB_REPOSITORY}" ]; then
+            echo "Refusing to create release artifacts from forked PR head ${head_repo}"
+            exit 1
+          fi
+
+          if [ "${head_ref}" != "${RELEASE_BRANCH}" ]; then
+            echo "Refusing to create release artifacts from ${head_ref}; expected ${RELEASE_BRANCH}"
+            exit 1
+          fi
+
+          if ! printf '%s\n' "${title}" | grep -Eq '^chore\(release\): v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "Release PR title is not valid: ${title}"
+            exit 1
+          fi
+
+          base_tag="$(printf '%s\n' "${title}" | sed -E 's/^chore\(release\): (v[0-9]+\.[0-9]+\.[0-9]+)$/\1/')"
+          echo "base_tag=${base_tag}" >> "$GITHUB_OUTPUT"
+          echo "head_ref=${head_ref}" >> "$GITHUB_OUTPUT"
+          echo "head_sha=${head_sha}" >> "$GITHUB_OUTPUT"
+
+      - name: Create RC tag
+        id: rc
+        env:
+          GH_TOKEN: ${{ env.RELEASE_TOKEN }}
+          BASE_TAG: ${{ steps.pr.outputs.base_tag }}
+          HEAD_SHA: ${{ steps.pr.outputs.head_sha }}
+        run: |
+          base_re="$(printf '%s\n' "${BASE_TAG}" | sed -E 's/[][(){}.^$*+?|\\]/\\&/g')"
+          last_rc="$(
+            gh api "repos/${GITHUB_REPOSITORY}/git/matching-refs/tags/${BASE_TAG}-rc." \
+              --jq '.[].ref' \
+              | sed -nE "s|^refs/tags/${base_re}-rc\.([0-9]+)$|\1|p" \
+              | sort -n \
+              | tail -n 1
+          )"
+          next_rc="$(( ${last_rc:-0} + 1 ))"
+          rc_tag="${BASE_TAG}-rc.${next_rc}"
+
+          while gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${rc_tag}" >/dev/null 2>&1; do
+            next_rc="$((next_rc + 1))"
+            rc_tag="${BASE_TAG}-rc.${next_rc}"
+          done
+
+          gh api \
+            --method POST \
+            "repos/${GITHUB_REPOSITORY}/git/refs" \
+            -f ref="refs/tags/${rc_tag}" \
+            -f sha="${HEAD_SHA}"
+
+          echo "tag=${rc_tag}" >> "$GITHUB_OUTPUT"
+
+      - name: Comment with RC details
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RC_TAG: ${{ steps.rc.outputs.tag }}
+          HEAD_SHA: ${{ steps.pr.outputs.head_sha }}
+        run: |
+          short_sha="$(printf '%s\n' "${HEAD_SHA}" | cut -c1-12)"
+          {
+            echo "Created pre-release tag \`${RC_TAG}\` from \`${short_sha}\`."
+            echo
+            echo "The release artifact workflow will run from the tag push, publish a GitHub prerelease, attach release artifacts, and push GHCR image tags for \`${RC_TAG}\` without updating \`latest\`."
+          } > /tmp/pre-release-comment.md
+
+          gh issue comment "${{ github.event.issue.number }}" --body-file /tmp/pre-release-comment.md
