@@ -8,13 +8,13 @@ on:
       - created
 
 permissions:
-  actions: write
   contents: read
   issues: write
   pull-requests: read
 
 env:
   RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+  RELEASE_BRANCH: release/next
 
 concurrency:
   group: pre-release-pr-${{ github.event.issue.number }}
@@ -81,6 +81,11 @@ jobs:
             exit 1
           fi
 
+          if [ "${head_ref}" != "${RELEASE_BRANCH}" ]; then
+            echo "Refusing to create release artifacts from ${head_ref}; expected ${RELEASE_BRANCH}"
+            exit 1
+          fi
+
           if ! printf '%s\n' "${title}" | grep -Eq '^chore\(release\): v[0-9]+\.[0-9]+\.[0-9]+$'; then
             echo "Release PR title is not valid: ${title}"
             exit 1
@@ -122,15 +127,6 @@ jobs:
 
           echo "tag=${rc_tag}" >> "$GITHUB_OUTPUT"
 
-      - name: Dispatch release artifact build
-        env:
-          GH_TOKEN: ${{ env.RELEASE_TOKEN }}
-          RC_TAG: ${{ steps.rc.outputs.tag }}
-        run: |
-          gh workflow run release-artifacts.yaml \
-            --ref "${{ github.event.repository.default_branch }}" \
-            -f release_tag="${RC_TAG}"
-
       - name: Comment with RC details
         env:
           GH_TOKEN: ${{ github.token }}
@@ -139,9 +135,9 @@ jobs:
         run: |
           short_sha="$(printf '%s\n' "${HEAD_SHA}" | cut -c1-12)"
           {
-            echo "Queued pre-release \`${RC_TAG}\` from \`${short_sha}\`."
+            echo "Created pre-release tag \`${RC_TAG}\` from \`${short_sha}\`."
             echo
-            echo "The release artifact workflow will publish a GitHub prerelease, attach release artifacts, and push GHCR image tags for \`${RC_TAG}\` without updating \`latest\`."
+            echo "The release artifact workflow will run from the tag push, publish a GitHub prerelease, attach release artifacts, and push GHCR image tags for \`${RC_TAG}\` without updating \`latest\`."
           } > /tmp/pre-release-comment.md
 
           gh issue comment "${{ github.event.issue.number }}" --body-file /tmp/pre-release-comment.md
