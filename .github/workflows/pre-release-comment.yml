@@ -53,6 +53,7 @@ jobs:
               ;;
             *)
               gh issue comment "${{ github.event.issue.number }}" \
+                --repo "${GITHUB_REPOSITORY}" \
                 --body "Cannot create a pre-release for @${ACTOR}: write access to this repository is required."
               exit 1
               ;;
@@ -140,4 +141,6 @@ jobs:
             echo "The release artifact workflow will run from the tag push, publish a GitHub prerelease, attach release artifacts, and push GHCR image tags for \`${RC_TAG}\` without updating \`latest\`."
           } > /tmp/pre-release-comment.md
 
-          gh issue comment "${{ github.event.issue.number }}" --body-file /tmp/pre-release-comment.md
+          gh issue comment "${{ github.event.issue.number }}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --body-file /tmp/pre-release-comment.md

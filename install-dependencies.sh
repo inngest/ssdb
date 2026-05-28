@@ -197,7 +197,7 @@ declare -A NODE_EXPORTER_CHECKSUM=(
     ["aarch64"]=e386c7b53bc130eaf5e74da28efc6b444857b77df8070537be52678aefd34d96
     ["s390x"]=aeda68884918f10b135b76bbcd4977cb7a1bb3c4c98a8551f8d2183bafdd9264
 )
-NODE_EXPORTER_DIR=/opt/scylladb/dependencies
+NODE_EXPORTER_DIR=${NODE_EXPORTER_DIR:-/opt/scylladb/dependencies}
 
 node_exporter_filename() {
     echo "node_exporter-$NODE_EXPORTER_VERSION.linux-$(go_arch).tar.gz"
@@ -243,6 +243,7 @@ print_usage() {
     echo "  --print-pip-runtime-packages Print required pip packages for Scylla"
     echo "  --print-pip-symlinks Print list of pip provided commands which need to install to /usr/bin"
     echo "  --print-node-exporter-filename Print node_exporter filename"
+    echo "  --download-node-exporter Download node_exporter into NODE_EXPORTER_DIR"
     exit 1
 }
 
@@ -250,6 +251,7 @@ PRINT_PYTHON3=false
 PRINT_PIP=false
 PRINT_PIP_SYMLINK=false
 PRINT_NODE_EXPORTER=false
+DOWNLOAD_NODE_EXPORTER=false
 while [ $# -gt 0 ]; do
     case "$1" in
         "--print-python3-runtime-packages")
@@ -266,6 +268,10 @@ while [ $# -gt 0 ]; do
             ;;
         "--print-node-exporter-filename")
             PRINT_NODE_EXPORTER=true
+            shift 1
+            ;;
+        "--download-node-exporter")
+            DOWNLOAD_NODE_EXPORTER=true
             shift 1
             ;;
          *)
@@ -295,6 +301,20 @@ fi
 
 if $PRINT_NODE_EXPORTER; then
     node_exporter_fullpath
+    exit 0
+fi
+
+if $DOWNLOAD_NODE_EXPORTER; then
+    if [ -f "$(node_exporter_fullpath)" ] && node_exporter_checksum; then
+        echo "$(node_exporter_filename) already exists, skipping download"
+    else
+        mkdir -p "$NODE_EXPORTER_DIR"
+        curl -fSL -o "$(node_exporter_fullpath)" "$(node_exporter_url)"
+        if ! node_exporter_checksum; then
+            echo "$(node_exporter_filename) download failed"
+            exit 1
+        fi
+    fi
     exit 0
 fi
 
