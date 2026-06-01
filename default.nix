@@ -104,6 +104,7 @@ in derive ({
     cxx-rs
     file
     gcc
+    gdb
     openjdk11_headless
     libtool
     llvm.bintools
@@ -113,6 +114,7 @@ in derive ({
     pkg-config
     python2
     python3
+    python3Packages.pyelftools
     uv
     ragel
     rustc
