@@ -182,13 +182,17 @@ arch_packages=(
     snappy
 )
 
+machine_arch() {
+    uname -m
+}
+
 go_arch() {
     declare -A local GO_ARCH=(
         ["x86_64"]=amd64
         ["aarch64"]=arm64
         ["s390x"]=s390x
     )
-    echo ${GO_ARCH["$(arch)"]}
+    echo ${GO_ARCH["$(machine_arch)"]}
 }
 
 NODE_EXPORTER_VERSION=1.7.0
@@ -208,7 +212,7 @@ node_exporter_fullpath() {
 }
 
 node_exporter_checksum() {
-    sha256sum "$(node_exporter_fullpath)" | while read -r sum _; do [[ "$sum" == "${NODE_EXPORTER_CHECKSUM["$(arch)"]}" ]]; done
+    sha256sum "$(node_exporter_fullpath)" | while read -r sum _; do [[ "$sum" == "${NODE_EXPORTER_CHECKSUM["$(machine_arch)"]}" ]]; done
 }
 
 node_exporter_url() {
