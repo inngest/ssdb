@@ -61,6 +61,9 @@ def filter_dist(info):
             return None
     return info
 
+def distrocmd(name, fallback_dir='/usr/bin'):
+    return shutil.which(name) or os.path.join(fallback_dir, name)
+
 SCYLLA_DIR='scylla-package'
 def reloc_add(ar, name, arcname=None):
     ar.add(name, arcname="{}/{}".format(SCYLLA_DIR, arcname if arcname else name))
@@ -85,16 +88,16 @@ executables_scylla = [
                 '{}/scylla'.format(args.build_dir),
                 '{}/iotune'.format(args.build_dir)]
 executables_distrocmd = [
-                shutil.which('patchelf') or '/usr/bin/patchelf',
-                '/usr/bin/lscpu',
-                '/usr/bin/gawk',
-                '/usr/bin/gzip',
-                '/usr/sbin/ifconfig',
-                '/usr/sbin/ethtool',
-                '/usr/bin/netstat',
-                '/usr/bin/hwloc-distrib',
-                '/usr/bin/hwloc-calc',
-                '/usr/bin/lsblk']
+                distrocmd('patchelf'),
+                distrocmd('lscpu'),
+                distrocmd('gawk'),
+                distrocmd('gzip'),
+                distrocmd('ifconfig', '/usr/sbin'),
+                distrocmd('ethtool', '/usr/sbin'),
+                distrocmd('netstat'),
+                distrocmd('hwloc-distrib'),
+                distrocmd('hwloc-calc'),
+                distrocmd('lsblk')]
 
 executables = executables_scylla + executables_distrocmd
 
