@@ -15,6 +15,7 @@ dependencies = [
     "humanfriendly",
     "jinja2",
     "psutil",
+    "pyelftools",
     "pyparsing",
     "python-magic",
     "pyudev; sys_platform == 'linux'",

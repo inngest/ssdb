@@ -45,6 +45,7 @@ jobs:
       - name: Validate commenter access
         env:
           GH_TOKEN: ${{ github.token }}
+          COMMENT_TOKEN: ${{ env.RELEASE_TOKEN }}
           ACTOR: ${{ github.event.comment.user.login }}
         run: |
           permission="$(gh api "repos/${GITHUB_REPOSITORY}/collaborators/${ACTOR}/permission" --jq '.permission' 2>/dev/null || true)"
@@ -52,7 +53,7 @@ jobs:
             admin|maintain|write)
               ;;
             *)
-              gh issue comment "${{ github.event.issue.number }}" \
+              GH_TOKEN="${COMMENT_TOKEN}" gh issue comment "${{ github.event.issue.number }}" \
                 --repo "${GITHUB_REPOSITORY}" \
                 --body "Cannot create a pre-release for @${ACTOR}: write access to this repository is required."
               exit 1
@@ -130,7 +131,7 @@ jobs:
 
       - name: Comment with RC details
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ env.RELEASE_TOKEN }}
           RC_TAG: ${{ steps.rc.outputs.tag }}
           HEAD_SHA: ${{ steps.pr.outputs.head_sha }}
         run: |

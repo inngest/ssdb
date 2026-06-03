@@ -17,6 +17,7 @@ IMPORTS = [
     "humanfriendly",
     "jinja2",
     "psutil",
+    "elftools",
     "pyparsing",
     "pytest",
     "redis",

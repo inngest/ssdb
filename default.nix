@@ -104,6 +104,7 @@ in derive ({
     cxx-rs
     file
     gcc
+    gdb
     openjdk11_headless
     libtool
     llvm.bintools
