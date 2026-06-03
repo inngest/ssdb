@@ -1,16 +1,27 @@
 SPDX-License-Identifier: Apache-2.0
 
-## [unreleased]
+## [v6.2.4] - 2026-06-03
 
 ### 💼 Other
 
-- Add release package targets
+- Consolidate Python deps under uv (#5)
+- Fix dependency and code scanning alerts (#6)
+- Clear remaining alerts (#11)
 
 ### ⚙️ Miscellaneous Tasks
 
 - Prepare ssdb relicensing groundwork (#1)
-- Add release flow automation
-- Publish multi-arch release images
+- Add release packaging flow (#2)
+- Use semver release tags (#3)
+- Run full regression suites on PRs (#8)
+- Add release candidate workflow (#13)
+- Fix pre-release artifact build (#14)
+- Fix release PR notes preview (#15)
+- Fix release candidate flow (#16)
+
+### 🛡️ Security
+
+- *(deps)* Bump rand from 0.8.5 to 0.8.6 in /rust in the cargo group across 1 directory (#7)
 ## [v6.2.3] - 2025-01-19
 
 ### 💼 Other
