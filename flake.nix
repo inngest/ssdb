@@ -147,15 +147,28 @@
                   minio-client
 
                   # etc
+                  debian-devscripts
                   diffutils
+                  dpkg
                   doxygen
+                  ethtool
+                  fakeroot
+                  gawk
+                  gzip
+                  hwloc
+                  nettools
+                  perl
+                  pigz
                   rapidxml
+                  rpm
                   colordiff
                   binaryen
                   cargoWasm
                   clangWasm
                   patchelf
+                  util-linux
                   wabt
+                  xz
                 ];
             }
           else

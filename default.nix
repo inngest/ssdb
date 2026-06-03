@@ -162,6 +162,11 @@ in derive ({
     xxHash
     zlib
     zstd
+    (zstd.override {
+      static = true;
+      doCheck = false;
+      buildContrib = false;
+    })
   ]);
 
   JAVA8_HOME = "${pkgs.openjdk8_headless}/lib/openjdk";
