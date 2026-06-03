@@ -35,12 +35,31 @@ def ldd(executable):
     at the files they resolve to. A fake key ld.so points at the
     dynamic loader.'''
     libraries = {}
-    for ldd_line in subprocess.check_output(
+    ldd_result = subprocess.run(
             ['ldd', executable],
-            universal_newlines=True).splitlines():
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+    ldd_output = ldd_result.stdout + ldd_result.stderr
+    if ldd_result.returncode != 0:
+        if 'not a dynamic executable' in ldd_output:
+            return libraries
+        raise subprocess.CalledProcessError(
+            ldd_result.returncode,
+            ldd_result.args,
+            output=ldd_result.stdout,
+            stderr=ldd_result.stderr)
+
+    for ldd_line in ldd_output.splitlines():
         elements = ldd_line.split()
+        if not elements:
+            continue
+        if ldd_line == 'statically linked':
+            continue
         if ldd_line.endswith('not found'):
             raise Exception('ldd {}: could not resolve {}'.format(executable, elements[0]))
+        if len(elements) < 2:
+            continue
         if elements[1] != '=>':
             if elements[0].startswith('linux-vdso.so'):
                 # provided by kernel
@@ -61,8 +80,29 @@ def filter_dist(info):
             return None
     return info
 
+def executable(path, arcname=None):
+    return (path, arcname or os.path.basename(path))
+
 def distrocmd(name, fallback_dir='/usr/bin'):
-    return shutil.which(name) or os.path.join(fallback_dir, name)
+    path = shutil.which(name) or os.path.join(fallback_dir, name)
+    wrapped = os.path.join(os.path.dirname(path), f'.{os.path.basename(path)}-wrapped')
+    if os.path.exists(wrapped):
+        return executable(wrapped, name)
+    return executable(path, name)
+
+def find_thread_db(libs):
+    candidates = ['/lib64/libthread_db.so']
+    for libfile in libs.values():
+        if os.path.basename(libfile).startswith('libc.so'):
+            libdir = os.path.dirname(libfile)
+            candidates.extend([
+                os.path.join(libdir, 'libthread_db.so'),
+                os.path.join(libdir, 'libthread_db.so.1'),
+            ])
+    for candidate in candidates:
+        if os.path.exists(candidate):
+            return os.path.realpath(candidate)
+    return None
 
 SCYLLA_DIR='scylla-package'
 def reloc_add(ar, name, arcname=None):
@@ -85,8 +125,8 @@ ap.add_argument('--print-libexec', action='store_true',
 args = ap.parse_args()
 
 executables_scylla = [
-                '{}/scylla'.format(args.build_dir),
-                '{}/iotune'.format(args.build_dir)]
+                executable('{}/scylla'.format(args.build_dir)),
+                executable('{}/iotune'.format(args.build_dir))]
 executables_distrocmd = [
                 distrocmd('patchelf'),
                 distrocmd('lscpu'),
@@ -102,18 +142,20 @@ executables_distrocmd = [
 executables = executables_scylla + executables_distrocmd
 
 if args.print_libexec:
-    for exec in executables:
-        print(f'libexec/{os.path.basename(exec)}')
+    for _, exec_name in executables:
+        print(f'libexec/{exec_name}')
     sys.exit(0)
 
 output = args.dest
 
 libs = {}
-for exe in executables:
+for exe, _ in executables:
     libs.update(ldd(exe))
 
-# manually add libthread_db for debugging thread
-libs.update({'libthread_db.so.1': os.path.realpath('/lib64/libthread_db.so')})
+# Manually add libthread_db for thread debugging when the active libc provides it.
+thread_db = find_thread_db(libs)
+if thread_db:
+    libs.update({'libthread_db.so.1': thread_db})
 
 ld_so = libs['ld.so']
 
@@ -135,21 +177,20 @@ with tempfile.NamedTemporaryFile('w+t') as version_file:
     version_file.flush()
     ar.add(version_file.name, arcname='.relocatable_package_version')
 
-for exe in executables_scylla:
-    basename = os.path.basename(exe)
+for exe, exe_name in executables_scylla:
     if not args.stripped:
-        ar.reloc_add(exe, arcname=f'libexec/{basename}')
+        ar.reloc_add(exe, arcname=f'libexec/{exe_name}')
     else:
-        ar.reloc_add(f'{exe}.stripped', arcname=f'libexec/{basename}')
-for exe in executables_distrocmd:
-    basename = os.path.basename(exe)
-    ar.reloc_add(exe, arcname=f'libexec/{basename}')
+        ar.reloc_add(f'{exe}.stripped', arcname=f'libexec/{exe_name}')
+for exe, exe_name in executables_distrocmd:
+    ar.reloc_add(exe, arcname=f'libexec/{exe_name}')
 
 for lib, libfile in libs.items():
     ar.reloc_add(libfile, arcname='libreloc/' + lib)
 if have_gnutls:
     gnutls_config_nolink = os.path.realpath('/etc/crypto-policies/back-ends/gnutls.config')
-    ar.reloc_add(gnutls_config_nolink, arcname='libreloc/gnutls.config')
+    if os.path.exists(gnutls_config_nolink):
+        ar.reloc_add(gnutls_config_nolink, arcname='libreloc/gnutls.config')
     ar.reloc_add('conf')
 ar.reloc_add('dist', filter=filter_dist)
 with tempfile.NamedTemporaryFile('w') as relocatable_file:
