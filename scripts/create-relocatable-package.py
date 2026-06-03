@@ -10,6 +10,7 @@
 
 import argparse
 import os
+import shutil
 import subprocess
 import tarfile
 import pathlib
@@ -84,7 +85,7 @@ executables_scylla = [
                 '{}/scylla'.format(args.build_dir),
                 '{}/iotune'.format(args.build_dir)]
 executables_distrocmd = [
-                '/usr/bin/patchelf',
+                shutil.which('patchelf') or '/usr/bin/patchelf',
                 '/usr/bin/lscpu',
                 '/usr/bin/gawk',
                 '/usr/bin/gzip',
