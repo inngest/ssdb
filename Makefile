@@ -93,7 +93,7 @@ release-node-exporter: ## Download node_exporter for release packaging.
 
 .PHONY: release-configure
 release-configure: release-node-exporter ## Configure the inherited Linux release/package build.
-	$(NIX) develop .#cpp -c env NODE_EXPORTER_DIR="$(NODE_EXPORTER_DIR)" $(UV) run ./configure.py $(RELEASE_CONFIGURE_FLAGS)
+	$(NIX) develop .#cpp -c sh -c 'site_packages="$$(uv run --locked python -c '"'"'import site; print(site.getsitepackages()[0])'"'"')"; export NODE_EXPORTER_DIR="$$1"; export PYTHONPATH="$${site_packages}$${PYTHONPATH:+:$$PYTHONPATH}"; shift; exec $(UV) run --locked ./configure.py "$$@"' sh "$(NODE_EXPORTER_DIR)" $(RELEASE_CONFIGURE_FLAGS)
 
 .PHONY: release-server-tar
 release-server-tar: release-configure ## Build the inherited relocatable server tarball.
