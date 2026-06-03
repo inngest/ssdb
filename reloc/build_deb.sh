@@ -48,10 +48,18 @@ if $DIST; then
 fi
 
 mv scylla/debian debian
+if [ ! -x /usr/bin/make ]; then
+    make_cmd=$(command -v make)
+    sed -i "1c#!${make_cmd} -f" debian/rules
+fi
+if [ ! -f /usr/share/dpkg/pkg-info.mk ]; then
+    dpkg_info=$(dirname "$(dirname "$(command -v dpkg-parsechangelog)")")/share/dpkg/pkg-info.mk
+    sed -i "s|^include /usr/share/dpkg/pkg-info.mk$|include ${dpkg_info}|" debian/rules
+fi
 
 PKG_NAME=$(dpkg-parsechangelog --show-field Source)
 # XXX: Drop revision number from version string.
 #      Since it always '1', this should be okay for now.
 PKG_VERSION=$(dpkg-parsechangelog --show-field Version |sed -e 's/-1$//')
 ln -fv $RELOC_PKG ../"$PKG_NAME"_"$PKG_VERSION".orig.tar.gz
-debuild -rfakeroot -us -uc
+debuild --prepend-path "$PATH" --no-lintian -d -rfakeroot -us -uc

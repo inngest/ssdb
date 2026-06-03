@@ -68,6 +68,13 @@ rpm_payload_opts=(--define "_binary_payload w2${xz_thread_param}.xzdio")
 ln -fv $RELOC_PKG $RPMBUILD/SOURCES/
 
 parameters=(
+    -D"_prefix /usr"
+    -D"_bindir /usr/bin"
+    -D"_sbindir /usr/sbin"
+    -D"_sysconfdir /etc"
+    -D"_sharedstatedir /var/lib"
+    -D"_unitdir /usr/lib/systemd/system"
+    -D"_sysctldir /usr/lib/sysctl.d"
     -D"version $SCYLLA_VERSION"
     -D"release $SCYLLA_RELEASE"
     -D"housekeeping $DIST"

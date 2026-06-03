@@ -94,6 +94,11 @@ jobs:
           nix develop .#cpp -c ccache --max-size="$CCACHE_MAXSIZE"
           nix develop .#cpp -c ccache --zero-stats
 
+      - name: Install Debian packaging helper
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y debhelper
+
       - name: Build release artifacts
         run: make release-artifacts RELEASE_DATE_STAMP=${{ steps.tag.outputs.date_stamp }}
 

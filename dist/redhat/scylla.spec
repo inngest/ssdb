@@ -60,7 +60,7 @@ This package installs all required packages for ScyllaDB,  including
 %if 0%{housekeeping}
 install_arg="--housekeeping"
 %endif
-./install.sh --packaging --root "$RPM_BUILD_ROOT" $install_arg
+./install.sh --packaging --sysconfdir /etc/sysconfig --root "$RPM_BUILD_ROOT" $install_arg
 
 %clean
 rm -rf $RPM_BUILD_ROOT
