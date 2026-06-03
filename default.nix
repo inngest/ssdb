@@ -114,7 +114,6 @@ in derive ({
     pkg-config
     python2
     python3
-    python3Packages.pyelftools
     uv
     ragel
     rustc
