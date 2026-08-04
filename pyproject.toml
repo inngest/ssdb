@@ -23,7 +23,7 @@ dependencies = [
     "requests>=2.33.0",
     "scylla-api-client",
     "scylla-driver",
-    "setuptools>=78.1.1",
+    "setuptools>=83.0.0",
     "six",
     "tabulate",
     "traceback-with-variables",
